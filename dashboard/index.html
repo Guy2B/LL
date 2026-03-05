@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lune Beauty — Staff Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/dash.css" />
+</head>
+<body>
+  <div id="gate" class="gate" aria-hidden="true">
+    <div class="gate-card">
+      <h1>Staff Login</h1>
+      <p>Bitte Passwort eingeben, um das Dashboard zu öffnen.</p>
+      <div class="gate-row">
+        <input id="gateInput" type="password" placeholder="Passwort" autocomplete="current-password" />
+        <button id="gateBtn" class="btn primary">Öffnen</button>
+      </div>
+      <p id="gateMsg" class="gate-msg hidden">Falsches Passwort</p>
+      <label class="remember"><input type="checkbox" id="gateRemember" /> Eingeloggt bleiben (nur dieses Gerät)</label>
+    </div>
+  </div>
+
+  <header class="dash-header">
+    <div class="hdr-left">
+      <h1>Dashboard</h1>
+      <a class="link" href="../app/index.html">↩ Zur Skin‑App</a>
+    </div>
+    <div class="hdr-spacer"></div>
+    <div class="hdr-right">
+      <img src="../assets/img/logo.png" alt="Lune Beauty" class="brand-logo" />
+    </div>
+  </header>
+
+  <div class="dash-wrap">
+    <aside class="sidebar">
+      <button class="navbtn active" data-panel="prompt">📝 Prompt</button>
+      <button class="navbtn" data-panel="results">📦 Results</button>
+      <button class="navbtn" data-panel="table">📊 Table</button>
+      <div class="side-foot">v5</div>
+    </aside>
+
+    <main class="main">
+      <section id="panel-prompt" class="panel active">
+        <h2>Prompt</h2>
+        <div class="ctx">
+          <div><strong>Ausgewählter Kunde:</strong> <span id="ctxName">–</span></div>
+          <div><strong>Plan:</strong> <span id="ctxPlan">–</span></div>
+          <div><strong>Score:</strong> <span id="ctxScore">–</span></div>
+        </div>
+        <textarea id="promptText" rows="10" placeholder="Interne Notiz / Prompt ..."></textarea>
+        <div class="row">
+          <button id="btnGenerate" class="btn">Generate</button>
+          <button id="btnPromptClear" class="btn subtle">Clear</button>
+          <button id="btnPromptSave" class="btn subtle">Save Note</button>
+        </div>
+        <h3>Output</h3>
+        <pre id="promptOut" class="mono"></pre>
+      </section>
+
+      <section id="panel-results" class="panel">
+        <h2>Results Editor (JSON)</h2>
+        <div class="row">
+          <button id="btnResultsFormat" class="btn">Pretty‑Print</button>
+          <button id="btnResultsRestore" class="btn subtle">Restore Saved</button>
+          <button id="btnResultsSave" class="btn subtle">Save to Record</button>
+        </div>
+        <textarea id="resultsJson" rows="16" class="mono" placeholder='{"summary":"..."}'></textarea>
+      </section>
+
+      <section id="panel-table" class="panel">
+        <h2>User Records</h2>
+        <div class="row">
+          <button id="btnExportCsv" class="btn">Export CSV</button>
+          <button id="btnClearAll" class="btn subtle">Clear All (local)</button>
+        </div>
+        <div class="table-wrap">
+          <table id="dashTable">
+            <thead><tr><th>Datum</th><th>Name</th><th>Email</th><th>Plan</th><th>Score</th><th>Aktion</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/dash.js"></script>
+</body>
+</html>

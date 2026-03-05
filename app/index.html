@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title id="t_app_title">Lune Skin Analysis</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- MAIN STYLES (fixed closing tag) -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Minimal inline CSS for the disclaimer modal (you can move into css/style.css later) -->
+  <style>
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:20}
+    .modal[hidden]{display:none}
+    .modal__card{background:#fff;border:1px solid #e6dfd5;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px 16px;max-width:460px;width:92%}
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="left">
+      <img src="../assets/img/logo.png" class="logo" alt="Lune Beauty" />
+    </div>
+
+    <nav class="nav" aria-label="Primary">
+      <button data-nav="screenStart">Home</button>
+      <button data-nav="screenCamera" id="navCamera">Camera</button>
+      <button data-nav="screenQuickScore" id="navScore">Score</button>
+      <button data-nav="screenIntake" id="navIntake">Profile</button>
+      <button data-nav="screenPayment" id="navPayment">Payment</button>
+    </nav>
+
+    <div class="lang">
+      <!-- Multilingual (EN/DE/FR) -->
+      <select id="locale" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="de">DE</option>
+        <option value="fr">FR</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- START / HERO -->
+  <section id="screenStart" class="screen">
+    <div class="hero">
+      <img src="../assets/img/logo.png" alt="Lune" style="height:60px;opacity:.9" />
+      <h1 class="hero-title" id="t_tagline">Your private, premium skin analysis</h1>
+      <p class="muted" id="t_subtag">Photograph once, receive a personalized plan.</p>
+      <div class="hero-cta">
+        <button id="btnStart" class="primary" data-nav="screenCamera">
+          <span id="t_startCta">Start Analysis</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMERA -->
+  <section id="screenCamera" class="screen hidden">
+    <h2 id="t_camera_title">Camera</h2>
+    <p class="muted" id="t_camera_hint">Use good lighting; keep the camera steady.</p>
+
+    <div class="camera-wrap">
+      <!-- Buttons -->
+      <div class="row" style="margin-bottom:10px;">
+        <button id="btnCapture" class="primary">
+          <span id="t_capture">Capture Photo</span>
+        </button>
+
+        <label class="secondary file-btn" style="display:inline-block;">
+          <input id="fileUpload" type="file" accept="image/*" hidden />
+          <span id="t_upload">Upload Photo</span>
+        </label>
+      </div>
+
+      <!-- Live preview + capture target (REQUIRED for camera to work) -->
+      <video id="camVideo" autoplay playsinline style="width:100%;max-width:640px;border-radius:12px;display:block;margin:10px auto;"></video>
+      <canvas id="camCanvas" hidden></canvas>
+
+      <!-- Camera info / errors -->
+      <div id="camMsg" class="muted" style="text-align:center;margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- QUICK SCORE + OFFERS -->
+  <section id="screenQuickScore" class="screen hidden">
+    <h2 id="t_quick_title">Your Skin Score</h2>
+    <p class="lead" id="t_quick_lead">An instant orientation to guide your plan.</p>
+
+    <div class="gaugeWrap">
+      <svg class="gauge" viewBox="0 0 120 120" aria-label="Score">
+        <circle cx="60" cy="60" r="52" class="g_bg"></circle>
+        <circle cx="60" cy="60" r="52" id="scoreRing" class="g_meter"></circle>
+      </svg>
+      <!-- Vertical-readable label (no rotation) -->
+      <div class="g_label">
+        <div id="scoreValue" class="scoreValue">0</div>
+        <div id="scoreBand" class="band">—</div>
+      </div>
+    </div>
+
+    <!-- Offer cards (Style A — Elegant Spa Tone) -->
+    <div id="screenOffers" class="offer-grid">
+      <article class="offer-card">
+        <h3>Recovery Plan — €9.90</h3>
+        <ul>
+          <li>Your personalized deep‑dive skin analysis</li>
+          <li>Step‑by‑step morning + evening routine</li>
+          <li>Weekly rhythm & ingredient guidance</li>
+          <li>Based on your scan & profile</li>
+        </ul>
+        <button id="btnDeep" class="primary">Get your recovery plan — €9.90</button>
+      </article>
+
+      <article class="offer-card">
+        <h3>Premium Companion — €39.90</h3>
+        <ul>
+          <li>Everything in the Recovery Plan</li>
+          <li>Progress monitoring guidance</li>
+          <li>Routine refinements over 4 weeks</li>
+          <li>Priority recommendations</li>
+        </ul>
+        <button id="btnCompanion" class="secondary">Premium Companion — €39.90</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- INTAKE (Premium Chips) -->
+  <section id="screenIntake" class="screen hidden">
+    <h2 id="t_intake_title">Your Profile</h2>
+
+    <form id="intakeForm" class="form" autocomplete="on">
+      <div class="form-block">
+        <label for="i_name" id="t_name">Name</label>
+        <input id="i_name" name="name" placeholder="Name" />
+      </div>
+
+      <div class="form-block">
+        <label for="i_email" id="t_email">Email</label>
+        <input id="i_email" type="email" name="email" placeholder="name@example.com" />
+      </div>
+
+      <div class="form-block">
+        <label id="t_skinType">Skin Type</label>
+        <div class="chip-group" id="chip_skinType" role="group" aria-label="Skin Type">
+          <label class="chip"><input type="radio" name="skinType" value="Dry" />Dry</label>
+          <label class="chip"><input type="radio" name="skinType" value="Normal" />Normal</label>
+          <label class="chip"><input type="radio" name="skinType" value="Combination" />Combination</label>
+          <label class="chip"><input type="radio" name="skinType" value="Oily" />Oily</label>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label id="t_goals">Skin Goals</label>
+        <div class="chip-group" id="chip_goals" role="group" aria-label="Skin Goals">
+          <label class="chip"><input type="checkbox" name="skinGoals" value="Clarity" />Clarity</label>
+          <label class="chip"><input type="checkbox" name="skinGoals" value="Hydration" />Hydration</label>
+          <label class="chip"><input type="checkbox" name="skinGoals" value="Texture" />Texture</label>
+          <label class="chip"><input type="checkbox" name="skinGoals" value="Even Tone" />Even Tone</label>
+          <label class="chip"><input type="checkbox" name="skinGoals" value="Barrier Support" />Barrier Support</label>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label id="t_allergies">Allergies</label>
+        <div class="chip-group" id="chip_allergies" role="group" aria-label="Allergies">
+          <label class="chip"><input type="checkbox" name="allergies" value="Fragrance" />Fragrance</label>
+          <label class="chip"><input type="checkbox" name="allergies" value="Essential oils" />Essential oils</label>
+          <label class="chip"><input type="checkbox" name="allergies" value="AHAs/BHAs" />AHAs/BHAs</label>
+          <label class="chip"><input type="checkbox" name="allergies" value="Sulfates" />Sulfates</label>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label id="t_budget">Budget</label>
+        <div class="chip-group" id="chip_budget" role="group" aria-label="Budget">
+          <label class="chip"><input type="radio" name="budget" value="Essential" />Essential</label>
+          <label class="chip"><input type="radio" name="budget" value="Balanced" />Balanced</label>
+          <label class="chip"><input type="radio" name="budget" value="Premium" />Premium</label>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label id="t_routinePref">Routine Preference</label>
+        <div class="chip-group" id="chip_routine" role="group" aria-label="Routine Preference">
+          <label class="chip"><input type="radio" name="routinePreference" value="Minimal" />Minimal</label>
+          <label class="chip"><input type="radio" name="routinePreference" value="Balanced" />Balanced</label>
+          <label class="chip"><input type="radio" name="routinePreference" value="Advanced" />Advanced</label>
+        </div>
+      </div>
+    </form>
+
+    <div class="stickyCTA">
+      <button class="secondary" data-nav="screenQuickScore" id="btnBackToScore">← <span id="t_back">Back</span></button>
+      <button class="primary" data-nav="screenPayment" id="btnProceedPayment"><span id="t_continue">Continue</span> →</button>
+    </div>
+  </section>
+
+  <!-- PAYMENT (Dummy → Report) -->
+  <section id="screenPayment" class="screen hidden">
+    <h2 id="t_payment_title">Payment</h2>
+    <p class="muted" id="t_payment_hint">This is a simulation (no real payment).</p>
+    <div class="pay" id="payWrap">
+      <button class="primary" id="toReportBtn"><span id="t_viewReport">View Report</span></button>
+    </div>
+  </section>
+
+  <!-- CAMERA DISCLAIMER MODAL (shows before first camera start) -->
+  <div id="camDisclaimer" class="modal" hidden>
+    <div class="modal__card">
+      <h3>Camera Notice</h3>
+      <p>For your privacy, images stay on this device and are used only to generate your skin analysis.</p>
+      <div class="row">
+        <button id="camAccept" class="primary">I Understand — Start Camera</button>
+        <button id="camCancel" class="secondary">Cancel</button>
+      </div>
+      <p id="camMsg" class="muted" style="margin-top:6px"></p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../i18n/i18n.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Helpful note for dev/testing -->
+  <noscript style="color:#b04040;display:block;text-align:center;margin:10px 0;">
+    JavaScript is required for camera, scoring, and navigation.
+  </noscript>
+</body>
+</html>

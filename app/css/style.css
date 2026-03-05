@@ -1,0 +1,43 @@
+
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#F7F2EB;color:#2A2623} 
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06)} 
+.logo{height:34px}.nav button{margin:0 6px;padding:8px 10px;border-radius:10px;border:1px solid #e6dfd5;background:#fff;cursor:pointer} 
+.lang select{padding:6px;border-radius:8px} 
+.screen{padding:20px 14px;max-width:860px;margin:0 auto} 
+.hidden{display:none} 
+.hero{text-align:center;padding:80px 0} 
+.primary{padding:10px 16px;border-radius:12px;background:linear-gradient(90deg,#C9A646,#E6C770);color:#2a251d;font-weight:700;border:none;cursor:pointer} 
+.secondary{padding:10px 16px;border-radius:12px;border:2px solid #C9A646;background:transparent;color:#2a251d;font-weight:700;cursor:pointer} 
+.gaugeWrap{position:relative;width:200px;height:220px;margin:18px auto} 
+.gauge{width:200px;height:200px;transform:rotate(-90deg)} 
+.g_bg{fill:none;stroke:#E9E0CF;stroke-width:10} 
+.g_meter{fill:none;stroke:#C9A646;stroke-width:10;stroke-linecap:round;stroke-dasharray:326;stroke-dashoffset:326;transition:stroke-dashoffset 1200ms cubic-bezier(.17,.67,.83,.67)} 
+.g_label{position:absolute;left:0;right:0;top:70px;text-align:center} 
+.band{color:#6D655E;font-weight:700;margin-top:6px} 
+.lead{font-size:18px} 
+.muted{color:#6D655E} 
+.stickyCTA{position:sticky;bottom:10px;display:flex;justify-content:center;gap:10px;background:rgba(247,242,235,.8);padding:10px;border-radius:12px} 
+.form{display:grid;gap:12px} 
+.pay{display:flex;align-items:center;gap:10px} 
+.pay[data-loading]::after{content:'Processing…';color:#6D655E}
+
+
+/* --- Lune Enhancements --- */
+.hero { text-align:center; padding:72px 0; }
+.hero-title { font:700 28px "Playfair Display", Georgia, serif; margin:10px 0 6px; }
+.hero-cta { margin-top:10px; }
+.camera-wrap { display:grid; gap:12px; }
+.camera-placeholder { background:#fff; border:1px solid #e6dfd5; border-radius:12px; height:220px; display:grid; place-items:center; color:#6D655E; }
+.camera-placeholder .ph { opacity:.7; }
+.scoreValue { font:700 34px "Playfair Display", Georgia, serif; }
+.offer-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:12px; }
+.offer-card { background:#fff; border-radius:16px; padding:18px 18px; border:1px solid #E6DFD5; box-shadow:0 8px 24px rgba(0,0,0,.06); }
+.offer-card h3 { margin:0 0 6px 0; font-family:"Playfair Display", Georgia, serif; }
+.offer-card ul { margin:10px 0 16px; padding-left:18px; color:#6D655E; line-height:1.55; }
+.form { display:grid; gap:14px; }
+.form-block label { display:block; margin-bottom:6px; font-weight:600; }
+.form-block input[type="text"], .form-block input[type="email"], .form-block input[type="number"] { padding:10px 12px; border:1px solid #e6dfd5; border-radius:10px; background:#fff; }
+.chip-group { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { padding:8px 14px; border-radius:20px; border:1px solid #C9A646; cursor:pointer; background:#fff; color:#2A2623; transition:all .2s; font-weight:500; user-select:none; }
+.chip input { display:none; }
+.chip.selected { background:linear-gradient(90deg,#C9A646,#E6C770); border-color:transparent; color:#2A2623; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,.12); }
