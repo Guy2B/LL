@@ -1,170 +1,45 @@
-/* Lune Beauty — Camera + Flow Fix
-   - Disclaimer modal before starting camera
-   - getUserMedia permission prompt (HTTPS/localhost required)
-   - Live preview + capture to dataURL
-   - Fallback to upload if camera not available
-   - Safe navigation + stream cleanup
-*/
+
+/* =========================================================================
+   LUNE BEAUTY — PREMIUM FUTURISTIC BUILD (BLOCK 3 — JS)
+   Aesthetic: B1 Dark→Sand | Gold: G1 (#C9A646 → #E6C770)
+   Header: H1 | Scanner: S3 + O1 | HUD: C (max) | Pure CSS overlays
+   ========================================================================= */
 
 window.AppState = window.AppState || { scanMetrics:{}, intake:{}, payment:{} };
-
-function navigateTo(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-  const el=document.getElementById(id); if(el) el.classList.remove('hidden');
-  // Stop camera when leaving camera screen
-  if(id !== 'screenCamera') LuneCamera.stop();
-}
-
-(function(){
-  // Locale
-  const sel=document.getElementById('locale');
-  if(sel){ sel.addEventListener('change',()=>{ LuneI18n.setLocale(sel.value); applyLocale();}); LuneI18n.setLocale(sel.value||'en'); }
-
-  // Nav buttons
-  document.querySelectorAll('.nav [data-nav], .screen [data-nav], #btnStart').forEach(el=>{
-    el.addEventListener('click',()=> navigateTo(el.getAttribute('data-nav')||'screenCamera'));
-  });
-
-  // Flow buttons (if present)
-  const deep=document.getElementById('btnDeep'); if(deep) deep.addEventListener('click',()=>navigateTo('screenIntake'));
-  const comp=document.getElementById('btnCompanion'); if(comp) comp.addEventListener('click',()=>navigateTo('screenIntake'));
-  const back=document.getElementById('btnBackToScore'); if(back) back.addEventListener('click',()=>navigateTo('screenQuickScore'));
-  const cont=document.getElementById('btnProceedPayment'); if(cont) cont.addEventListener('click',()=>navigateTo('screenPayment'));
-
-  const toReport=document.getElementById('toReportBtn');
-  if(toReport){ toReport.addEventListener('click',()=>{ saveUserRecord(); localStorage.setItem('LUNE_APP_STATE', JSON.stringify({ locale:LuneI18n.locale(), scanMetrics:AppState.scanMetrics||{}, intake:AppState.intake||{}, payment:AppState.payment||{} })); window.location.href='report/report.html'; }); }
-
-  // Camera events
-  const cap=document.getElementById('btnCapture'); if(cap){ cap.addEventListener('click',()=> LuneCamera.capture()); }
-  const up=document.getElementById('fileUpload'); if(up){ up.addEventListener('change',e=>{
-    const f=e.target.files && e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ LuneCamera.stop(); onCaptured(String(r.result)); }; r.readAsDataURL(f);
-  }); }
-
-  // Auto start: when entering Camera screen via nav
-  const navCamera=document.getElementById('navCamera');
-  if(navCamera){ navCamera.addEventListener('click',()=> LuneCamera.ensureStarted()); }
-
-  // Also start when Start CTA → Camera
-  const startBtn=document.getElementById('btnStart'); if(startBtn){ startBtn.addEventListener('click',()=> LuneCamera.ensureStarted()); }
-
-  applyLocale();
-})();
-
-function applyLocale(){ const t=k=>LuneI18n.t(k); const map=[
-  ['t_app_title','app_title'],['t_tagline','tagline'],['t_subtag','subtag'],['t_startCta','start_cta'],
-  ['t_camera_title','camera_title'],['t_camera_hint','camera_hint'],['t_capture','capture'],['t_upload','upload'],
-  ['t_quick_title','quick_title'],['t_quick_lead','quick_lead'],['t_intake_title','intake_title'],
-  ['t_name','name'],['t_email','email'],['t_skinType','skin_type'],['t_goals','goals'],['t_allergies','allergies'],
-  ['t_budget','budget'],['t_routinePref','routine_pref'],['t_back','back'],['t_continue','continue'],
-  ['t_payment_title','payment_title'],['t_payment_hint','payment_hint'],['t_viewReport','view_report']
-]; map.forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.textContent=t(key); }); }
-
-// --- CAMERA MODULE ---
-const LuneCamera = (function(){
-  let stream = null;
-  const video = () => document.getElementById('camVideo');
-  const canvas = () => document.getElementById('camCanvas');
-
-  function needsSecure(){
-    const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
-    return !(location.protocol === 'https:' || isLocal);
-  }
-
-  async function ensureStarted(){
-    // show disclaimer first time only
-    if(!localStorage.getItem('LUNE_CAM_OK')){ openDisclaimer(); return; }
-    await start();
-  }
-
-  function openDisclaimer(){
-    const dlg=document.getElementById('camDisclaimer');
-    if(!dlg) { // no dialog in markup → just try to start
-      start(); return;
-    }
-    dlg.removeAttribute('hidden');
-    const accept=document.getElementById('camAccept');
-    accept?.addEventListener('click', async ()=>{
-      localStorage.setItem('LUNE_CAM_OK','1');
-      dlg.setAttribute('hidden','');
-      await start();
-    }, { once:true });
-    const cancel=document.getElementById('camCancel');
-    cancel?.addEventListener('click', ()=>{ dlg.setAttribute('hidden',''); });
-  }
-
-  async function start(){
-    const msg = document.getElementById('camMsg');
-    if(needsSecure()){
-      if(msg) msg.textContent = 'Camera requires HTTPS or localhost. Please open this page over https:// or use localhost.';
-      return;
-    }
-    try{
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:{ideal:1280}, height:{ideal:720} }, audio:false });
-      const v=video(); if(v){ v.srcObject = stream; await v.play(); }
-      if(msg) msg.textContent='';
-    }catch(err){
-      if(msg){
-        if(err && err.name==='NotAllowedError') msg.textContent='Camera permission denied. Please allow access and try again.';
-        else if(err && err.name==='NotFoundError') msg.textContent='No camera device found.';
-        else msg.textContent='Unable to start camera: '+(err && err.message ? err.message : String(err));
-      }
-    }
-  }
-
-  function stop(){ try{ if(stream){ stream.getTracks().forEach(t=>t.stop()); } }finally{ stream=null; const v=video(); if(v){ v.pause(); v.srcObject=null; } }
-  }
-
-  function capture(){
-    const v=video(), c=canvas(); if(!v||!c) return;
-    const w = v.videoWidth || 640, h = v.videoHeight || 480;
-    c.width = w; c.height = h; const ctx=c.getContext('2d'); ctx.drawImage(v,0,0,w,h);
-    const data = c.toDataURL('image/png');
-    stop(); // release camera after capture
-    onCaptured(data);
-  }
-
+const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const isSecureContextLike=()=>{const h=location.hostname;const isLocal=/^(localhost|127\.0\.0\.1|\[::1\])$/i.test(h);return location.protocol==='https:'||isLocal};
+const on=(el,ev,fn,opts)=>el&&el.addEventListener(ev,fn,opts);
+function t(k){ try{return LuneI18n.t(k);}catch{return k;} }
+function setText(id,key){ const el=document.getElementById(id); if(el) el.textContent=t(key); }
+function showScreen(id){ $$('.screen').forEach(s=>s.classList.add('hidden')); const el=document.getElementById(id); if(el) el.classList.remove('hidden'); if(id!=='screenCamera') Camera.stop(); if(id==='screenCamera') Camera.ensureStarted(); }
+(function initNav(){ $$('.navbtn, .screen [data-nav], #btnStart').forEach(btn=>{ on(btn,'click',()=>{ const id=btn.getAttribute('data-nav')||'screenCamera'; showScreen(id); }); }); })();
+function applyLocale(){ setText('t_app_title','app_title'); setText('t_tagline','tagline'); setText('t_subtag','subtag'); setText('t_startCta','start_cta'); setText('t_camera_title','camera_title'); setText('t_camera_hint','camera_hint'); setText('t_capture','capture'); setText('t_upload','upload'); setText('t_quick_title','quick_title'); setText('t_quick_lead','quick_lead'); setText('t_intake_title','intake_title'); setText('t_name','name'); setText('t_email','email'); setText('t_skinType','skin_type'); setText('t_goals','goals'); setText('t_allergies','allergies'); setText('t_budget','budget'); setText('t_routinePref','routine_pref'); setText('t_back','back'); setText('t_continue','continue'); setText('t_payment_title','payment_title'); setText('t_payment_hint','payment_hint'); setText('t_viewReport','view_report'); setText('t_hud_light','hud_light'); setText('t_hud_stability','hud_stability'); setText('t_hud_center','hud_center'); document.title=t('app_title'); }
+(function initLocale(){ const sel=document.getElementById('locale'); if(sel){ on(sel,'change',()=>{ LuneI18n.setLocale(sel.value); applyLocale(); }); LuneI18n.setLocale(sel.value||'en'); } else { try{ LuneI18n.setLocale('en'); }catch{} } applyLocale(); })();
+const Camera=(function(){ let stream=null,rafId=null,samplingId=null; const v=()=>document.getElementById('camVideo'); const c=()=>document.getElementById('camCanvas'); const ctx=()=>c()?.getContext('2d'); const msg=()=>document.getElementById('camMsg'); const tips=()=>document.getElementById('camTips'); const hudLight=()=>document.getElementById('hudLightMeter'); const hudStab=()=>document.getElementById('hudStabilityMeter'); const hudDot=()=>document.getElementById('hudFaceDot'); const hudProg=()=>document.getElementById('hudProgressLine'); const faceDetector=('FaceDetector' in window)? new window.FaceDetector({fastMode:true}):null; function needsDisclaimer(){return !localStorage.getItem('LUNE_CAM_OK')} function openDisclaimer(){const d=document.getElementById('camDisclaimer'); if(!d){ start(); return; } d.removeAttribute('hidden'); on(document.getElementById('camAccept'),'click',async()=>{ localStorage.setItem('LUNE_CAM_OK','1'); d.setAttribute('hidden',''); await start(); },{once:true}); on(document.getElementById('camCancel'),'click',()=>{ d.setAttribute('hidden',''); setCamMsg(''); },{once:true}); } function ensureStarted(){ if(needsDisclaimer()){ openDisclaimer(); return; } start(); }
+  function setCamMsg(text){ if(msg()) msg().textContent=text; } function setTips(text){ if(tips()) tips().textContent=text; }
+  async function start(){ if(!isSecureContextLike()){ setCamMsg('Camera requires HTTPS or localhost. Please open this page over https:// or use localhost.'); return; } if(!navigator.mediaDevices?.getUserMedia){ setCamMsg('Camera not supported in this browser.'); return; } try{ stream=await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ideal:1280}, height:{ideal:720}}, audio:false }); const vid=v(); if(vid){ vid.srcObject=stream; await vid.play(); } setCamMsg(''); setTips(t('hud_tips_ready')||'Center your face in the oval. Keep eyes open. Hold steady.'); startGuidanceLoop(); }catch(err){ if(err?.name==='NotAllowedError') setCamMsg('Camera permission denied. Please allow access and try again.'); else if(err?.name==='NotFoundError') setCamMsg('No camera device found.'); else setCamMsg('Unable to start camera: '+(err?.message||String(err))); } }
+  function stop(){ if(stream){ try{ stream.getTracks().forEach(t=>t.stop()); }catch{} } stream=null; const vid=v(); if(vid){ try{ vid.pause(); vid.srcObject=null; }catch{} } if(rafId){ cancelAnimationFrame(rafId); rafId=null; } if(samplingId){ clearInterval(samplingId); samplingId=null; } }
+  function capture(){ const vid=v(),cnv=c(),context=ctx(); if(!vid||!cnv||!context) return; const w=vid.videoWidth||1280,h=vid.videoHeight||720; cnv.width=w; cnv.height=h; context.drawImage(vid,0,0,w,h); const dataUrl=cnv.toDataURL('image/png'); stop(); onCaptured(String(dataUrl)); }
+  let lastSample=null, progress=0; function startGuidanceLoop(){ const vid=v(),cnv=c(),context=ctx(); if(!vid||!cnv||!context) return; samplingId=setInterval(async()=>{ const sw=160,sh=90; cnv.width=sw; cnv.height=sh; context.drawImage(vid,0,0,sw,sh); const img=context.getImageData(0,0,sw,sh).data; let sumY=0; for(let i=0;i<img.length;i+=4){ sumY += 0.2126*img[i] + 0.7152*img[i+1] + 0.0722*img[i+2]; } const avgY=(sumY/(sw*sh))/255; let motion=0; if(lastSample){ let diffSum=0,count=0; for(let i=0;i<img.length;i+=4){ const y=0.2126*img[i]+0.7152*img[i+1]+0.0722*img[i+2]; const y0=lastSample[i/4]||0; diffSum+=Math.abs(y-y0); count++; } motion=(diffSum/count)/255; } lastSample=new Float32Array(sw*sh); for(let i=0,j=0;i<img.length;i+=4,j++){ lastSample[j]=0.2126*img[i]+0.7152*img[i+1]+0.0722*img[i+2]; }
+      let dx=0,dy=0; if(faceDetector){ try{ const faces=await faceDetector.detect(cnv); if(faces&&faces[0]){ const box=faces[0].boundingBox||faces[0].boundingClientRect||faces[0]; const cx=(box.x+box.width/2)/sw; const cy=(box.y+box.height/2)/sh; dx=(cx-.5)*2; dy=(cy-.5)*2; } }catch{} }
+      updateHUD(avgY=avgY, motion=motion, dx=dx, dy=dy);
+    },150);
+    const loop=()=>{ rafId=requestAnimationFrame(loop); }; loop(); }
+  function updateHUD(light,motion,dx,dy){ const lightVal=Math.max(0,Math.min(1,light)); setMeterWidth(hudLight(),lightVal); const stability=Math.max(0,Math.min(1,1-motion*2)); setMeterWidth(hudStab(),stability); const goodLight=lightVal>=0.45, goodStable=stability>=0.55; if(goodLight&&goodStable){ progress=Math.min(1,progress+0.04);} else { progress=Math.max(0,progress-0.02);} setProgress(hudProg(),progress); if(hudDot()){ const px=(dx||0)*24, py=(dy||0)*12; hudDot().style.transform=`translate(${px}px, ${py}px)`; } const hints=[]; if(!isSecureContextLike()) hints.push(t('hint_https')||'Open over HTTPS or localhost to enable camera.'); else { if(lightVal<0.35) hints.push(t('hint_more_light')||'Increase lighting.'); if(stability<0.55) hints.push(t('hint_hold_steady')||'Hold device steady.'); if(Math.abs(dx)>0.4) hints.push(dx>0?(t('hint_move_left')||'Move slightly left.'):(t('hint_move_right')||'Move slightly right.')); if(Math.abs(dy)>0.35) hints.push(dy>0?(t('hint_move_up')||'Raise face a bit.'):(t('hint_move_down')||'Lower face a bit.')); hints.push(t('hint_open_eyes')||'Keep eyes open, face evenly lit.'); } const tips=document.getElementById('camTips'); if(tips) tips.textContent=hints.join('  '); }
+  function setMeterWidth(el,val){ if(!el) return; if(!el._fill){ const fill=document.createElement('span'); fill.style.display='block'; fill.style.height='100%'; fill.style.width='0%'; fill.style.borderRadius='999px'; fill.style.background='linear-gradient(90deg, var(--gold-1), var(--gold-2))'; fill.style.boxShadow='0 0 12px rgba(230,199,112,.35)'; el.appendChild(fill); el._fill=fill; } el._fill.style.width=`${Math.round(val*100)}%`; }
+  function setProgress(el,val){ if(!el) return; el.style.width=`${Math.round(val*100)}%`; }
   return { ensureStarted, start, stop, capture };
 })();
-
-function onCaptured(imageDataUrl){
-  // Basic scoring mock → navigate to QuickScore and render ring
-  AppState.scanMetrics = { image:imageDataUrl, texture: Math.random()*0.4+0.5, pores: Math.random()*0.4+0.3, tone: Math.random()*0.4+0.4, redness: Math.random()*0.4+0.2, shine: Math.random()*0.5, dryness: Math.random()*0.5, sensitivity: Math.random()*0.5 };
-  navigateTo('screenQuickScore');
-  const C = 2*Math.PI*52; // ring length
-  // compute score
-  const m = AppState.scanMetrics; const final=Math.round((0.30*m.texture+0.20*m.pores+0.15*m.tone+0.10*m.redness+0.10*(1-m.tone)+0.05*m.shine+0.05*m.dryness+0.05*m.sensitivity)*100);
-  const ring=document.getElementById('scoreRing'); if(ring){ ring.style.strokeDasharray=String(C); ring.style.strokeDashoffset=String(C*(1-final/100)); }
-  const t=k=>LuneI18n.t(k);
-  const val=document.getElementById('scoreValue'); if(val) val.textContent=String(final);
-  const band=document.getElementById('scoreBand'); if(band) band.textContent = final>=80?t('band_great'):final>=60?t('band_fair'):t('band_support');
-}
-
-// --- Intake (chips) ---
-(function(){
-  document.querySelectorAll('.chip-group .chip')?.forEach(chip=>{
-    chip.addEventListener('click',()=>{
-      const input=chip.querySelector('input'); if(!input) return;
-      if(input.type==='checkbox'){ input.checked=!input.checked; chip.classList.toggle('selected', input.checked); }
-      else { const g=chip.closest('.chip-group'); g?.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected')); input.checked=true; chip.classList.add('selected'); }
-      collectIntake();
-    });
-  });
-  ['i_name','i_email'].forEach(id=>{ const el=document.getElementById(id); el?.addEventListener('input', collectIntake); });
-  function collectIntake(){
-    const v=(sel)=>{ const x=document.querySelector(`input[name="${sel}"]:checked`); return x?x.value:''; };
-    const arr=(sel)=> Array.from(document.querySelectorAll(`input[name="${sel}"]:checked`)).map(x=>x.value);
-    AppState.intake={ name:document.getElementById('i_name')?.value?.trim()||'', email:document.getElementById('i_email')?.value?.trim()||'', skinType:v('skinType'), routinePreference:v('routinePreference'), budget:v('budget'), skinGoals:arr('skinGoals'), allergies:arr('allergies'), pregnancy:false };
-  }
-})();
-
-// --- Payment (dummy) ---
-(function(){
-  const deep=document.getElementById('btnDeep'); deep?.addEventListener('click',()=>{ AppState.payment={ product:'Recovery Plan', amount:9.90, currency:'EUR' }; });
-  const comp=document.getElementById('btnCompanion'); comp?.addEventListener('click',()=>{ AppState.payment={ product:'Premium Companion', amount:39.90, currency:'EUR' }; });
-})();
-
-function saveUserRecord(){
-  const records = JSON.parse(localStorage.getItem('LUNE_USERS')||'[]');
-  const entry = { timestamp:new Date().toISOString(), locale:LuneI18n.locale?.()||'en', scan:AppState.scanMetrics||{}, intake:AppState.intake||{}, payment:AppState.payment||{}, quickScore:Number(document.getElementById('scoreValue')?.textContent||0) };
-  records.push(entry); localStorage.setItem('LUNE_USERS', JSON.stringify(records));
-}
+(function bindCameraButtons(){ on($('#btnCapture'),'click',()=>Camera.capture()); const up=$('#fileUpload'); on(up,'change',e=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ Camera.stop(); onCaptured(String(r.result)); }; r.readAsDataURL(f); }); on($('#navCamera'),'click',()=>Camera.ensureStarted()); on($('#btnStart'),'click',()=>Camera.ensureStarted()); })();
+function computeQuickScoreFromMetrics(m){ const score=Math.round((0.30*(m.texture??0.6)+0.20*(m.pores??0.5)+0.15*(m.tone??0.5)+0.10*(m.redness??0.4)+0.10*(1-(m.tone??0.5))+0.05*(m.shine??0.4)+0.05*(m.dryness??0.4)+0.05*(m.sensitivity??0.5))*100); return Math.max(0,Math.min(100,score)); }
+function renderQuickScore(score){ const C=2*Math.PI*52; const ring=$('#scoreRing'); if(ring){ ring.style.strokeDasharray=String(C); ring.style.strokeDashoffset=String(C*(1-score/100)); } const v=$('#scoreValue'); if(v) v.textContent=String(score); const band=$('#scoreBand'); if(band){ const text=score>=80?t('band_great'):score>=60?t('band_fair'):t('band_support'); band.textContent=text||(score>=80?'Great':score>=60?'Fair':'Needs Support'); } const expl=$('#quick_llm_2s'); if(expl) expl.textContent=luneTwoSentenceExplainer({ score, band:band?.textContent||'', intake:AppState.intake||{} }); }
+function onCaptured(imageDataUrl){ const m={ image:imageDataUrl, texture:Math.random()*0.4+0.5, pores:Math.random()*0.4+0.3, tone:Math.random()*0.4+0.4, redness:Math.random()*0.4+0.2, shine:Math.random()*0.5, dryness:Math.random()*0.5, sensitivity:Math.random()*0.5 }; AppState.scanMetrics=m; showScreen('screenQuickScore'); const score=computeQuickScoreFromMetrics(m); renderQuickScore(score); }
+function luneTwoSentenceExplainer({score,band,intake={}}){ const goals=Array.isArray(intake.skinGoals)&&intake.skinGoals.length? intake.skinGoals.join(', '):(t('goals')||'goals'); const s1= score>=80?(t('llm_s1_great')||`Your score of ${score} suggests a strong skin balance with only fine‑tuning needed.`): score>=60?(t('llm_s1_fair')||`Your score of ${score} indicates a solid baseline with a few focus areas to optimize.`):(t('llm_s1_support')||`Your score of ${score} highlights some imbalances we can steadily improve.`); const s2=(intake.pregnancy?(t('llm_s2_preg')||'We use pregnancy‑conscious choices and gentle actives; stay consistent and re‑scan in 3–4 weeks.'):(t('llm_s2_std')||'Focus on {GOALS} with gentle, consistent actives and re‑scan in 3–4 weeks.')).replace('{GOALS}',goals); return `${s1} ${s2}`; }
+(function initIntake(){ $$('.chip-group .chip').forEach(chip=>{ on(chip,'click',()=>{ const input=chip.querySelector('input'); if(!input) return; if(input.type==='checkbox'){ input.checked=!input.checked; chip.classList.toggle('selected',input.checked);} else { const g=chip.closest('.chip-group'); g&&$$('.chip',g).forEach(c=>c.classList.remove('selected')); input.checked=true; chip.classList.add('selected'); } collectIntake(); }); }); ['i_name','i_email','i_age'].forEach(id=>{ const el=document.getElementById(id); on(el,'input',collectIntake); }); function getRadio(n){ const el=document.querySelector(`input[name="${n}"]:checked`); return el?el.value:'' } function getChecks(n){ return Array.from(document.querySelectorAll(`input[name="${n}"]:checked`)).map(x=>x.value) } function collectIntake(){ const name=$('#i_name')?.value?.trim()||''; const email=$('#i_email')?.value?.trim()||''; const age=parseInt($('#i_age')?.value||'0',10)||''; const skinType=getRadio('skinType'); const routinePreference=getRadio('routinePreference'); const budget=getRadio('budget'); const skinGoals=getChecks('skinGoals'); const allergies=getChecks('allergies'); const routineMorning=getChecks('routineMorning'); const routineEvening=getChecks('routineEvening'); const routineWeekly=getChecks('routineWeekly'); AppState.intake={ name,email,age, skinType,routinePreference,budget, skinGoals,allergies,pregnancy:false, currentRoutine:{morning:routineMorning,evening:routineEvening,weekly:routineWeekly} }; } collectIntake(); })();
+on($('#btnBackToScore'),'click',()=>showScreen('screenQuickScore')); on($('#btnProceedPayment'),'click',()=>showScreen('screenPayment'));
+on($('#btnDeep'),'click',()=>{ AppState.payment={product:'Recovery Plan',amount:9.90,currency:'EUR'}; showScreen('screenIntake'); });
+on($('#btnCompanion'),'click',()=>{ AppState.payment={product:'Premium Companion',amount:39.90,currency:'EUR'}; showScreen('screenIntake'); });
+on($('#toReportBtn'),'click',()=>{ saveUserRecord(); localStorage.setItem('LUNE_APP_STATE', JSON.stringify({ locale:(LuneI18n?.locale&&LuneI18n.locale())||'en', scanMetrics:AppState.scanMetrics||{}, intake:AppState.intake||{}, payment:AppState.payment||{} })); window.location.href='report/report.html'; });
+function saveUserRecord(){ const records=JSON.parse(localStorage.getItem('LUNE_USERS')||'[]'); const score=Number($('#scoreValue')?.textContent||0); records.push({ timestamp:new Date().toISOString(), locale:(LuneI18n?.locale&&LuneI18n.locale())||'en', scan:AppState.scanMetrics||{}, intake:AppState.intake||{}, payment:AppState.payment||{}, quickScore:score }); localStorage.setItem('LUNE_USERS', JSON.stringify(records)); }
+(function initTips(){ const base=t('hud_tips_ready')||'Center your face in the oval. Keep eyes open. Hold steady.'; const extra=isSecureContextLike()? '': '  '+(t('hint_https')||'Open over HTTPS or localhost to enable camera.'); const el=$('#camTips'); if(el) el.textContent=base+extra; })();
+window.LuneApp={ showScreen, saveUserRecord, Camera };

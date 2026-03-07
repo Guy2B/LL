@@ -4,38 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title id="t_app_title">Lune Skin Analysis</title>
-
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- MAIN STYLES (fixed closing tag) -->
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Minimal inline CSS for the disclaimer modal (you can move into css/style.css later) -->
-  <style>
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:20}
-    .modal[hidden]{display:none}
-    .modal__card{background:#fff;border:1px solid #e6dfd5;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px 16px;max-width:460px;width:92%}
-  </style>
 </head>
-<body>
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="left">
-      <img src="../assets/img/logo.png" class="logo" alt="Lune Beauty" />
+<body class="bg-dark-sand">
+  <header class="topbar topbar--glass">
+    <div class="topbar__left">
+      <a href="/index.html" class="brand-link" aria-label="Home">
+        <img src="../img/logo.png" class="topbar__logo" alt="Lune Beauty" />
+      </a>
     </div>
-
-    <nav class="nav" aria-label="Primary">
-      <button data-nav="screenStart">Home</button>
-      <button data-nav="screenCamera" id="navCamera">Camera</button>
-      <button data-nav="screenQuickScore" id="navScore">Score</button>
-      <button data-nav="screenIntake" id="navIntake">Profile</button>
-      <button data-nav="screenPayment" id="navPayment">Payment</button>
+    <nav class="topbar__nav" aria-label="Primary">
+      <button class="navbtn" data-nav="screenStart">Home</button>
+      <button class="navbtn" id="navCamera" data-nav="screenCamera">Camera</button>
+      <button class="navbtn" id="navScore" data-nav="screenQuickScore">Score</button>
+      <button class="navbtn" id="navIntake" data-nav="screenIntake">Profile</button>
+      <button class="navbtn" id="navPayment" data-nav="screenPayment">Payment</button>
     </nav>
-
-    <div class="lang">
-      <!-- Multilingual (EN/DE/FR) -->
-      <select id="locale" aria-label="Language">
+    <div class="topbar__right">
+      <label for="locale" class="visually-hidden">Language</label>
+      <select id="locale" class="locale" aria-label="Language">
         <option value="en">EN</option>
         <option value="de">DE</option>
         <option value="fr">FR</option>
@@ -43,77 +31,111 @@
     </div>
   </header>
 
-  <!-- START / HERO -->
-  <section id="screenStart" class="screen">
-    <div class="hero">
-      <img src="../assets/img/logo.png" alt="Lune" style="height:60px;opacity:.9" />
-      <h1 class="hero-title" id="t_tagline">Your private, premium skin analysis</h1>
-      <p class="muted" id="t_subtag">Photograph once, receive a personalized plan.</p>
-      <div class="hero-cta">
-        <button id="btnStart" class="primary" data-nav="screenCamera">
-          <span id="t_startCta">Start Analysis</span>
-        </button>
+  <section id="screenStart" class="screen screen--active">
+    <div class="hero hero--center">
+      <h1 class="hero__title" id="t_tagline">Your private, premium skin analysis</h1>
+      <p class="hero__sub muted" id="t_subtag">Photograph once, receive a personalized plan.</p>
+      <div class="hero__cta">
+        <button id="btnStart" class="btn btn--primary" data-nav="screenCamera"><span id="t_startCta">Start Analysis</span></button>
       </div>
     </div>
   </section>
 
-  <!-- CAMERA -->
-  <section id="screenCamera" class="screen hidden">
-    <h2 id="t_camera_title">Camera</h2>
-    <p class="muted" id="t_camera_hint">Use good lighting; keep the camera steady.</p>
+  <section id="screenCamera" class="screen hidden" aria-labelledby="t_camera_title">
+    <header class="section__header">
+      <h2 id="t_camera_title" class="section__title">Camera</h2>
+      <p id="t_camera_hint" class="section__sub muted">Use good lighting; keep the camera steady.</p>
+    </header>
 
-    <div class="camera-wrap">
-      <!-- Buttons -->
-      <div class="row" style="margin-bottom:10px;">
-        <button id="btnCapture" class="primary">
-          <span id="t_capture">Capture Photo</span>
-        </button>
+    <div class="scanner">
+      <video id="camVideo" class="scanner__video" autoplay playsinline></video>
+      <canvas id="camCanvas" class="scanner__canvas" hidden></canvas>
 
-        <label class="secondary file-btn" style="display:inline-block;">
-          <input id="fileUpload" type="file" accept="image/*" hidden />
-          <span id="t_upload">Upload Photo</span>
-        </label>
+      <div class="scanner__overlay">
+        <div class="scanner__oval"></div>
+        <div class="scanner__grid"></div>
+        <div class="scanner__sweep" aria-hidden="true"></div>
       </div>
 
-      <!-- Live preview + capture target (REQUIRED for camera to work) -->
-      <video id="camVideo" autoplay playsinline style="width:100%;max-width:640px;border-radius:12px;display:block;margin:10px auto;"></video>
-      <canvas id="camCanvas" hidden></canvas>
+      <div class="scanner__hud" aria-live="polite">
+        <div class="hud hud--lt">
+          <div class="hud__bar hud__bar--light">
+            <span class="hud__label" id="t_hud_light">Light</span>
+            <span class="hud__meter" id="hudLightMeter" aria-hidden="true"></span>
+          </div>
+          <div class="hud__bar hud__bar--stability">
+            <span class="hud__label" id="t_hud_stability">Stability</span>
+            <span class="hud__meter" id="hudStabilityMeter" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="hud hud--rt">
+          <div class="hud__face">
+            <span class="hud__label" id="t_hud_center">Center</span>
+            <span class="hud__dot" id="hudFaceDot" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="hud hud--bottom">
+          <div class="hud__progress">
+            <span class="hud__line" id="hudProgressLine" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <!-- Camera info / errors -->
-      <div id="camMsg" class="muted" style="text-align:center;margin-top:8px;"></div>
+    <p id="camMsg" class="cam__msg muted" role="status"></p>
+    <p id="camTips" class="cam__tips" aria-live="polite"></p>
+
+    <div class="row row--center">
+      <button id="btnCapture" class="btn btn--primary"><span id="t_capture">Capture Photo</span></button>
+      <label class="btn btn--secondary file-btn">
+        <input id="fileUpload" type="file" accept="image/*" hidden />
+        <span id="t_upload">Upload Photo</span>
+      </label>
     </div>
   </section>
 
-  <!-- QUICK SCORE + OFFERS -->
-  <section id="screenQuickScore" class="screen hidden">
-    <h2 id="t_quick_title">Your Skin Score</h2>
-    <p class="lead" id="t_quick_lead">An instant orientation to guide your plan.</p>
+  <div id="camDisclaimer" class="modal" hidden>
+    <div class="modal__card">
+      <h3 class="modal__title">Camera Notice</h3>
+      <p class="modal__text">For your privacy, images stay on this device and are used only to generate your skin analysis. Please allow camera access.</p>
+      <div class="row row--gap">
+        <button id="camAccept" class="btn btn--primary">I Understand — Start Camera</button>
+        <button id="camCancel" class="btn btn--secondary">Cancel</button>
+      </div>
+      <p id="camMsgModal" class="muted" style="margin-top:6px"></p>
+    </div>
+  </div>
+
+  <section id="screenQuickScore" class="screen hidden" aria-labelledby="t_quick_title">
+    <header class="section__header">
+      <h2 id="t_quick_title" class="section__title">Your Skin Score</h2>
+      <p id="t_quick_lead" class="section__sub">An instant orientation to guide your plan.</p>
+    </header>
 
     <div class="gaugeWrap">
       <svg class="gauge" viewBox="0 0 120 120" aria-label="Score">
         <circle cx="60" cy="60" r="52" class="g_bg"></circle>
         <circle cx="60" cy="60" r="52" id="scoreRing" class="g_meter"></circle>
       </svg>
-      <!-- Vertical-readable label (no rotation) -->
       <div class="g_label">
         <div id="scoreValue" class="scoreValue">0</div>
         <div id="scoreBand" class="band">—</div>
       </div>
     </div>
 
-    <!-- Offer cards (Style A — Elegant Spa Tone) -->
-    <div id="screenOffers" class="offer-grid">
+    <p id="quick_llm_2s" class="muted quick__llm"></p>
+
+    <div class="offer-grid">
       <article class="offer-card">
         <h3>Recovery Plan — €9.90</h3>
         <ul>
           <li>Your personalized deep‑dive skin analysis</li>
           <li>Step‑by‑step morning + evening routine</li>
-          <li>Weekly rhythm & ingredient guidance</li>
-          <li>Based on your scan & profile</li>
+          <li>Weekly rhythm &amp; ingredient guidance</li>
+          <li>Based on your scan &amp; profile</li>
         </ul>
-        <button id="btnDeep" class="primary">Get your recovery plan — €9.90</button>
+        <button id="btnDeep" class="btn btn--primary">Get your recovery plan — €9.90</button>
       </article>
-
       <article class="offer-card">
         <h3>Premium Companion — €39.90</h3>
         <ul>
@@ -122,29 +144,33 @@
           <li>Routine refinements over 4 weeks</li>
           <li>Priority recommendations</li>
         </ul>
-        <button id="btnCompanion" class="secondary">Premium Companion — €39.90</button>
+        <button id="btnCompanion" class="btn btn--outline">Premium Companion — €39.90</button>
       </article>
     </div>
   </section>
 
-  <!-- INTAKE (Premium Chips) -->
-  <section id="screenIntake" class="screen hidden">
-    <h2 id="t_intake_title">Your Profile</h2>
+  <section id="screenIntake" class="screen hidden" aria-labelledby="t_intake_title">
+    <header class="section__header">
+      <h2 id="t_intake_title" class="section__title">Your Profile</h2>
+    </header>
 
-    <form id="intakeForm" class="form" autocomplete="on">
-      <div class="form-block">
-        <label for="i_name" id="t_name">Name</label>
-        <input id="i_name" name="name" placeholder="Name" />
+    <form id="intakeForm" class="form form--premium" autocomplete="on">
+      <div class="card card--input">
+        <label for="i_name" id="t_name" class="card__label">Name</label>
+        <input id="i_name" name="name" placeholder="Name" class="input input--xl" />
+      </div>
+      <div class="card card--input">
+        <label for="i_email" id="t_email" class="card__label">Email</label>
+        <input id="i_email" type="email" name="email" placeholder="name@example.com" class="input input--xl" />
+      </div>
+      <div class="card card--input">
+        <label for="i_age" class="card__label">Age</label>
+        <input id="i_age" type="number" min="0" max="120" step="1" name="age" placeholder="Age" class="input input--xl" />
       </div>
 
-      <div class="form-block">
-        <label for="i_email" id="t_email">Email</label>
-        <input id="i_email" type="email" name="email" placeholder="name@example.com" />
-      </div>
-
-      <div class="form-block">
-        <label id="t_skinType">Skin Type</label>
-        <div class="chip-group" id="chip_skinType" role="group" aria-label="Skin Type">
+      <div class="card">
+        <div class="card__label" id="t_skinType">Skin Type</div>
+        <div class="chip-group" id="chip_skinType" role="radiogroup" aria-label="Skin Type">
           <label class="chip"><input type="radio" name="skinType" value="Dry" />Dry</label>
           <label class="chip"><input type="radio" name="skinType" value="Normal" />Normal</label>
           <label class="chip"><input type="radio" name="skinType" value="Combination" />Combination</label>
@@ -152,19 +178,20 @@
         </div>
       </div>
 
-      <div class="form-block">
-        <label id="t_goals">Skin Goals</label>
+      <div class="card">
+        <div class="card__label" id="t_goals">Skin Goals</div>
         <div class="chip-group" id="chip_goals" role="group" aria-label="Skin Goals">
           <label class="chip"><input type="checkbox" name="skinGoals" value="Clarity" />Clarity</label>
           <label class="chip"><input type="checkbox" name="skinGoals" value="Hydration" />Hydration</label>
           <label class="chip"><input type="checkbox" name="skinGoals" value="Texture" />Texture</label>
           <label class="chip"><input type="checkbox" name="skinGoals" value="Even Tone" />Even Tone</label>
+          <label class="chip"><input type="checkbox" name="skinGoals" value="Wrinkles" />Wrinkles</label>
           <label class="chip"><input type="checkbox" name="skinGoals" value="Barrier Support" />Barrier Support</label>
         </div>
       </div>
 
-      <div class="form-block">
-        <label id="t_allergies">Allergies</label>
+      <div class="card">
+        <div class="card__label" id="t_allergies">Allergies</div>
         <div class="chip-group" id="chip_allergies" role="group" aria-label="Allergies">
           <label class="chip"><input type="checkbox" name="allergies" value="Fragrance" />Fragrance</label>
           <label class="chip"><input type="checkbox" name="allergies" value="Essential oils" />Essential oils</label>
@@ -173,60 +200,74 @@
         </div>
       </div>
 
-      <div class="form-block">
-        <label id="t_budget">Budget</label>
-        <div class="chip-group" id="chip_budget" role="group" aria-label="Budget">
+      <div class="card">
+        <div class="card__label" id="t_budget">Budget</div>
+        <div class="chip-group" id="chip_budget" role="radiogroup" aria-label="Budget">
           <label class="chip"><input type="radio" name="budget" value="Essential" />Essential</label>
           <label class="chip"><input type="radio" name="budget" value="Balanced" />Balanced</label>
           <label class="chip"><input type="radio" name="budget" value="Premium" />Premium</label>
         </div>
       </div>
 
-      <div class="form-block">
-        <label id="t_routinePref">Routine Preference</label>
-        <div class="chip-group" id="chip_routine" role="group" aria-label="Routine Preference">
+      <div class="card">
+        <div class="card__label" id="t_routinePref">Routine Preference</div>
+        <div class="chip-group" id="chip_routine" role="radiogroup" aria-label="Routine Preference">
           <label class="chip"><input type="radio" name="routinePreference" value="Minimal" />Minimal</label>
           <label class="chip"><input type="radio" name="routinePreference" value="Balanced" />Balanced</label>
           <label class="chip"><input type="radio" name="routinePreference" value="Advanced" />Advanced</label>
         </div>
       </div>
+
+      <div class="card card--dd">
+        <details class="dd" id="dd_morning">
+          <summary class="dd__summary">Current Routine — Morning</summary>
+          <div class="dd__body">
+            <label class="dd__row"><input type="checkbox" name="routineMorning" value="Cleanser" /> Cleanser</label>
+            <label class="dd__row"><input type="checkbox" name="routineMorning" value="Vitamin C" /> Vitamin C</label>
+            <label class="dd__row"><input type="checkbox" name="routineMorning" value="Niacinamide" /> Niacinamide</label>
+            <label class="dd__row"><input type="checkbox" name="routineMorning" value="Moisturizer" /> Moisturizer</label>
+            <label class="dd__row"><input type="checkbox" name="routineMorning" value="SPF" /> SPF</label>
+          </div>
+        </details>
+        <details class="dd" id="dd_evening">
+          <summary class="dd__summary">Current Routine — Evening</summary>
+          <div class="dd__body">
+            <label class="dd__row"><input type="checkbox" name="routineEvening" value="Cleanser" /> Cleanser</label>
+            <label class="dd__row"><input type="checkbox" name="routineEvening" value="Retinal" /> Retinal</label>
+            <label class="dd__row"><input type="checkbox" name="routineEvening" value="Hydrating serum" /> Hydrating serum</label>
+            <label class="dd__row"><input type="checkbox" name="routineEvening" value="Moisturizer" /> Moisturizer</label>
+            <label class="dd__row"><input type="checkbox" name="routineEvening" value="Spot treatment" /> Spot treatment</label>
+          </div>
+        </details>
+        <details class="dd" id="dd_weekly">
+          <summary class="dd__summary">Current Routine — Weekly</summary>
+          <div class="dd__body">
+            <label class="dd__row"><input type="checkbox" name="routineWeekly" value="Gentle exfoliation" /> Gentle exfoliation</label>
+            <label class="dd__row"><input type="checkbox" name="routineWeekly" value="Hydrating mask" /> Hydrating mask</label>
+            <label class="dd__row"><input type="checkbox" name="routineWeekly" value="Clay mask" /> Clay mask</label>
+          </div>
+        </details>
+      </div>
     </form>
 
     <div class="stickyCTA">
-      <button class="secondary" data-nav="screenQuickScore" id="btnBackToScore">← <span id="t_back">Back</span></button>
-      <button class="primary" data-nav="screenPayment" id="btnProceedPayment"><span id="t_continue">Continue</span> →</button>
+      <button class="btn btn--secondary" data-nav="screenQuickScore" id="btnBackToScore">← <span id="t_back">Back</span></button>
+      <button class="btn btn--primary" data-nav="screenPayment" id="btnProceedPayment"><span id="t_continue">Continue</span> →</button>
     </div>
   </section>
 
-  <!-- PAYMENT (Dummy → Report) -->
-  <section id="screenPayment" class="screen hidden">
-    <h2 id="t_payment_title">Payment</h2>
-    <p class="muted" id="t_payment_hint">This is a simulation (no real payment).</p>
-    <div class="pay" id="payWrap">
-      <button class="primary" id="toReportBtn"><span id="t_viewReport">View Report</span></button>
+  <section id="screenPayment" class="screen hidden" aria-labelledby="t_payment_title">
+    <header class="section__header">
+      <h2 id="t_payment_title" class="section__title">Payment</h2>
+      <p id="t_payment_hint" class="section__sub muted">This is a simulation (no real payment).</p>
+    </header>
+    <div class="pay">
+      <button class="btn btn--xl btn--gold" id="toReportBtn"><span id="t_viewReport">View Report</span></button>
     </div>
   </section>
 
-  <!-- CAMERA DISCLAIMER MODAL (shows before first camera start) -->
-  <div id="camDisclaimer" class="modal" hidden>
-    <div class="modal__card">
-      <h3>Camera Notice</h3>
-      <p>For your privacy, images stay on this device and are used only to generate your skin analysis.</p>
-      <div class="row">
-        <button id="camAccept" class="primary">I Understand — Start Camera</button>
-        <button id="camCancel" class="secondary">Cancel</button>
-      </div>
-      <p id="camMsg" class="muted" style="margin-top:6px"></p>
-    </div>
-  </div>
-
-  <!-- Scripts -->
   <script src="../i18n/i18n.js"></script>
   <script src="js/app.js"></script>
-
-  <!-- Helpful note for dev/testing -->
-  <noscript style="color:#b04040;display:block;text-align:center;margin:10px 0;">
-    JavaScript is required for camera, scoring, and navigation.
-  </noscript>
+  <noscript style="display:block;text-align:center;margin:12px 0;color:#b04040;">JavaScript is required for camera, scanning and navigation.</noscript>
 </body>
 </html>
