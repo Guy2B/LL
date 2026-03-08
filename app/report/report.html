@@ -7,26 +7,19 @@
   <link rel="stylesheet" href="report.css" />
 </head>
 <body class="bg-sand">
-
   <div class="actions no-print">
     <button id="btnPrint" class="btn btn-gold">Print / Save PDF</button>
-    <a class="btn btn-outline" href="../index.html">Back to Home</a>
+    <a class="btn btn-outline" href="../../index.html">Back to Home</a>
   </div>
-
   <main class="sheet A4">
-
-    <!-- BRAND SECTION (logo removed) -->
     <header class="brandbar">
+      <img src="../../assets/img/logo.png" class="brandbar__logo" alt="logo"/>
       <div class="brandbar__meta">
         <h1 id="t_reportTitle" class="report-title">Your Lune Skin Report</h1>
-        <p id="t_reportSubtitle" class="report-sub">
-          A premium, private skin analysis—crafted just for you.
-        </p>
+        <p id="t_reportSubtitle" class="report-sub">A premium, private skin analysis—crafted just for you.</p>
       </div>
       <div class="brandbar__stamp"><span class="stamp">Skin‑AI</span></div>
     </header>
-
-    <!-- HERO SECTION -->
     <section class="hero">
       <div class="hero__left">
         <div class="score">
@@ -48,7 +41,6 @@
         </div>
         <p id="r_llm2" class="muted" style="margin-top:10px"></p>
       </div>
-
       <div class="hero__right">
         <div class="idcard">
           <div class="idcard__row"><span class="label">Name</span><span id="r_name">—</span></div>
@@ -56,27 +48,22 @@
           <div class="idcard__row"><span class="label">Skin Type</span><span id="r_skinType">—</span></div>
           <div class="idcard__row"><span class="label">Budget</span><span id="r_budget">—</span></div>
         </div>
-
         <figure class="thumb">
           <img id="r_photo" src="" alt="Captured preview" />
           <figcaption id="t_analysisPhoto">Analysis Photo</figcaption>
         </figure>
       </div>
     </section>
-
     <hr class="gold-rule" />
-
     <section class="block">
       <h2 id="t_executiveSummary" class="h2">Executive Summary</h2>
       <ul id="r_summary" class="bullet luxe"></ul>
       <p id="r_strategy" class="muted"></p>
     </section>
-
     <section class="block">
       <h2 id="t_keyFindings" class="h2">Key Findings (ordered by priority)</h2>
       <div id="r_findings" class="cards findings"></div>
     </section>
-
     <section class="block two-col">
       <div>
         <h2 id="t_morningRoutine" class="h2">Morning Routine</h2>
@@ -87,45 +74,38 @@
         <ol id="r_evening" class="steps"></ol>
       </div>
     </section>
-
     <section class="block">
       <h2 id="t_weeklyRoutine" class="h2">Weekly Rhythm</h2>
       <ul id="r_weekly" class="bullet"></ul>
     </section>
-
     <section class="block">
       <h2 id="t_actives" class="h2">Active Ingredients</h2>
       <div id="r_actives" class="cards actives"></div>
     </section>
-
     <section class="block">
       <h2 id="t_avoidList" class="h2">Avoid List</h2>
       <ul id="r_avoid" class="bullet warn"></ul>
     </section>
-
     <section class="block">
       <h2 class="h2">Detailed Analysis</h2>
       <div id="r_detail" class="card"></div>
     </section>
-
     <section class="block">
-      <h2 class"card"></div>
+      <h2 class="h2">Features & Registration</h2>
+      <div id="r_features" class="card"></div>
     </section>
-
     <footer class="footer">
       <div class="footer__left">
+        <img src="../../assets/img/logo.png" class="footer__logo" alt="logo"/>
         <span>Lune Beauty · Private Skin‑AI</span>
       </div>
       <div class="footer__right">
-        <span id="t_disclaimer" class="muted">
-          This report is informational and not medical advice.
-        </span>
+        <span id="t_disclaimer" class="muted">This report is informational and not medical advice.</span>
       </div>
     </footer>
-
   </main>
-
-  ../i18n/i18n.js</script>
-  report.js</script>
+  <img src="../../assets/img/logo.png" class="wm" alt="wm"/>
+  <script src="../i18n/i18n.js"></script>
+  <script src="report.js"></script>
 </body>
 </html>

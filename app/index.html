@@ -262,8 +262,26 @@
       <p id="t_payment_hint" class="section__sub muted">This is a simulation (no real payment).</p>
     </header>
     <div class="pay">
-      <button class="btn btn--xl btn--gold" id="toReportBtn"><span id="t_viewReport">View Report</span></button>
+      <a id="toReportBtn" class="btn btn--xl btn--gold" href="report/report.html">
+        <span id="t_viewReport">View Report</span>
+      </a>
     </div>
+
+    <script>
+      // Best-effort save so the Report can render user data (progressive enhancement)
+      (function(){
+        const link=document.getElementById('toReportBtn');
+        link?.addEventListener('click',()=>{
+          try{
+            const score=Number(document.getElementById('scoreValue')?.textContent||0);
+            const rec=JSON.parse(localStorage.getItem('LUNE_USERS')||'[]');
+            rec.push({timestamp:new Date().toISOString(),quickScore:score,intake:(window.AppState?.intake)||{},payment:(window.AppState?.payment)||{},scan:(window.AppState?.scanMetrics)||{}});
+            localStorage.setItem('LUNE_USERS',JSON.stringify(rec));
+            localStorage.setItem('LUNE_APP_STATE',JSON.stringify({locale:(window.LuneI18n?.locale&&window.LuneI18n.locale())||'en',scanMetrics:(window.AppState?.scanMetrics)||{},intake:(window.AppState?.intake)||{},payment:(window.AppState?.payment)||{}}));
+          }catch(e){/* allow navigation anyway */}
+        });
+      })();
+    </script>
   </section>
 
   <script src="../i18n/i18n.js"></script>
