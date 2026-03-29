@@ -91,6 +91,7 @@ html,body{font-family:Inter,sans-serif;background:var(--sand);color:var(--ink);s
 .bottom-cta-wrap{margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 .cta-btn{padding:1rem 1.8rem;border-radius:16px;font-weight:600;text-decoration:none;font-size:1.05rem;transition:.25s}
 .cta-btn.whatsapp{background:#25D366;color:#fff}
+.cta-btn.instagram{background:#E1306C;color:#fff}
 .cta-btn.email{background:#444;color:#fff}
 .cta-btn.premium{background:var(--gold);color:#111}
 .ai-cta{animation:idlePulse 3.5s ease-in-out infinite}
