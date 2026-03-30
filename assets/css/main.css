@@ -1,50 +1,256 @@
-
-/* Services */
-.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;justify-items:center;align-items:start}
-.service-card{background:#fff;border:1px solid #eee;border-radius:22px;padding:2rem 1.4rem;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.06);transition:.35s;cursor:pointer}
-.service-card:hover{transform:translateY(-8px) scale(1.05);box-shadow:0 22px 40px rgba(0,0,0,.18)}
-.service-card img{width:180px;height:180px;object-fit:contain;margin-bottom:1rem}
-/* Pricing */
-.acc.premium{background:#fff;border:1px solid #e8e4d9;border-radius:18px;padding:1.2rem 1.6rem;margin:1.4rem auto;max-width:900px;box-shadow:0 6px 24px rgba(0,0,0,.06);transition:.3s ease}
-.acc.premium[open]{background:#fffdf8;box-shadow:0 12px 38px rgba(0,0,0,.12)}
-.acc-list{list-style:none;margin:0;padding:0}
-.acc-list li{padding:.8rem 0;border-top:1px solid #eee5d8;display:grid;grid-template-columns:1fr auto;gap:.5rem}
-.acc-list .price{font-weight:700}
-details summary{list-style:none;cursor:pointer;font-weight:600;font-size:1.1rem;padding:.6rem 0;border-radius:10px}
-details summary::-webkit-details-marker{display:none}
-/* Reveal Up */
-.reveal-up{opacity:0;transform:translateY(40px);transition:all .9s cubic-bezier(.16,.84,.44,1)}
-.reveal-up.visible{opacity:1;transform:translateY(0)}
-/* Responsive */
-@media(max-width:820px){.services-grid{grid-template-columns:repeat(2,1fr);gap:1.4rem}}
-@media(max-width:520px){.services-grid{grid-template-columns:1fr}.service-card img{width:150px;height:150px}}
-.service-left strong {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+/* -----------------------------------------------------
+   SERVICES GRID
+----------------------------------------------------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  justify-items: center;
+  align-items: start;
 }
 
-.service-left p {
-  margin: 0;
-  opacity: 0.75;
-  font-size: 0.95rem;
-  line-height: 1.4;
+/* -----------------------------------------------------
+   LUNE BEAUTY — ULTRA PREMIUM SERVICE CARDS ✨
+----------------------------------------------------- */
+.service-card {
+  position: relative;
+  overflow: hidden;
+  background: #fffdf8;
+  border: 1px solid #e8e0cf;
+  border-radius: 28px;
+  padding: 2.4rem 1.8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.45s ease;
+  box-shadow:
+      0 8px 28px rgba(0,0,0,0.06),
+      0 2px 6px rgba(255, 220, 160, 0.35);
+  backdrop-filter: blur(2px);
+  transform-style: preserve-3d;
+}
+
+/* MICRO-TEXTURE */
+.service-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.045'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ANIMATED GRADIENT */
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 245, 220, 0.12),
+    rgba(255, 228, 185, 0.12),
+    rgba(255, 240, 200, 0.12)
+  );
+  background-size: 200% 200%;
+  animation: cardGradient 8s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes cardGradient {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 80%; }
+  100% { background-position: 0% 0%; }
+}
+
+/* HOVER SHIMMER */
+.service-card:hover::after {
+  background: linear-gradient(
+    120deg,
+    rgba(255, 245, 220, 0.18),
+    rgba(255, 232, 190, 0.30),
+    rgba(255, 225, 160, 0.18)
+  );
+  background-size: 350% 350%;
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 3D PARALLAX TILT */
+.service-card:hover {
+  transform: translateY(-10px) scale(1.04) rotateX(4deg) rotateY(-4deg);
+  border-color: #e5d8be;
+  box-shadow:
+      0 28px 58px rgba(0,0,0,0.16),
+      0 10px 20px rgba(255, 215, 160, 0.55);
+}
+
+/* FLOATING GOLD PARTICLES */
+.service-card .particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.service-card .particles span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #ffe7b0, #d5a96100);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: floatParticle 6s infinite ease-in-out;
+}
+
+@keyframes floatParticle {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-14px) scale(1.25); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0.6; }
+}
+
+.service-card .particles span:nth-child(1) { top: 10%; left: 18%; animation-delay: 0s; }
+.service-card .particles span:nth-child(2) { top: 35%; left: 80%; animation-delay: .5s; }
+.service-card .particles span:nth-child(3) { top: 70%; left: 25%; animation-delay: 1s; }
+.service-card .particles span:nth-child(4) { top: 50%; left: 50%; animation-delay: 1.5s; }
+.service-card .particles span:nth-child(5) { top: 20%; left: 60%; animation-delay: 2s; }
+.service-card .particles span:nth-child(6) { top: 80%; left: 40%; animation-delay: 2.4s; }
+.service-card .particles span:nth-child(7) { top: 60%; left: 10%; animation-delay: 3s; }
+.service-card .particles span:nth-child(8) { top: 15%; left: 45%; animation-delay: 3.5s; }
+.service-card .particles span:nth-child(9) { top: 78%; left: 78%; animation-delay: 4s; }
+.service-card .particles span:nth-child(10){ top: 42%; left: 32%; animation-delay: 4.5s; }
+
+/* GOLD OUTLINE IMAGES */
+.service-card img {
+  position: relative;
+  z-index: 2;
+  width: 360px;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 216, 150, 0.55);
+  box-shadow:
+      0 5px 20px rgba(0,0,0,0.12),
+      0 0 18px rgba(255, 225, 160, 0.35);
+  margin-bottom: 1rem;
+}
+
+/* INNER GLOW TITLES */
+.service-card h3,
+.service-card strong {
+  position: relative;
+  z-index: 3;
+  color: #3e2d16;
+  text-shadow:
+      0 0 4px rgba(255, 230, 180, 0.65),
+      0 0 1px rgba(0,0,0,0.2);
+}
+
+/* -----------------------------------------------------
+   PRICING
+----------------------------------------------------- */
+.acc.premium {
+  background:#fff;
+  border:1px solid #e8e4d9;
+  border-radius:18px;
+  padding:1.2rem 1.6rem;
+  margin:1.4rem auto;
+  max-width:900px;
+  box-shadow:0 6px 24px rgba(0,0,0,.06);
+  transition:.3s ease;
+}
+
+.acc.premium[open]{
+  background:#fffdf8;
+  box-shadow:0 12px 38px rgba(0,0,0,.12);
+}
+
+.acc-list {
+  list-style:none;
+  margin:0;
+  padding:0;
 }
 
 .acc-list li {
-  align-items: flex-start;
-  padding: 1rem 0;
+  padding:.8rem 0;
+  border-top:1px solid #eee5d8;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:.5rem;
+  align-items:flex-start;
 }
-/* Mobile fix for pricing */
-@media(max-width:520px) {
+
+.acc-list .price {
+  font-weight:700;
+}
+
+details summary {
+  list-style:none;
+  cursor:pointer;
+  font-weight:600;
+  font-size:1.1rem;
+  padding:.6rem 0;
+  border-radius:10px;
+}
+
+details summary::-webkit-details-marker {
+  display:none;
+}
+
+/* -----------------------------------------------------
+   REVEAL UP
+----------------------------------------------------- */
+.reveal-up {
+  opacity:0;
+  transform:translateY(40px);
+  transition:all .9s cubic-bezier(.16,.84,.44,1);
+}
+
+.reveal-up.visible {
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* -----------------------------------------------------
+   RESPONSIVE
+----------------------------------------------------- */
+@media(max-width:820px){
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap:1.4rem;
+  }
+}
+
+@media(max-width:520px){
+  .services-grid { grid-template-columns:1fr; }
+
+  .service-card img {
+    width:300px;
+    height:300px;
+  }
 
   .acc-list li {
-    grid-template-columns: 1fr; /* Price moves under title+description */
+    grid-template-columns: 1fr;
   }
 
   .price {
-    justify-self: start;
-    margin-top: 0.35rem;
+    justify-self:start;
+    margin-top:0.35rem;
   }
 }
-``
+
+.service-left strong {
+  display:block;
+  font-weight:600;
+  margin-bottom:0.25rem;
+}
+
+.service-left p {
+  margin:0;
+  opacity:0.75;
+  font-size:0.95rem;
+  line-height:1.4;
+}
