@@ -1,1 +1,0 @@
-window.DASH_CONFIG = { pass: 'lune', remember: 'session', tabs: ['prompt','results','table'] };
