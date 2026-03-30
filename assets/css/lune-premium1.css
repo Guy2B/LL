@@ -1,0 +1,596 @@
+/* =====================================================
+   1. GLOBAL RESET & VARIABLES
+===================================================== */
+:root {
+  --sand: #FBF8F4;
+  --ink: #151515;
+  --muted: #6b6b6b;
+  --gold: #C8A34A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: Inter, sans-serif;
+  background: var(--sand);
+  color: var(--ink);
+  scroll-behavior: smooth;
+}
+
+.section {
+  padding: 4rem 1rem;
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.section-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 2.4vw, 2.4rem);
+  margin-bottom: 2rem;
+}
+
+/* =====================================================
+   2. NAVIGATION
+===================================================== */
+.top-nav {
+  position: sticky;
+  top: 0;
+  background: #ffffffd9;
+  border-bottom: 1px solid #eee;
+  backdrop-filter: blur(12px);
+  z-index: 200;
+}
+
+.nav-divider {
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), #9d7b2f);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-logo {
+  height: 110px;
+  width: auto;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.6rem;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+  transition: 0.25s;
+}
+
+.nav-links a:hover {
+  color: var(--gold);
+}
+
+/* =====================================================
+   3. HERO (780px Logo)
+===================================================== */
+.hero {
+  position: relative;
+  min-height: 78vh;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.hero.parallax {
+  background: url('assets/img/hero.jpg')
+    center center / cover
+    no-repeat fixed;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    60% 40% at 50% 30%,
+    rgba(238,217,166,0.35),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(255,255,255,.12), transparent 60%),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,.10), transparent 55%),
+    radial-gradient(circle at 50% 20%, rgba(255,255,255,.08), transparent 60%);
+  animation: floatParticles 12s ease-in-out infinite alternate;
+}
+
+@keyframes floatParticles {
+  0% { transform: translateY(-10px); }
+  100% { transform: translateY(10px); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.hero-logo {
+  height: 780px;
+  width: auto;
+  max-width: 90vw;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.hero-sub {
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+/* =====================================================
+   4. PREMIUM SERVICES – GRID
+===================================================== */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  justify-items: center;
+  overflow: visible;
+}
+
+/* Safe spacing so 3D tilt never overlaps */
+.service-card {
+  margin-bottom: 3rem;
+  position: relative;
+  background: #fffdf8;
+  border: 1px solid #e8e0cf;
+  border-radius: 28px;
+  padding: 2.4rem 1.8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.4s ease;
+  transform-style: preserve-3d;
+  box-shadow:
+    0 8px 28px rgba(0,0,0,0.06),
+    0 2px 6px rgba(255, 220, 160, 0.35);
+  overflow: hidden;
+}
+
+/* Micro-texture */
+.service-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' ... %3C/svg%3E");
+  opacity: 0.045;
+  z-index: 1;
+}
+
+/* Champagne gradient */
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(255,245,220,.12),
+    rgba(255,228,185,.12),
+    rgba(255,240,200,.12)
+  );
+  background-size: 200% 200%;
+  animation: cardGradient 8s infinite ease-in-out;
+  z-index: 1;
+}
+
+@keyframes cardGradient {
+  0% {background-position: 0% 0%;}
+  50% {background-position: 100% 80%;}
+  100% {background-position: 0% 0%;}
+}
+
+/* Gold shimmer when hovered */
+.service-card.hovered::after {
+  background: linear-gradient(
+    120deg,
+    rgba(255,245,220,.18),
+    rgba(255,232,190,.30),
+    rgba(255,225,160,.18)
+  );
+  background-size: 350% 350%;
+  animation: shimmer 2.4s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+/* 3D Tilt (JS adds transform inline) */
+.service-card.hovered {
+  z-index: 10;
+  box-shadow:
+    0 28px 58px rgba(0,0,0,0.16),
+    0 10px 20px rgba(255,215,160,0.55);
+}
+
+/* Always-on gold particles (JS injects them) */
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Images */
+.service-card img {
+  width: 360px;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 2px solid rgba(255,216,150,.55);
+  box-shadow:
+    0 5px 20px rgba(0,0,0,.12),
+    0 0 18px rgba(255,225,160,.35);
+  position: relative;
+  z-index: 3;
+}
+
+/* Titles */
+.service-card h3 {
+  color: #3e2d16;
+  font-weight: 600;
+  position: relative;
+  z-index: 3;
+  text-shadow:
+    0 0 4px rgba(255,230,180,.65),
+    0 0 1px rgba(0,0,0,.2);
+}
+
+/* =====================================================
+   5. PRICING — PREMIUM ACCORDION
+===================================================== */
+.acc.premium {
+  background: #fffdf8;
+  border: 1px solid #e7dcc8;
+  border-radius: 22px;
+  padding: 1.4rem 1.6rem;
+  margin: 1.4rem auto;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.05),
+    0 2px 6px rgba(255,220,160,.35);
+  position: relative;
+  overflow: hidden;
+  max-width: 900px;
+  transition: 0.4s ease;
+}
+
+.acc.premium[open] {
+  box-shadow:
+    0 16px 36px rgba(0,0,0,.08),
+    0 0 12px rgba(255,220,160,.35);
+}
+
+/* Title */
+details summary {
+  font-size: 1.18rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.8rem 0;
+  list-style: none;
+  position: relative;
+  z-index: 3;
+  text-shadow:
+    0 0 4px rgba(255,230,180,.65),
+    0 0 1px rgba(0,0,0,.2);
+}
+
+/* List */
+.acc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.acc-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 1rem 0;
+  border-top: 1px solid #efe4d5;
+  gap: 0.5rem;
+}
+
+.price {
+  font-weight: 700;
+  text-shadow: 0 0 3px rgba(255,225,180,.5);
+}
+
+/* =====================================================
+   6. CONTACT SECTION — PREMIUM
+===================================================== */
+#contact .centered p,
+#contact .centered strong {
+  color: #3e2d16;
+  text-shadow: 0 0 3px rgba(255,230,180,.3);
+}
+
+.cta-btn {
+  padding: 1rem 1.8rem;
+  border-radius: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.05rem;
+  color: white;
+  transition: 0.3s;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.12),
+    0 3px 8px rgba(255,220,160,.25);
+}
+
+.cta-btn:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow:
+    0 18px 30px rgba(0,0,0,.15),
+    0 0 12px rgba(255,220,160,.55);
+}
+
+.cta-btn.whatsapp { background: #25D366; }
+.cta-btn.instagram { background: #E1306C; }
+.cta-btn.email { background: #444; }
+
+.cta-btn.premium {
+  background: linear-gradient(135deg, #d6b47c, #f2d9a2);
+  color: #3e2d16;
+  font-weight: 700;
+}
+
+/* =====================================================
+   7. REVEAL ANIMATIONS
+===================================================== */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.9s cubic-bezier(.16,.84,.44,1);
+}
+
+.reveal-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =====================================================
+   8. RESPONSIVE
+===================================================== */
+@media (max-width:820px) {
+  .services-grid {
+    grid-template-columns: repeat(2,1fr);
+  }
+}
+
+@media (max-width:520px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  .service-card img {
+    width: 300px;
+    height: 300px;
+  }
+}
+/* ✅ Fix: Kontaktbereich wirklich perfekt zentrieren */
+#contact {
+  text-align: center;
+}
+
+#contact .section-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#contact .section-title {
+  text-align: center;
+  width: 100%;
+}
+
+/* Der wichtige Teil: der Block selbst muss zentriert werden */
+#contact .centered {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Buttons auf perfekte Mitte ausrichten */
+#contact .bottom-cta-wrap {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Optional: bessere visuelle Balance */
+#contact p {
+  margin: 6px 0;
+}
+.footer {
+  text-align: center;
+}
+``
+/* =====================================================
+   PREMIUM CONTACT SECTION ✨ GOLD EDITION
+===================================================== */
+#contact {
+  position: relative;
+  padding: 5rem 1rem 6rem;
+  background: linear-gradient(
+                180deg,
+                rgba(255, 245, 225, 0.65) 0%,
+                rgba(255, 240, 210, 0.85) 40%,
+                #fff8ee 100%
+              );
+  border-radius: 30px;
+  box-shadow:
+      0 -10px 40px rgba(0,0,0,0.06),
+      0 4px 50px rgba(220,180,110,0.25);
+  overflow: hidden;
+}
+
+/* Soft gold micro texture overlay */
+#contact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' ... %3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Gentle gold shimmer vertical */
+#contact::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0.35) 0%,
+    rgba(255,232,180,0.22) 45%,
+    rgba(255,215,160,0.28) 90%
+  );
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: soft-light;
+}
+
+/* Section content on top */
+#contact .section-inner {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+}
+
+/* Gold section title */
+#contact .section-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #3e2d16;
+  text-shadow:
+      0 0 12px rgba(255,230,180,0.75),
+      0 0 2px rgba(0,0,0,0.18);
+}
+
+/* Contact text block */
+#contact .centered {
+  max-width: 540px;
+  margin: 0 auto 2rem;
+  padding: 1.6rem 1rem;
+  background: rgba(255,255,255,0.6);
+  border-radius: 20px;
+  box-shadow:
+      0 8px 18px rgba(0,0,0,0.05),
+      0 0 22px rgba(255,220,160,0.25);
+  backdrop-filter: blur(6px);
+}
+
+/* Text styling inside */
+#contact .centered p {
+  margin: 0.45rem 0;
+  color: #4b3820;
+  font-size: 1.05rem;
+  text-shadow: 0 0 4px rgba(255,235,205,0.45);
+}
+
+#contact .centered strong {
+  color: #3b2a14;
+  font-weight: 700;
+  text-shadow: 0 0 3px rgba(255,225,180,0.45);
+}
+
+/* CTA Buttons Row */
+#contact .bottom-cta-wrap {
+  margin-top: 2rem;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Unified premium CTA style */
+#contact .cta-btn {
+  min-width: 130px;
+  padding: 0.9rem 1.8rem;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+  color: white;
+  transition: 0.35s;
+  box-shadow:
+      0 6px 16px rgba(0,0,0,0.14),
+      0 0 12px rgba(255,220,160,0.45);
+}
+
+/* WA / Insta / Mail */
+#contact .cta-btn.whatsapp { background: linear-gradient(135deg, #2fe676, #20b85a); }
+#contact .cta-btn.instagram { background: linear-gradient(135deg, #e1306c, #af1950); }
+#contact .cta-btn.email { background: linear-gradient(135deg, #444, #222); }
+
+/* Premium AI CTA */
+#contact .cta-btn.premium {
+  background: linear-gradient(135deg, #d6b47c, #f4e2b8, #d6b47c);
+  color: #4d3a1c;
+  font-weight: 700;
+  box-shadow:
+      0 10px 28px rgba(0,0,0,0.18),
+      0 0 18px rgba(255,230,170,0.65);
+}
+
+/* Hover lift & shimmer */
+#contact .cta-btn:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow:
+      0 16px 36px rgba(0,0,0,0.18),
+      0 0 22px rgba(255,230,180,0.85);
+}
+
+/* Responsive fixes */
+@media(max-width:520px){
+  #contact .section-title { font-size: 1.75rem; }
+  #contact .centered { padding: 1.2rem; }
+}
