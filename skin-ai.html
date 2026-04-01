@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lune Beauty – AI Skin Scan</title>
+
+<!-- ✅ Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --gold:#c9a86a;
+  --bg:#fffaf3;
+  --ink:#2f2a24;
+}
+
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  text-align:center;
+}
+
+#app{
+  max-width:420px;
+  margin:24px auto;
+}
+
+.badge{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  background:#f4efe7;
+  color:#7a6a4f;
+  font-size:12px;
+  margin-bottom:12px;
+}
+
+/* ---------- SCAN ---------- */
+#viewer{
+  width:320px;
+  height:320px;
+  margin:16px auto;
+  border-radius:50%;
+  background:#000;
+  border:3px solid var(--gold);
+  overflow:hidden;
+  position:relative;
+  transition:.6s;
+}
+
+#viewer.morph{
+  width:180px;
+  height:240px;
+  border-radius:18px;
+}
+
+video,canvas,img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+canvas{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+/* ---------- CONTROLS ---------- */
+.controls{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-top:16px;
+}
+
+button{
+  padding:11px 22px;
+  border-radius:18px;
+  border:none;
+  background:var(--gold);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button.secondary{
+  background:#f2ebe2;
+  color:#7a6a4f;
+}
+
+/* ---------- REPORT ---------- */
+#report{
+  opacity:0;
+  transform:translateY(40px);
+  pointer-events:none;
+  transition:.6s ease;
+}
+
+#report.active{
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+}
+
+.score{
+  font-size:46px;
+  color:var(--gold);
+  font-weight:600;
+}
+
+.zone{
+  font-size:14px;
+  opacity:.85;
+}
+
+/* ---------- CTA ---------- */
+.premium-cta{
+  margin-top:24px;
+  padding:22px;
+  border-radius:28px;
+  background:linear-gradient(180deg,#fff,#faf6ef);
+  box-shadow:0 18px 40px rgba(0,0,0,.12);
+}
+
+.cta-buttons{
+  display:flex;
+  gap:14px;
+  margin-top:14px;
+}
+
+.cta{
+  flex:1;
+  padding:14px 0;
+  border-radius:18px;
+  font-weight:600;
+  text-decoration:none;
+  color:#fff;
+}
+
+.phone{background:linear-gradient(135deg,#c9a86a,#efd8d1)}
+.whatsapp{background:#1dbf5f}
+
+.meta{
+  font-size:13px;
+  color:#6b5c43;
+  margin-top:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <div class="badge">Advanced AI Skin Scan</div>
+
+  <!-- SCAN VIEW -->
+  <div id="viewer">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="hud"></canvas>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="captureBtn" disabled>Capture</button>
+  </div>
+
+  <!-- REPORT -->
+  <div id="report">
+    <div class="badge">Ihr Haut‑Score</div>
+
+    <div class="score">86</div>
+
+    <div class="zone">Stirn: 88 · Wangen: 84 · Kinn: 86</div>
+
+    <p style="max-width:320px;margin:12px auto">
+      Ihre Haut zeigt eine insgesamt ausgeglichene Struktur mit leichter
+      Sensitivität im Wangenbereich.
+      Für ein optimales Gleichgewicht empfehlen wir eine individuell
+      abgestimmte Behandlung.
+    </p>
+
+    <div class="premium-cta">
+      <strong>Persönliche Hautberatung</strong>
+      <div class="cta-buttons">
+        <a class="cta phone" href="tel:+491791544002">📞 Telefon</a>
+        <a class="cta whatsapp" href="https://wa.me/491791544002">💬 WhatsApp</a>
+      </div>
+      <div class="meta">
+        Mo–Fr 10–18 Uhr · Sa 10–16 Uhr<br>
+        <a href="https://www.lunebeauty.de">www.lunebeauty.de</a>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="secondary" onclick="location.reload()">Neue Aufnahme</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ✅ MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const hud = document.getElementById("hud");
+const viewer = document.getElementById("viewer");
+const startBtn = document.getElementById("startBtn");
+const captureBtn = document.getElementById("captureBtn");
+const report = document.getElementById("report");
+
+let stream, faceMesh, cameraMP, captured=false;
+
+/* ---------- FaceMesh ---------- */
+const TRIANGLES = [
+  [127,34],[34,139],[11,0],[0,37],
+  [232,231],[72,37],[128,121],[197,196]
+];
+
+function drawResults(res){
+  if(captured) return;
+
+  const ctx = hud.getContext("2d");
+  hud.width = hud.clientWidth;
+  hud.height = hud.clientHeight;
+  ctx.clearRect(0,0,hud.width,hud.height);
+
+  ctx.strokeStyle="rgba(201,168,106,.5)";
+  ctx.lineWidth=1.2;
+  ctx.beginPath();
+  ctx.arc(hud.width/2,hud.height/2,hud.width/2-12,0,Math.PI*2);
+  ctx.stroke();
+
+  if(!res.multiFaceLandmarks) {
+    captureBtn.disabled=true;
+    return;
+  }
+
+  captureBtn.disabled=false;
+
+  ctx.lineWidth=.6;
+  ctx.strokeStyle="rgba(201,168,106,.75)";
+  res.multiFaceLandmarks.forEach(lm=>{
+    TRIANGLES.forEach(([i,j])=>{
+      ctx.beginPath();
+      ctx.moveTo(lm[i].x*hud.width,lm[i].y*hud.height);
+      ctx.lineTo(lm[j].x*hud.width,lm[j].y*hud.height);
+      ctx.stroke();
+    });
+  });
+}
+
+/* ---------- START ---------- */
+startBtn.onclick = async ()=>{
+  stream = await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject = stream;
+  startBtn.disabled=true;
+
+  faceMesh = new FaceMesh({
+    locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
+  });
+  faceMesh.setOptions({
+    maxNumFaces:1,
+    refineLandmarks:true,
+    minDetectionConfidence:.6,
+    minTrackingConfidence:.6
+  });
+  faceMesh.onResults(drawResults);
+
+  cameraMP = new Camera(video,{
+    onFrame: async ()=> !captured && faceMesh.send({image:video})
+  });
+  cameraMP.start();
+};
+
+/* ---------- CAPTURE ---------- */
+captureBtn.onclick = ()=>{
+  if(captured) return;
+  captured=true;
+
+  const snap=document.createElement("canvas");
+  snap.width=video.videoWidth;
+  snap.height=video.videoHeight;
+  const ctx=snap.getContext("2d");
+  ctx.drawImage(video,0,0);
+  ctx.drawImage(hud,0,0,snap.width,snap.height);
+
+  stream.getTracks().forEach(t=>t.stop());
+  cameraMP.stop();
+
+  const img=document.createElement("img");
+  img.src=snap.toDataURL("image/png");
+
+  viewer.innerHTML="";
+  viewer.appendChild(img);
+  viewer.classList.add("morph");
+  report.classList.add("active");
+};
+</script>
+
+</body>
+</html>
+``
