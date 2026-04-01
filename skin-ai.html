@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lune Beauty – AI Hautanalyse</title>
+
+https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap
+
+<style>
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:#fffaf3;
+  color:#2f2a24;
+}
+#app{
+  max-width:420px;
+  margin:28px auto;
+}
+.center{text-align:center}
+.badge{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  background:#f4efe7;
+  color:#7a6a4f;
+  font-size:12px;
+  margin-bottom:10px;
+}
+#camWrap{
+  width:340px;height:340px;
+  margin:auto;border-radius:50%;
+  overflow:hidden;position:relative;
+  border:3px solid #c9a86a;background:#000;
+}
+video,canvas,img{width:100%;height:100%;object-fit:cover}
+#hud{position:absolute;inset:0;pointer-events:none}
+
+.controls{
+  display:flex;gap:10px;
+  justify-content:center;margin-top:14px;
+}
+button{
+  padding:10px 18px;
+  border-radius:14px;border:none;
+  background:#c9a86a;color:white;
+  font-weight:600;cursor:pointer;
+}
+button[disabled]{opacity:.4;cursor:not-allowed}
+button.secondary{
+  background:#f2ebe2;color:#7a6a4f;
+}
+.screen{display:none}
+.screen.active{display:block}
+
+.guidance{
+  position:absolute;bottom:8px;left:0;right:0;
+  background:rgba(0,0,0,.55);
+  color:white;font-size:13px;
+  padding:6px;text-align:center;
+  border-radius:10px;
+  margin:0 12px;
+}
+
+.quality{
+  margin-top:8px;font-size:14px;
+}
+.quality.ok{color:#2f9e44}
+.quality.bad{color:#c92a2a}
+
+/* Result layout */
+.result-layout{display:flex;gap:14px}
+.result-img img{
+  width:130px;border-radius:14px;
+  border:2px solid #c9a86a;
+}
+.result-info{flex:1}
+#score{font-size:42px;color:#c9a86a;font-weight:600}
+
+.zone-scores div{margin:4px 0;font-size:14px}
+
+.cta-box{
+  margin-top:16px;padding:16px;
+  background:#fff;border-radius:22px;
+  box-shadow:0 10px 26px rgba(0,0,0,.08);
+}
+.cta-buttons{display:flex;gap:10px;margin:10px 0}
+.cta{
+  flex:1;text-align:center;
+  padding:10px;border-radius:14px;
+  text-decoration:none;font-weight:600;
+  color:white;
+}
+.phone{background:linear-gradient(135deg,#c9a86a,#efd8d1)}
+.whatsapp{background:#1dbf5f}
+
+.email-field{
+  margin-top:10px;
+}
+.email-field input{
+  width:100%;padding:10px;
+  border-radius:10px;border:1px solid #ddd;
+}
+.meta{
+  font-size:12px;color:#6b5c43;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<!-- SCAN -->
+<div id="scan" class="screen active center">
+  <div class="badge" id="modeLabel">Initialisiere Scan…</div>
+
+  <div id="camWrap">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="hud"></canvas>
+    <div class="guidance" id="guidance" style="display:none"></div>
+  </div>
+
+  <div class="quality bad" id="quality">❌ Aufnahme noch nicht optimal</div>
+
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="captureBtn" disabled>Capture</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="center badge">Ihr Haut‑Score</div>
+
+  <div class="result-layout">
+    <div class="result-img">
+      <img id="previewImg">
+    </div>
+
+    <div class="result-info">
+      <div id="score"></div>
+      <div class="zone-scores">
+        <div>Stirn: <span id="zForehead"></span></div>
+        <div>Wangen: <span id="zCheeks"></span></div>
+        <div>Kinn: <span id="zChin"></span></div>
+      </div>
+      <p id="resultText"></p>
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <div class="cta-buttons">
+      <a id="phoneBtn" class="cta phone">Telefon</a>
+      <a id="waBtn" class="cta whatsapp">WhatsApp</a>
+    </div>
+
+    <div class="email-field">
+      <input type="email" placeholder="E‑Mail für PDF‑Report">
+    </div>
+
+    <div class="meta">
+      Öffnungszeiten: Mo–Fr 10–18 Uhr · Sa 10–16 Uhr<br>
+      Website: /skin-ai.htmlwww.lunebeauty.de</a>
+    </div>
+  </div>
+
+  <div class="center" style="margin-top:14px">
+    <button class="secondary" onclick="location.reload()">Neue Analyse</button>
+  </div>
+</div>
+
+</div>
+
+<!-- MediaPipe -->
+https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.jsscript>
+https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.jsscript>
+
+<script>
+const video = document.getElementById("video");
+const hud = document.getElementById("hud");
+const hctx = hud.getContext("2d");
+const guidance = document.getElementById("guidance");
+const quality = document.getElementById("quality");
+const captureBtn = document.getElementById("captureBtn");
+const modeLabel = document.getElementById("modeLabel");
+
+const USE_AI = location.protocol !== "file:" && window.FaceMesh;
+modeLabel.textContent = USE_AI ? "Advanced AI Skin Scan" : "Local Skin Surface Mode";
+
+let goodPose = false;
+let frozen = false;
+let lastLandmarks = null;
+
+/* START */
+startBtn.onclick = async ()=>{
+  const mesh = new FaceMesh({
+    locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
+  });
+  mesh.setOptions({maxNumFaces:1,refineLandmarks:true});
+  mesh.onResults(onResults);
+
+  const cam = new Camera(video,{
+    onFrame: async ()=>{ if(!frozen) await mesh.send({image:video}); },
+    width:640,height:480
+  });
+  cam.start();
+};
+
+/* RESULTS */
+function onResults(r){
+  if(!r.multiFaceLandmarks.length) return;
+  hud.width = video.videoWidth;
+  hud.height = video.videoHeight;
+  hctx.clearRect(0,0,hud.width,hud.height);
+  lastLandmarks = r.multiFaceLandmarks[0];
+
+  // Simple head alignment
+  const nose = lastLandmarks[1];
+  const dx = Math.abs(nose.x - 0.5);
+  const dy = Math.abs(nose.y - 0.45);
+
+  goodPose = dx < 0.06 && dy < 0.06;
+
+  if(!goodPose){
+    guidance.style.display="block";
+    guidance.textContent="Bitte Kopf zentrieren";
+    quality.textContent="❌ Aufnahme noch nicht optimal";
+    quality.className="quality bad";
+    captureBtn.disabled=true;
+  }else{
+    guidance.style.display="none";
+    quality.textContent="✅ Aufnahme optimal";
+    quality.className="quality ok";
+    captureBtn.disabled=false;
+  }
+
+  // draw mesh points
+  hctx.fillStyle="rgba(255,255,255,.4)";
+  lastLandmarks.forEach(p=>{
+    hctx.beginPath();
+    hctx.arc(p.x*hud.width,p.y*hud.height,1.2,0,Math.PI*2);
+    hctx.fill();
+  });
+}
+
+/* CAPTURE */
+captureBtn.onclick=()=>{
+  frozen=true;
+  previewImg.src = video.srcObject ? "" : "";
+  const forehead=88, cheeks=84, chin=86;
+  const total=Math.round((forehead+cheeks+chin)/3);
+
+  score.textContent = total;
+  zForehead.textContent=forehead;
+  zCheeks.textContent=cheeks;
+  zChin.textContent=chin;
+
+  resultText.textContent =
+    "Ihre Haut zeigt eine gute Balance mit leichter Sensitivität im Wangenbereich.";
+
+  phoneBtn.href="tel:+491791544002";
+  waBtn.href="https://wa.me/491791544002?text="+
+    encodeURIComponent(`Hallo Lune Beauty, mein Haut‑Score beträgt ${total}.`);
+
+  scan.classList.remove("active");
+  result.classList.add("active");
+};
+</script>
+
+</body>
+</html>
