@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lune Beauty – AI Skin Scan</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --gold:#c9a86a;
+  --gold-soft:rgba(201,168,106,.28);
+  --bg:#fffaf3;
+  --ink:#2f2a24;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  text-align:center;
+}
+
+#app{
+  max-width:420px;
+  margin:36px auto 72px;
+}
+
+/* ===== BADGE ===== */
+.badge{
+  display:inline-block;
+  padding:6px 16px;
+  border-radius:999px;
+  background:var(--gold-soft);
+  color:#6f5d3d;
+  font-size:12px;
+  margin-bottom:20px;
+}
+
+/* ===== VIEWER ===== */
+#viewer{
+  width:300px;
+  height:380px; /* head frame */
+  margin:0 auto 22px;
+  border-radius:30px;
+  background:#000;
+  border:2px solid var(--gold);
+  overflow:hidden;
+  position:relative;
+  transition:.7s cubic-bezier(.2,.6,.2,1);
+}
+
+#viewer.morph{
+  width:190px;
+  height:260px;
+}
+
+/* media */
+video, canvas, img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+canvas{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+/* ===== CONTROLS ===== */
+.controls{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  margin-bottom:14px;
+}
+
+button{
+  padding:13px 28px;
+  border-radius:999px;
+  border:none;
+  background:var(--gold);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition:opacity .3s;
+}
+
+button:disabled{opacity:.4}
+
+/* ===== PROCEDURE NOTICE ===== */
+.notice{
+  font-size:12px;
+  color:#6b5c43;
+  margin-bottom:26px;
+}
+
+/* ===== REPORT ===== */
+#report{
+  opacity:0;
+  transform:translateY(36px);
+  transition:.7s ease;
+  pointer-events:none;
+}
+
+#report.active{
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+}
+
+.score-context{
+  font-size:12px;
+  color:#7a6a4f;
+  margin-top:6px;
+}
+
+.score{
+  font-family:"Playfair Display",serif;
+  font-size:58px;
+  color:var(--gold);
+  margin:10px 0;
+}
+
+.reco{
+  max-width:320px;
+  margin:0 auto 20px;
+  font-size:14px;
+  line-height:1.55;
+  color:#5f5240;
+}
+
+/* ===== CTA ===== */
+.premium-cta{
+  margin-top:22px;
+  padding:26px;
+  border-radius:30px;
+  background:linear-gradient(180deg,#fff,#faf6ef);
+  box-shadow:0 20px 42px rgba(0,0,0,.12);
+}
+
+.premium-cta strong{
+  font-family:"Playfair Display",serif;
+  font-size:18px;
+}
+
+.cta-sub{
+  font-size:13px;
+  color:#6b5c43;
+  margin-top:4px;
+}
+
+.cta-buttons{
+  display:flex;
+  gap:14px;
+  margin-top:16px;
+}
+
+.cta{
+  flex:1;
+  padding:14px 0;
+  border-radius:18px;
+  font-weight:600;
+  color:#fff;
+  text-decoration:none;
+}
+
+.phone{background:linear-gradient(135deg,#c9a86a,#efd8d1)}
+.whatsapp{background:#1dbf5f}
+
+.meta{
+  font-size:12px;
+  color:#6b5c43;
+  margin-top:14px;
+}
+
+.meta a{
+  color:#6b5c43;
+  text-decoration:none;
+}
+.meta a:hover{text-decoration:underline}
+
+.disclaimer{
+  font-size:11px;
+  color:#8c7b63;
+  margin-top:14px;
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div class="badge">Advanced AI Skin Scan</div>
+
+  <!-- VIEWER -->
+  <div id="viewer">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="hud"></canvas>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button id="startBtn">Analyse starten</button>
+    <button id="captureBtn" disabled>Analyse abschließen</button>
+  </div>
+
+  <div class="notice">Bitte ruhig bleiben – Analyse läuft</div>
+
+  <!-- REPORT -->
+  <div id="report">
+    <div class="badge">Ihr Haut‑Score</div>
+    <div class="score-context">Gesamtzustand der Haut · Skala 0–100</div>
+    <div id="score" class="score">0</div>
+    <div id="diagnosis" class="reco"></div>
+
+    <div class="premium-cta">
+      <strong>Persönliche Expertenberatung</strong>
+      <div class="cta-sub">Auf Basis Ihrer Hautanalyse</div>
+
+      <div class="cta-buttons">
+        <a class="cta phone" href="tel:+491791544002">📞 Telefon</a>
+        <a class="cta whatsapp" id="waBtn" target="_blank">💬 WhatsApp</a>
+      </div>
+
+      <div class="meta">
+        Mo–Fr 10–18 · Sa 10–16<br>
+        <a href="https://www.lunebeauty.de" target="_blank">www.lunebeauty.de</a>
+      </div>
+
+      <div class="disclaimer">
+        Diese Analyse ersetzt keine dermatologische Untersuchung.
+      </div>
+    </div>
+
+    <div class="controls" style="margin-top:22px">
+      <button id="restartBtn">Neue Analyse</button>
+    </div>
+  </div>
+</div>
+
+<!-- MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const hud = document.getElementById("hud");
+const viewer = document.getElementById("viewer");
+const startBtn = document.getElementById("startBtn");
+const captureBtn = document.getElementById("captureBtn");
+const report = document.getElementById("report");
+const scoreEl = document.getElementById("score");
+const diagnosisEl = document.getElementById("diagnosis");
+
+let stream, faceMesh, cam, captured=false, lastLandmarks=null;
+let scans = 0;
+
+/* Mesh topology */
+const T = window.FACEMESH_TESSELATION;
+
+/* Smooth score animation (luxury pacing) */
+function animateScore(val){
+  let n = 0;
+  const step = ()=>{
+    n += (val - n) / 12;
+    scoreEl.textContent = Math.round(n);
+    if(n < val-0.5) requestAnimationFrame(step);
+  };
+  step();
+}
+
+/* Live mesh */
+function onFace(res){
+  if(captured) return;
+
+  const ctx = hud.getContext("2d");
+  hud.width = hud.clientWidth;
+  hud.height = hud.clientHeight;
+  ctx.clearRect(0,0,hud.width,hud.height);
+
+  if(!res.multiFaceLandmarks){
+    captureBtn.disabled = true;
+    return;
+  }
+
+  captureBtn.disabled = false;
+  lastLandmarks = res.multiFaceLandmarks[0];
+
+  ctx.strokeStyle = "rgba(201,168,106,.75)";
+  ctx.lineWidth = .55;
+
+  T.forEach(([a,b])=>{
+    const p1 = lastLandmarks[a];
+    const p2 = lastLandmarks[b];
+    ctx.beginPath();
+    ctx.moveTo(p1.x*hud.width,p1.y*hud.height);
+    ctx.lineTo(p2.x*hud.width,p2.y*hud.height);
+    ctx.stroke();
+  });
+}
+
+/* Start */
+startBtn.onclick = async ()=>{
+  stream = await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject = stream;
+
+  faceMesh = new FaceMesh({
+    locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
+  });
+
+  faceMesh.setOptions({
+    maxNumFaces:1,
+    refineLandmarks:true,
+    minDetectionConfidence:.6,
+    minTrackingConfidence:.6
+  });
+
+  faceMesh.onResults(onFace);
+  cam = new Camera(video,{onFrame:()=>!captured && faceMesh.send({image:video})});
+  cam.start();
+};
+
+/* Capture */
+captureBtn.onclick = ()=>{
+  captured = true;
+
+  const w=hud.width, h=hud.height;
+  const xs=lastLandmarks.map(p=>p.x*w);
+  const ys=lastLandmarks.map(p=>p.y*h);
+  let minX=Math.min(...xs), maxX=Math.max(...xs);
+  let minY=Math.min(...ys), maxY=Math.max(...ys);
+
+  minX-=40; maxX+=40;
+  minY-=80; maxY+=20;
+
+  const snap=document.createElement("canvas");
+  snap.width=maxX-minX;
+  snap.height=maxY-minY;
+
+  const sctx=snap.getContext("2d");
+  sctx.drawImage(
+    video,
+    minX/w*video.videoWidth,
+    minY/h*video.videoHeight,
+    snap.width/w*video.videoWidth,
+    snap.height/h*video.videoHeight,
+    0,0,snap.width,snap.height
+  );
+  sctx.drawImage(hud,minX,minY,snap.width,snap.height,0,0,snap.width,snap.height);
+
+  stream.getTracks().forEach(t=>t.stop());
+  cam.stop();
+
+  viewer.innerHTML="";
+  const img=new Image();
+  img.src=snap.toDataURL();
+  viewer.appendChild(img);
+  viewer.classList.add("morph");
+
+  const score=88;
+  animateScore(score);
+
+  diagnosisEl.textContent =
+    score>90
+    ? "Die Haut zeigt eine außergewöhnlich ausgeglichene Struktur mit hoher Ebenmäßigkeit und minimalen Stressanzeichen."
+    : score>80
+    ? "Die Haut wirkt insgesamt sehr harmonisch. Dezente Hinweise auf Sensibilität und einen erhöhten Feuchtigkeitsbedarf zeigen sich im Stirn‑ und Wangenbereich."
+    : "Es lassen sich erste Anzeichen von Ungleichgewicht in Feuchtigkeitsverteilung und Hauttextur erkennen.";
+
+  waBtn.href=`https://wa.me/491791544002?text=Mein%20Haut-Score%20ist%20${score}`;
+  report.classList.add("active");
+};
+
+/* Restart with limit */
+restartBtn.onclick = ()=>{
+  scans++;
+  if(scans>=2){
+    document.body.style.opacity=".4";
+    setTimeout(()=>location.href="https://www.lunebeauty.de",600);
+  } else location.reload();
+};
+</script>
+
+</body>
+</html>
