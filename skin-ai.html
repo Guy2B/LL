@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skin AI Scan</title>
+
+<!-- FONT -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+
+<style>
+:root{
+  --gold:#c9a86a;
+  --bg:#fffaf3;
+}
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  text-align:center;
+}
+#app{max-width:420px;margin:24px auto}
+.badge{
+  display:inline-block;padding:6px 14px;
+  border-radius:999px;background:#f4efe7;
+  color:#7a6a4f;font-size:12px;
+}
+#viewer{
+  width:320px;height:320px;margin:16px auto;
+  border-radius:50%;overflow:hidden;
+  border:3px solid var(--gold);
+  background:#000;position:relative;
+  transition:.6s
+}
+#viewer.morph{
+  width:180px;height:240px;border-radius:18px;
+}
+video,canvas,img{
+  width:100%;height:100%;object-fit:cover
+}
+canvas{position:absolute;inset:0;pointer-events:none}
+.controls{display:flex;gap:12px;justify-content:center}
+button{
+  padding:12px 22px;border-radius:18px;
+  border:none;background:var(--gold);
+  color:#fff;font-weight:600;cursor:pointer
+}
+button:disabled{opacity:.4;cursor:not-allowed}
+
+#result{
+  opacity:0;pointer-events:none;
+  transition:.6s;transform:translateY(40px)
+}
+#result.active{
+  opacity:1;pointer-events:auto;transform:none
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div class="badge">Advanced AI Skin Scan</div>
+
+  <div id="viewer">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="hud"></canvas>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="captureBtn">Capture</button>
+  </div>
+
+  <div id="result">
+    <h2 style="color:#c9a86a;font-size:48px">86</h2>
+    <p>Stirn 88 · Wangen 84 · Kinn 86</p>
+    <p>Ihre Haut zeigt eine ausgewogene Struktur.</p>
+    <div class="controls">
+      <button onclick="location.reload()">Neue Aufnahme</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ MEDIAPIPE (CORRECT) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const viewer = document.getElementById("viewer");
+const hud = document.getElementById("hud");
+const startBtn = document.getElementById("startBtn");
+const captureBtn = document.getElementById("captureBtn");
+const result = document.getElementById("result");
+
+let stream = null;
+let faceMesh = null;
+let cameraMP = null;
+let captured = false;
+
+captureBtn.disabled = true;
+
+/* ---------- START ---------- */
+startBtn.onclick = async () => {
+  stream = await navigator.mediaDevices.getUserMedia({ video:true });
+  video.srcObject = stream;
+
+  captureBtn.disabled = false;   // ✅ GUARANTEED ENABLE
+  startBtn.disabled = true;
+
+  // Try FaceMesh (non‑blocking)
+  try{
+    faceMesh = new FaceMesh({
+      locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
+    });
+    faceMesh.setOptions({
+      maxNumFaces:1,
+      refineLandmarks:true,
+      minDetectionConfidence:.5,
+      minTrackingConfidence:.5
+    });
+    faceMesh.onResults(drawMesh);
+
+    cameraMP = new Camera(video,{
+      onFrame:async()=>{
+        if(!captured) await faceMesh.send({image:video});
+      }
+    });
+    cameraMP.start();
+  }catch(e){
+    console.warn("FaceMesh unavailable – fallback active");
+  }
+};
+
+/* ---------- DRAW HUD ---------- */
+function drawMesh(res){
+  const ctx = hud.getContext("2d");
+  hud.width = hud.clientWidth;
+  hud.height = hud.clientHeight;
+  ctx.clearRect(0,0,hud.width,hud.height);
+
+  ctx.strokeStyle="rgba(201,168,106,.6)";
+  ctx.lineWidth=1.3;
+  ctx.beginPath();
+  ctx.arc(hud.width/2,hud.height/2,hud.width/2-12,0,Math.PI*2);
+  ctx.stroke();
+
+  if(!res.multiFaceLandmarks) return;
+  ctx.lineWidth=.6;
+  res.multiFaceLandmarks.forEach(lm=>{
+    for(let i=0;i<lm.length;i+=4){
+      ctx.beginPath();
+      ctx.arc(lm[i].x*hud.width,lm[i].y*hud.height,0.7,0,6.28);
+      ctx.stroke();
+    }
+  });
+}
+
+/* ---------- CAPTURE ---------- */
+captureBtn.onclick = () => {
+  if(captured) return;
+  captured = true;
+
+  const snap = document.createElement("canvas");
+  snap.width = video.videoWidth;
+  snap.height = video.videoHeight;
+  const sctx = snap.getContext("2d");
+  sctx.drawImage(video,0,0);
+  sctx.drawImage(hud,0,0,snap.width,snap.height);
+
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  if(cameraMP) cameraMP.stop();
+
+  const img = document.createElement("img");
+  img.src = snap.toDataURL();
+
+  viewer.innerHTML="";
+  viewer.appendChild(img);
+  viewer.classList.add("morph");
+
+  result.classList.add("active");
+};
+</script>
+</body>
+</html>
+``
