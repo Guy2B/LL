@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lune Beauty – AI Skin Scan</title>
+
+<!-- MediaPipe (MUST be scripts, not plain text) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<style>
+:root{
+  --gold:#c9a86a;
+  --bg:#fffaf3;
+  --ok:#2f9e44;
+  --bad:#c92a2a;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+#app{
+  max-width:420px;
+  margin:28px auto;
+  text-align:center;
+}
+
+/* ===== SCAN STAGE ===== */
+#stage{
+  width:340px;
+  height:340px;
+  margin:auto;
+  border-radius:50%;
+  overflow:hidden;
+  position:relative;
+  border:3px solid var(--gold);
+  background:#000;
+}
+
+video,canvas,img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none; /* IMPORTANT: do not block buttons */
+}
+
+/* ===== UI ===== */
+.state{
+  margin-top:10px;
+  font-size:14px;
+}
+.state.ok{color:var(--ok)}
+.state.bad{color:var(--bad)}
+
+.controls{
+  margin-top:16px;
+  display:flex;
+  gap:12px;
+  justify-content:center;
+}
+
+button{
+  padding:12px 22px;
+  border-radius:18px;
+  border:none;
+  background:var(--gold);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+button[disabled]{opacity:.45; cursor:not-allowed}
+
+/* ===== REPORT ===== */
+#report{
+  display:none;
+  margin-top:28px;
+  text-align:left;
+}
+
+.report-layout{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+}
+
+.report-img{
+  width:140px;
+  height:180px;
+  border-radius:16px;
+  overflow:hidden;
+  border:2px solid var(--gold);
+}
+
+#score{
+  font-size:46px;
+  font-weight:600;
+  color:var(--gold);
+}
+
+.zone div{font-size:14px}
+
+/* ===== CTA ===== */
+.cta{
+  margin-top:20px;
+  padding:22px;
+  border-radius:26px;
+  background:linear-gradient(180deg,#fff,#faf6ef);
+  box-shadow:0 16px 36px rgba(0,0,0,.12);
+}
+
+.cta-buttons{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+}
+
+.cta-buttons a{
+  flex:1;
+  text-align:center;
+  padding:14px;
+  border-radius:18px;
+  color:#fff;
+  text-decoration:none;
+  font-weight:600;
+}
+
+.phone{background:linear-gradient(135deg,#c9a86a,#efd8d1)}
+.whatsapp{background:#1dbf5f}
+
+.meta{
+  margin-top:14px;
+  text-align:center;
+  font-size:13px;
+  color:#6b5c43;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- ===== SCAN ===== -->
+  <div id="scan">
+    <div id="stage">
+      <video id="video" autoplay muted playsinline></video>
+      <canvas id="overlay"></canvas>
+    </div>
+
+    <div id="state" class="state bad">Kamera nicht gestartet</div>
+
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="captureBtn" disabled>Capture</button>
+    </div>
+  </div>
+
+  <!-- ===== REPORT ===== -->
+  <div id="report">
+    <h2>Ihr Haut‑Score</h2>
+
+    <div class="report-layout">
+      <div class="report-img">
+        <img id="reportImage" alt="Scan Ergebnis">
+      </div>
+
+      <div>
+        <div id="score">–</div>
+        <div class="zone">
+          <div>Stirn: <span id="zForehead"></span></div>
+          <div>Wangen: <span id="zCheeks"></span></div>
+          <div>Kinn: <span id="zChin"></span></div>
+        </div>
+        <p id="recommendation"></p>
+      </div>
+    </div>
+
+    <div class="cta">
+      <p><strong>
+        Für eine gezielte, individuelle Behandlung empfehlen wir eine persönliche Beratung bei Lune Beauty.
+      </strong></p>
+
+      <div class="cta-buttons">
+        <a class="phone" href="tel:+491791544002">Telefon</a>
+        <a id="waBtn" class="whatsapp" href="#">WhatsApp</a>
+      </div>
+
+      <div class="meta">
+        Öffnungszeiten: Mo–Fr 10–18 · Sa 10–16<br>
+        <a href="https://www.lunebeauty.de" target="_blank">www.lunebeauty.de</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===== STATE MACHINE ===== */
+const State = { IDLE:0, TRACKING:1, READY:2, FROZEN:3 };
+let appState = State.IDLE;
+
+/* ===== DOM ===== */
+const video = document.getElementById("video");
+const canvas = document.getElementById("overlay");
+const ctx = canvas.getContext("2d");
+
+const startBtn = document.getElementById("startBtn");
+const captureBtn = document.getElementById("captureBtn");
+const stateEl = document.getElementById("state");
+
+const scanEl = document.getElementById("scan");
+const reportEl = document.getElementById("report");
+
+const reportImage = document.getElementById("reportImage");
+const scoreEl = document.getElementById("score");
+const zForehead = document.getElementById("zForehead");
+const zCheeks = document.getElementById("zCheeks");
+const zChin = document.getElementById("zChin");
+const recEl = document.getElementById("recommendation");
+const waBtn = document.getElementById("waBtn");
+
+/* ===== FACEMESH SURFACE GRID ===== */
+const GRID_LINES = [
+  [10,338,297,332,284,251,389,356,454],   // forehead
+  [234,93,132,58,172,136,150,149],        // cheeks
+  [152,377,400,378,379]                   // chin
+];
+
+let lastFrame = null;
+let camera = null;
+
+/* ===== FACEMESH ===== */
+const faceMesh = new FaceMesh({
+  locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
+});
+faceMesh.setOptions({
+  maxNumFaces:1,
+  refineLandmarks:true,
+  minDetectionConfidence:0.6,
+  minTrackingConfidence:0.6
+});
+
+faceMesh.onResults(res=>{
+  if(appState !== State.TRACKING) return;
+  if(!res.multiFaceLandmarks.length) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.strokeStyle="rgba(255,255,255,0.9)";
+  ctx.lineWidth=1.4;
+
+  GRID_LINES.forEach(line=>{
+    ctx.beginPath();
+    line.forEach((id,i)=>{
+      const p=res.multiFaceLandmarks[0][id];
+      const x=p.x*canvas.width;
+      const y=p.y*canvas.height;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  });
+
+  // Store last valid frame
+  lastFrame = canvas.toDataURL("image/png");
+
+  appState = State.READY;
+  stateEl.textContent="✅ Aufnahme bereit";
+  stateEl.className="state ok";
+  captureBtn.disabled=false;
+});
+
+/* ===== START CAMERA ===== */
+startBtn.onclick = async ()=>{
+  if(appState!==State.IDLE) return;
+
+  if(location.protocol!=="https:" && location.hostname!=="localhost"){
+    alert("Bitte über https:// oder localhost öffnen.");
+    return;
+  }
+
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:"user"}
+    });
+
+    video.srcObject = stream;
+    await new Promise(r=>video.onloadedmetadata=r);
+    await video.play();
+
+    camera = new Camera(video,{
+      onFrame: async()=>{ await faceMesh.send({image:video}); },
+      width:640,height:640
+    });
+    camera.start();
+
+    appState=State.TRACKING;
+    stateEl.textContent="Gesicht wird erkannt…";
+    stateEl.className="state bad";
+  }catch(err){
+    alert("Kamerazugriff nicht möglich.");
+    console.error(err);
+  }
+};
+
+/* ===== SCORE + RECOMMENDATION ===== */
+function zoneScore(red,tex,wr){
+  return Math.max(60, Math.round(100-(red*0.6+tex*0.4+wr*0.5)));
+}
+function recommendation(score){
+  if(score>=90) return "Sehr gute Hautbalance. Regelmäßige professionelle Pflege unterstützt den langfristigen Hauterhalt.";
+  if(score>=80) return "Gute Hautstruktur mit leichter Sensitivität. Eine gezielte Behandlung kann Textur und Widerstandskraft verbessern.";
+  return "Mehrere Stressindikatoren. Eine individuelle, professionelle Behandlung ist empfehlenswert.";
+}
+
+/* ===== CAPTURE ===== */
+captureBtn.onclick = ()=>{
+  if(appState!==State.READY || !lastFrame) return;
+
+  appState=State.FROZEN;
+  camera?.stop();
+
+  reportImage.src = lastFrame;
+
+  // Deterministic example scores (replace with real analysis later)
+  const f=zoneScore(8,6,6);
+  const c=zoneScore(10,8,5);
+  const ch=zoneScore(7,6,5);
+  const total=Math.round((f+c+ch)/3);
+
+  zForehead.textContent=f;
+  zCheeks.textContent=c;
+  zChin.textContent=ch;
+  scoreEl.textContent=total;
+  recEl.textContent=recommendation(total);
+
+  waBtn.href="https://wa.me/491791544002?text="+encodeURIComponent(
+    `Hallo Lune Beauty, mein Haut‑Score beträgt ${total}. Ich möchte gern einen Beratungstermin vereinbaren.`
+  );
+
+  scanEl.style.display="none";
+  reportEl.style.display="block";
+};
+</script>
+</body>
+</html>
