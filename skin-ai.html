@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lune Beauty – Advanced AI Skin Scan</title>
+
+<!-- ✅ GOOGLE FONT -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --gold:#c9a86a;
+  --bg:#fffaf3;
+}
+
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  color:#2f2a24;
+}
+
+#app{
+  max-width:420px;
+  margin:24px auto;
+  overflow:hidden;
+}
+
+.center{text-align:center}
+
+/* ---------- BADGE ---------- */
+.badge{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  background:#f4efe7;
+  color:#7a6a4f;
+  font-size:12px;
+  margin-bottom:12px;
+}
+
+/* ---------- CAMERA ---------- */
+#camStage{
+  display:flex;
+  justify-content:center;
+  transition:all .6s ease;
+}
+
+#camWrap{
+  width:340px;
+  height:340px;
+  border-radius:50%;
+  overflow:hidden;
+  position:relative;
+  border:3px solid var(--gold);
+  background:#000;
+  transition:all .6s cubic-bezier(.4,0,.2,1);
+}
+
+video,canvas,img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+#hud{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+/* ---------- OVERLAYS ---------- */
+.arrow-guide{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:46px;
+  color:white;
+  text-shadow:0 0 14px rgba(0,0,0,.5);
+  display:none;
+  pointer-events:none;
+}
+
+.quality{
+  margin-top:10px;
+  font-size:14px;
+  min-height:18px;
+}
+.quality.ok{color:#2f9e44}
+.quality.bad{color:#c92a2a}
+
+/* ---------- CONTROLS ---------- */
+.controls{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-top:16px;
+}
+
+button{
+  padding:11px 20px;
+  border-radius:18px;
+  border:none;
+  background:var(--gold);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+button.secondary{
+  background:#f2ebe2;
+  color:#7a6a4f;
+}
+button[disabled]{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+/* ---------- RESULT ---------- */
+#result{
+  opacity:0;
+  transform:translateY(40px);
+  pointer-events:none;
+  transition:opacity .6s ease, transform .6s ease;
+}
+
+#result.active{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+.result-layout{
+  display:flex;
+  gap:18px;
+  margin-top:20px;
+}
+
+.result-img img{
+  width:140px;
+  height:180px;
+  border-radius:18px;
+  border:2px solid var(--gold);
+}
+
+/* ---------- SCORE ---------- */
+#score{
+  font-size:48px;
+  color:var(--gold);
+  font-weight:600;
+}
+
+.zone-scores div{
+  font-size:14px;
+  margin:4px 0;
+}
+
+/* ---------- CTA ---------- */
+.premium-cta{
+  background:linear-gradient(180deg,#fff,#faf6ef);
+  border-radius:28px;
+  padding:22px;
+  box-shadow:0 18px 40px rgba(0,0,0,.12);
+  margin-top:22px;
+}
+
+.cta-buttons{
+  display:flex;
+  gap:14px;
+}
+
+.cta{
+  flex:1;
+  text-align:center;
+  padding:14px 0;
+  border-radius:18px;
+  font-weight:600;
+  color:white;
+  text-decoration:none;
+}
+
+.phone{background:linear-gradient(135deg,#c9a86a,#efd8d1)}
+.whatsapp{background:#1dbf5f}
+
+.meta{
+  font-size:13px;
+  color:#6b5c43;
+  text-align:center;
+  margin-top:14px;
+  line-height:1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app" class="center">
+
+  <div class="badge">Advanced AI Skin Scan</div>
+
+  <!-- CAMERA -->
+  <div id="camStage">
+    <div id="camWrap">
+      <video id="video" autoplay muted playsinline></video>
+      <canvas id="hud"></canvas>
+      <div id="arrowGuide" class="arrow-guide">↑</div>
+    </div>
+  </div>
+
+  <div id="quality" class="quality"></div>
+
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="captureBtn" disabled>Capture</button>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="badge">Ihr Haut‑Score</div>
+
+    <div class="result-layout">
+      <div class="result-img">
+        <img id="previewImg" alt="Skin scan result">
+      </div>
+      <div>
+        <div id="score">86</div>
+        <div class="zone-scores">
+          <div>Stirn: 88</div>
+          <div>Wangen: 84</div>
+          <div>Kinn: 86</div>
+        </div>
+        <p>
+          Ihre Haut zeigt eine ausgewogene Struktur mit leichter Sensitivität im Wangenbereich.<br><br>
+          Für eine gezielte, individuelle Behandlung empfehlen wir eine persönliche Beratung bei
+          <strong>Lune Beauty</strong>.
+        </p>
+      </div>
+    </div>
+
+    <div class="premium-cta">
+      <div class="cta-buttons">
+        <a class="cta phone" href="tel:+491791544002">Telefon</a>
+        <a class="cta whatsapp" href="https://wa.me/491791544002">WhatsApp</a>
+      </div>
+      <div class="meta">
+        Öffnungszeiten: Mo–Fr 10–18 Uhr · Sa 10–16 Uhr<br>
+        <a href="https://www.lunebeauty.de">www.lunebeauty.de</a>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="secondary" onclick="restart()">Neue Aufnahme</button>
+      <a href="https://www.lunebeauty.de" class="secondary" style="padding:11px 20px;border-radius:18px;text-decoration:none;display:inline-block;">Zur Website zurück</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const video = document.getElementById("video");
+const startBtn = document.getElementById("startBtn");
+const captureBtn = document.getElementById("captureBtn");
+const arrow = document.getElementById("arrowGuide");
+const quality = document.getElementById("quality");
+const result = document.getElementById("result");
+const previewImg = document.getElementById("previewImg");
+
+let stream = null;
+
+/* START CAMERA */
+startBtn.onclick = async () => {
+  stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = stream;
+
+  arrow.style.display = "block";
+  quality.textContent = "Qualität: 92% · Aufnahme optimal";
+  quality.className = "quality ok";
+
+  captureBtn.disabled = false;
+};
+
+/* CAPTURE */
+captureBtn.onclick = () => {
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video, 0, 0);
+
+  previewImg.src = canvas.toDataURL("image/png");
+
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+  }
+
+  document.getElementById("camWrap").style.transform = "scale(.75)";
+  result.classList.add("active");
+};
+
+/* RESTART */
+function restart() {
+  location.reload();
+}
+</script>
+
+</body>
+</html>
