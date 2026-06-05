@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Impressum – Lune Beauty</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/lune-premium.css">
+
+  <style>
+    .legal-page {
+      max-width: 800px;
+      margin: 120px auto;
+      padding: 20px;
+    }
+
+    .legal-page h1 {
+      margin-bottom: 20px;
+    }
+
+    .legal-page h2 {
+      margin-top: 30px;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      color: #c6a87a;
+      text-transform: uppercase;
+    }
+
+    .legal-page p {
+      margin-top: 10px;
+      line-height: 1.6;
+      opacity: 0.85;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #c6a87a;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .back-link:hover {
+      opacity: 0.7;
+    }
+
+    .back-bottom {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="legal-page">
+
+  <a href="index.html" class="back-link">← Zurück zur Startseite</a>
+
+  <h1>Impressum</h1>
+
+  <p><strong>Lune Beauty</strong></p>
+
+  <p>
+    Mittelstraße 1<br>
+    67547 Worms<br>
+    Deutschland
+  </p>
+
+  <h2>Kontakt</h2>
+  <p>
+    Telefon: +49 179 1544002<br>
+    E-Mail: lunebeauty.kontakt@gmail.com
+  </p>
+
+  <h2>Verantwortlich für den Inhalt gemäß § 55 Abs. 2 RStV</h2>
+  <p>
+    Lune Beauty<br>
+    Mittelstraße 1<br>
+    67547 Worms
+  </p>
+
+  <div class="back-bottom">
+    <a href="index.html" class="back-link">← Zurück zur Startseite</a>
+  </div>
+
+</section>
+
+<footer class="footer">
+  <p>© <span id="year"></span> Lune Beauty – Kosmetikstudio in Worms</p>
+</footer>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
+``
