@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Studio | Lune Beauty</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="assets/css/lune-premium.css" />
+
+  <style>
+    body {
+      background: #f8f5f0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* HERO */
+    .studio-hero {
+      height: 70vh;
+      background: url('assets/img/studio-1.webp') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      text-align: center;
+      color: white;
+      margin-top: 80px;
+    }
+
+    .studio-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .studio-hero-content {
+  animation: fadeUp 1.4s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+    .studio-hero h1 {
+      font-family: 'Playfair Display';
+      font-size: 2.8rem;
+    }
+.studio-hero::after {
+  background: linear-gradient(
+    rgba(0,0,0,0.25),
+    rgba(0,0,0,0.45)
+  );
+}
+    /* TEXT */
+.studio-text p,
+.studio-text p {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.25rem;
+  line-height: 1.75;
+
+  color: #3b2c18;
+
+  margin: 0 auto;
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+ .studio-text p {
+  text-wrap: balance;
+}
+ 
+.studio-text {
+  max-width: 520px;
+  margin: 140px auto;
+  text-align: center;
+  padding: 0 20px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #3b2c18;
+}
+
+    /* SPLIT */
+    .studio-split {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+
+  gap: 80px;
+  max-width: 1100px;
+  margin: 140px auto;
+  padding: 0 20px;
+}
+section.studio-split:nth-of-type(even) {
+  grid-template-columns: 0.9fr 1.1fr;
+}
+
+img {
+  transition: transform 0.6s ease, filter 0.6s ease;
+}
+    .studio-split img {
+  width: 100%;
+  height: 480px;       /* controlled height */
+  object-fit: cover;
+  border-radius: 20px;
+}
+.studio-split img {
+  transition: transform .8s ease, filter .8s ease;
+}
+
+.studio-split:hover img {
+  transform: scale(1.03);
+}
+    .studio-split-text {
+  max-width: 380px;
+  margin: 0 auto;
+
+  font-size: 1.05rem;
+  line-height: 1.7;
+
+  padding: 30px;
+
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(6px);
+  border-radius: 18px;
+}
+.studio-split-text {
+  box-shadow:
+    0 14px 40px rgba(0,0,0,.08),
+    0 4px 14px rgba(220,180,120,.2);
+}
+<p class="slider-intro">Einblicke in unser Studio</p>
+.slider-intro {
+  font-family: "Playfair Display";
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+  color: #3b2c18;
+}
+
+.studio-slider {
+  text-align: center;
+  max-width: 1100px;
+  margin: 140px auto;
+  padding: 0 20px;
+}
+
+.slider-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.slide {
+  width: 100%;
+  height: 480px;     /* match split images */
+  object-fit: cover;
+  border-radius: 20px;
+}
+``
+    /* GALLERY */
+    .studio-gallery {
+      max-width: 1100px;
+      margin: 80px auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .studio-gallery img {
+      width: 100%;
+      border-radius: 12px;
+      height: 260px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .studio-gallery img:hover {
+      transform: scale(1.03);
+    }
+
+    /* CTA */
+    .studio-cta {
+  text-align: center;
+  margin: 160px 0;
+}
+
+.studio-cta .cta-btn {
+  margin-top: 10px;
+  transform: scale(1.05);
+}
+.studio-cta p {
+  font-family: "Playfair Display";
+  font-size: 1.6rem;
+  margin-bottom: 25px;
+}
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #c6a87a;
+      text-decoration: none;
+    }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      .studio-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .nav-links a.active {
+  color: var(--gold);
+  font-weight: 600;
+}
+  </style>
+</head>
+
+<body>
+
+<!-- ✅ NAVIGATION (same as main site) -->
+<nav class="top-nav">
+  <div class="nav-inner">
+
+    <a href="index.html">
+      <img src="assets/img/logo.png" class="brand-logo" alt="Lune Beauty" />
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html#hero">Home</a></li>
+      <li><a href="index.html#services">Leistungen</a></li>
+      <li><a href="index.html#pricing">Preise</a></li>
+      <li><a href="index.html#contact">Kontakt</a></li>
+      <li><a href="skin-ai.html">Skin AI</a></li>
+      <li><a class="active">Studio</a></li>
+    </ul>
+
+    <button class="nav-toggle">
+      <span></span><span></span><span></span>
+    </button>
+
+  </div>
+</nav>
+
+<div class="nav-divider"></div>
+
+<!-- HERO -->
+<section class="studio-hero">
+  <div class="studio-hero-content">
+    <h1>Ein Ort für Ruhe & Schönheit</h1>
+    <p>Erleben Sie Lune Beauty · Ihre persönliche Auszeit in Worms</p>
+  </div>
+
+</section>
+
+<!-- TEXT -->
+<section class="studio-text">
+  <p>
+    Lune Beauty ist mehr als ein Kosmetikstudio.
+    Es ist ein Ort, an dem moderne Hautpflege auf Ruhe,
+    Ästhetik und Individualität trifft.
+  </p>
+</section>
+
+<!-- ===============================
+     STUDIO SLIDESHOW
+=============================== -->
+<section class="studio-slider">
+
+  <div class="slider-wrapper">
+
+    <div class="slides">
+      <img src="assets/img/studio-2.webp" class="slide active">
+      <img src="assets/img/studio-3.webp" class="slide">
+      <img src="assets/img/studio-4.webp" class="slide">
+      <img src="assets/img/studio-5.webp" class="slide">
+      <img src="assets/img/studio-6.webp" class="slide">
+      <img src="assets/img/studio-7.webp" class="slide">
+      <img src="assets/img/studio-8.webp" class="slide">
+      <img src="assets/img/studio-9.webp" class="slide">
+      <img src="assets/img/studio-10.webp" class="slide">
+      <img src="assets/img/studio-11.webp" class="slide">
+      <img src="assets/img/studio-12.webp" class="slide">
+      <img src="assets/img/studio-13.webp" class="slide">
+      <img src="assets/img/studio-14.webp" class="slide">         
+      <!-- Add more up to 10 -->
+    </div>
+
+    <!-- Arrows -->
+    <button class="slider-btn prev">‹</button>
+    <button class="slider-btn next">›</button>
+
+    <!-- Dots -->
+    <div class="slider-dots"></div>
+
+  </div>
+
+</section>
+
+<!-- CTA -->
+<section class="studio-cta">
+  <p>Gönnen Sie sich Ihre persönliche Auszeit.</p>
+
+  <a href="index.html#contact" class="cta-btn premium">
+    Termin buchen →
+  </a>
+
+  <br>
+
+  <a href="index.html" class="back-link">
+    ← Zurück zur Startseite
+  </a>
+</section>
+
+<!-- ✅ FOOTER -->
+<footer class="footer">
+  <p>© <span id="year"></span> Lune Beauty – Kosmetikstudio in Worms</p>
+</footer>
+
+<!-- ✅ SCRIPTS -->
+<script src="assets/js/nav-mobile.js"></script>
+<script src="assets/js/header-scroll.js"></script>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  let slides = document.querySelectorAll(".slide");
+  let dotsContainer = document.querySelector(".slider-dots");
+
+  if (!slides.length) return;
+
+  let current = 0;
+
+  // ✅ Create dots
+  slides.forEach((_, i) => {
+    let dot = document.createElement("span");
+    if (i === 0) dot.classList.add("active");
+
+    dot.addEventListener("click", () => {
+      showSlide(i);
+    });
+
+    dotsContainer.appendChild(dot);
+  });
+
+  function getDots() {
+    return document.querySelectorAll(".slider-dots span");
+  }
+
+  // ✅ Show slide
+  function showSlide(index) {
+    slides[current].classList.remove("active");
+    getDots()[current].classList.remove("active");
+
+    current = index;
+
+    slides[current].classList.add("active");
+    getDots()[current].classList.add("active");
+  }
+
+  // ✅ Next
+  document.querySelector(".next").addEventListener("click", () => {
+    showSlide((current + 1) % slides.length);
+  });
+
+  // ✅ Prev
+  document.querySelector(".prev").addEventListener("click", () => {
+    showSlide((current - 1 + slides.length) % slides.length);
+  });
+
+  // ✅ Auto slide
+  setInterval(() => {
+    showSlide((current + 1) % slides.length);
+  }, 4000);
+
+});
+</script>
+``
+</body>
+</html>
