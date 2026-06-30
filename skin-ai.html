@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M53TVG84SK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-M53TVG84SK');
+</script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Lune Beauty – Lune Skin Check</title>
+<meta name="description" content="Digitaler kosmetischer Skin Check von Lune Beauty in Worms. Foto, Hautprofil und direkte Beratungsanfrage."/>
+<link rel="canonical" href="https://www.lunebeauty.de/skin-ai.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<script>
+window.luneLogoFallback = function(img){
+  var paths = [
+    "assets/img/logo.png", "asset/img/logo.png", "Asset/img/logo.png", "assets/img/logo", "asset/img/logo", "Asset/img/logo",
+    "assets/img/logo.svg", "asset/img/logo.svg", "Asset/img/logo.svg",
+    "assets/img/logo.webp", "asset/img/logo.webp", "Asset/img/logo.webp",
+    "assets/img/logo.jpg", "asset/img/logo.jpg", "Asset/img/logo.jpg"
+  ];
+  var n = Number(img.getAttribute('data-logo-attempt') || '0');
+  if(n < paths.length){
+    img.setAttribute('data-logo-attempt', String(n + 1));
+    img.src = paths[n];
+    return;
+  }
+  img.style.display = 'none';
+  var fallback = img.nextElementSibling;
+  if(fallback) fallback.style.display = 'grid';
+};
+</script>
+<style>
+:root{
+  --bg:#fffaf3;
+  --card:#fff;
+  --ink:#2f2a24;
+  --muted:#786850;
+  --line:#eadfcb;
+  --gold:#c3a063;
+  --gold2:#e7cf9a;
+  --rose:#efd8d1;
+  --soft:#f7efe3;
+  --green:#2f8f66;
+  --red:#ad5d54;
+  --shadow:0 24px 70px rgba(65,43,22,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at top,#fff8ee 0,#fffaf3 42%,#f5e6d2 100%);
+  color:var(--ink);
+  min-height:100svh;
+}
+a{color:inherit}
+button,.btn{
+  border:0;
+  border-radius:22px;
+  padding:15px 20px;
+  min-height:52px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#fff;
+  font-weight:800;
+  font-size:15px;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  box-shadow:0 14px 34px rgba(195,160,99,.24);
+}
+button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
+.btn.secondary,button.secondary{
+  background:#fff;
+  color:#6d5838;
+  border:1px solid var(--line);
+  box-shadow:none;
+}
+.btn.dark,button.dark{background:linear-gradient(135deg,#201612,#49382b)}
+.app{width:min(760px,100%);margin:0 auto;padding:14px 12px calc(72px + env(safe-area-inset-bottom,0px))}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 12px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;min-width:0}
+.brand-mark{width:46px;height:46px;border-radius:18px;background:linear-gradient(135deg,#fff,#f3e7d2);display:grid;place-items:center;border:1px solid rgba(195,160,99,.35);box-shadow:0 10px 28px rgba(70,47,19,.08);overflow:hidden;position:relative;flex:0 0 auto}
+.brand-mark img{width:100%;height:100%;object-fit:contain;padding:7px}
+.brand-letter{display:none;position:absolute;inset:0;place-items:center;font-family:"Playfair Display",serif;font-size:22px;color:var(--gold)}
+.brand small{display:block;letter-spacing:.16em;font-size:9px;color:#8f7445;text-transform:uppercase;font-weight:800}
+.brand b{font-family:"Playfair Display",serif;font-size:20px;white-space:nowrap}
+.back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 13px;text-decoration:none;font-weight:800;color:#6d5838;white-space:nowrap;font-size:13px}
+.stepper{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,rgba(255,250,243,.96),rgba(255,250,243,.82));backdrop-filter:blur(12px);padding:8px 0 12px;margin-bottom:10px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#fff;border:1px solid rgba(234,219,198,.9);border-radius:999px;padding:5px;box-shadow:0 10px 28px rgba(65,43,22,.07)}
+.step{border-radius:999px;padding:9px 6px;text-align:center;color:#8d7b61;font-size:12px;font-weight:900;transition:.22s ease}
+.step.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;box-shadow:0 8px 22px rgba(195,160,99,.24)}
+.step.done{color:#6f5b3c;background:#fbf4e9}
+.screen{display:none;animation:fadeUp .42s ease both}.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{background:rgba(255,255,255,.9);border:1px solid rgba(234,219,198,.9);border-radius:30px;box-shadow:var(--shadow);padding:22px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:#f4efe7;color:#7a6a4f;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+h1,h2,h3{font-family:"Playfair Display",serif}h1{font-size:clamp(36px,9vw,56px);line-height:.96;margin:16px 0 10px;letter-spacing:-.03em}h2{font-size:28px;margin:0 0 10px}h3{font-size:25px;margin:4px 0 8px}.lead{font-size:15.5px;line-height:1.55;color:var(--muted);margin:0 0 14px}.micro{font-size:12.5px;line-height:1.45;color:#8a785e}
+.hero-compact{text-align:left;min-height:calc(100svh - 158px);display:flex;flex-direction:column;justify-content:center;gap:16px}
+.promise{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.promise div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px 9px;text-align:center;font-size:12px;font-weight:900;color:#6e5b3d}.promise span{display:block;font-size:19px;margin-bottom:3px}
+.consent{display:flex;gap:10px;align-items:flex-start;margin:8px 0;text-align:left;color:var(--muted);font-size:12px;line-height:1.45}.consent input{margin-top:2px;accent-color:var(--gold)}
+.photo-shell{display:grid;gap:16px}.camera-card{text-align:center}.cameraCircle{width:min(390px,86vw);height:min(390px,86vw);border-radius:50%;overflow:hidden;margin:14px auto;position:relative;background:#15110f;border:3px solid rgba(195,160,99,.55);box-shadow:0 28px 78px rgba(0,0,0,.18)}
+video,.cameraCircle canvas{width:100%;height:100%;object-fit:cover}.hud,.guide{position:absolute;inset:0;pointer-events:none}.guide:before{content:"";position:absolute;inset:12%;border-radius:50%;border:1px dashed rgba(255,255,255,.72)}.guide:after{content:"";position:absolute;left:24%;right:24%;top:43%;height:1px;background:rgba(255,255,255,.32)}
+.quality{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0}.qitem{background:#fff;border:1px solid var(--line);border-radius:17px;padding:10px 8px;text-align:center}.qitem strong{font-size:11px;display:block;margin-bottom:7px;color:#6f6049}.qdot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#c9b89a}.qdot.ok{background:var(--green)}.qdot.warn{background:#d6a84e}.status{min-height:22px;color:var(--muted);font-size:13px;margin-top:8px}.camera-actions{display:grid;gap:9px}.camera-actions.two{grid-template-columns:1fr 1fr}.scanTips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}.tip{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;color:#756145}
+.result-top{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;margin-bottom:14px}.report-image{width:118px;height:148px;border-radius:26px;overflow:hidden;background:#000;box-shadow:0 16px 36px rgba(0,0,0,.16)}.report-image canvas{width:100%;height:100%;object-fit:cover}.score-ring{position:relative;width:118px;height:118px}.score-ring canvas{position:absolute;inset:0;width:100%;height:100%}.score-number{position:absolute;inset:0;display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:42px;color:var(--gold)}
+.profile-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}.profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.confidence{background:#f3ecdf;border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:#806a45;font-size:11px;font-weight:900;white-space:nowrap}.reason-list{display:grid;gap:9px;margin-top:14px}.reason{display:flex;gap:9px;align-items:flex-start;background:#fffaf4;border:1px solid var(--line);border-radius:16px;padding:11px;color:#655742;font-size:13px;line-height:1.4}.reason:before{content:"✓";font-weight:900;color:var(--gold)}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px}.metric-head{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:12px}.bar{height:7px;background:#eee2d0;border-radius:999px;margin-top:10px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--rose));border-radius:999px}.tagrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.tag{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px;color:#766247;font-weight:800}.result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.sticky-cta{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:10;margin-top:14px}.sticky-cta .btn{width:100%;box-shadow:0 18px 42px rgba(32,22,18,.24)}
+.cta-summary{background:linear-gradient(160deg,#fff,#fff8ed);border:1px solid rgba(195,160,99,.38);border-radius:28px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}.archive-form{display:grid;grid-template-columns:1fr;gap:10px}.archive-form input{width:100%;border:1px solid var(--line);border-radius:17px;padding:14px;background:#fff;font:inherit;font-size:15px}.archiveStatus{font-weight:800;color:var(--green);min-height:20px}.success-box{background:#f1f8f2;border:1px solid #cbe7cf;border-radius:18px;padding:14px;color:#286341;line-height:1.55}.success-box .small{display:block;margin-top:8px;font-size:12px;color:#53715b}.disclaimer{font-size:11.5px;color:#8b7b63;line-height:1.55;border-top:1px solid var(--line);padding-top:13px;margin-top:12px}.hiddenCanvas{display:none}.error{color:var(--red);font-weight:900}.loading{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.link-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.link-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;text-decoration:none;color:#6d5838;font-weight:900;text-align:center;font-size:13px}
+
+/* IMAGE EXPERIENCE V4 */
+.image-experience{display:grid;gap:10px}
+.report-image{position:relative}
+.report-image:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 30% 18%,rgba(255,255,255,.28),transparent 22%),
+    linear-gradient(140deg,rgba(195,160,99,.12),transparent 38%,rgba(239,216,209,.18));
+  mix-blend-mode:screen;
+}
+.aiImageControls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.chipbtn{
+  padding:9px 7px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#735f42;
+  font-size:11px;
+  font-weight:900;
+  box-shadow:none;
+}
+.chipbtn.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-color:transparent}
+.image-save{width:100%;padding:11px 12px;border-radius:16px;font-size:12px}
+.memory-card-note{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:7px;
+  color:#8a795f;
+  font-size:11.5px;
+  font-weight:800;
+}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(195,160,99,.42);animation:pulse 1.7s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(195,160,99,0)}100%{box-shadow:0 0 0 0 rgba(195,160,99,0)}}
+.experience-line{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.xp-item{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fffaf4;
+  padding:11px 8px;
+  text-align:center;
+  font-size:12px;
+  font-weight:900;
+  color:#765f3d;
+}
+.xp-item span{display:block;font-size:20px;margin-bottom:3px}
+
+@media(min-width:760px){.app{width:min(980px,100%)}.photo-shell{grid-template-columns:minmax(320px,430px) 1fr;align-items:start}.result-layout{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}.result-top{display:block;position:sticky;top:84px}.report-image{width:260px;height:320px;margin:0 auto 16px}.score-ring{width:160px;height:160px;margin:0 auto}.score-number{font-size:54px}.cta-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.hero-compact{min-height:0}.camera-actions{grid-template-columns:1fr 1fr}.camera-actions.two{grid-template-columns:1fr 1fr}.sticky-cta{position:static}.promise{max-width:620px}}
+@media(max-width:520px){.app{padding-left:12px;padding-right:12px}.brand b{font-size:18px}.brand small{font-size:8px}.brand-mark{width:42px;height:42px;border-radius:15px}.back{font-size:12px;padding:9px 11px}.step{font-size:11px;padding:8px 4px}.card{padding:19px;border-radius:27px}.promise{grid-template-columns:1fr}.promise div{display:flex;align-items:center;justify-content:center;gap:8px}.promise span{margin:0}.result-actions{grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr}.link-grid{grid-template-columns:1fr}h1{font-size:42px}.camera-actions.two{grid-template-columns:1fr}}
+
+
+/* MOBILE FRIENDLY V5 — Foto → Analyse → Anfrage */
+.mobile-only{display:none}
+.mobile-help{display:none}
+.skin-story{background:linear-gradient(160deg,#fff,#fff8ed);border:1px solid rgba(195,160,99,.32);border-radius:22px;padding:14px;margin:12px 0;color:#6b5c43;font-size:14px;line-height:1.5}
+.insight-list{display:grid;gap:9px;margin-top:12px}
+.insight-card{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:flex-start;background:#fffaf4;border:1px solid var(--line);border-radius:18px;padding:12px;text-align:left}
+.insight-no{width:26px;height:26px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;display:grid;place-items:center;font-size:12px;font-weight:900;box-shadow:0 8px 20px rgba(195,160,99,.18)}
+.insight-card b{display:block;color:#2f2a24;font-size:14px;margin-bottom:2px}
+.insight-card span{display:block;color:#7b6a50;font-size:12.5px;line-height:1.45}
+.mobile-bottom-bar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:25;display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px;background:rgba(255,250,243,.78);backdrop-filter:blur(12px);padding:8px;border-radius:24px;border:1px solid rgba(234,219,198,.75);box-shadow:0 18px 50px rgba(65,43,22,.12)}
+.mobile-bottom-bar .btn,.mobile-bottom-bar button{width:100%;min-height:54px}
+.details-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:0;margin:12px 0;overflow:hidden;box-shadow:0 16px 42px rgba(65,43,22,.08)}
+.details-card summary{list-style:none;cursor:pointer;padding:15px 16px;font-weight:900;color:#6d5838;display:flex;justify-content:space-between;align-items:center}
+.details-card summary::-webkit-details-marker{display:none}
+.details-card summary:after{content:'+';font-size:20px;color:var(--gold)}
+.details-card[open] summary:after{content:'–'}
+.details-body{padding:0 14px 14px}
+.metric-meaning{margin-top:8px;color:#8a785e;font-size:12px;line-height:1.35}
+.metric-level{font-size:11px;font-weight:900;color:#8a744e;white-space:nowrap}
+.cta-fixed-hint{font-size:12px;color:#8a785e;text-align:center;margin-top:6px}
+.form-label{font-size:12px;font-weight:900;color:#756145;margin:4px 0 -4px;text-align:left}
+
+@media(max-width:520px){
+  body{background:linear-gradient(180deg,#fffaf3 0,#f8eddd 100%)}
+  .app{padding:10px 10px calc(84px + env(safe-area-inset-bottom,0px));width:100%;max-width:430px}
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(255,250,243,.88);backdrop-filter:blur(14px);padding:8px 0;margin:0 0 6px}
+  .brand b{font-size:16px}.brand small{font-size:7.5px}.brand-mark{width:38px;height:38px;border-radius:14px}.back{font-size:0;padding:10px 12px}.back:after{content:'Website';font-size:12px}
+  .stepper{top:54px;padding:6px 0 8px;margin-bottom:8px}.steps{gap:4px;padding:4px}.step{font-size:0;padding:8px 4px}.step[data-step="1"]:after{content:'📸 Foto';font-size:11px}.step[data-step="2"]:after{content:'✨ Analyse';font-size:11px}.step[data-step="3"]:after{content:'🌙 Anfrage';font-size:11px}
+  .card{padding:16px;border-radius:26px;box-shadow:0 16px 45px rgba(65,43,22,.10)}
+  .badge{font-size:10px;padding:6px 11px}.lead{font-size:14px;line-height:1.45}.micro{font-size:11.5px}
+  h1{font-size:34px;line-height:1;margin:12px 0 8px}h2{font-size:24px}h3{font-size:22px}
+  .camera-card h1{font-size:31px}.camera-card .lead{max-width:310px;margin-left:auto;margin-right:auto}.promise{grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.promise div{display:block;padding:9px 6px;font-size:11px;border-radius:15px}.promise span{font-size:16px;margin:0 0 2px}
+  .consent{background:#fffaf4;border:1px solid var(--line);border-radius:16px;padding:10px;margin:10px 0;font-size:11.5px}
+  .cameraCircle{width:min(318px,82vw);height:min(318px,82vw);margin:10px auto;border-width:2px;box-shadow:0 18px 50px rgba(0,0,0,.14)}
+  .quality{gap:6px;margin:9px 0}.qitem{padding:8px 6px;border-radius:15px}.qitem strong{font-size:10px;margin-bottom:4px}.qdot{width:10px;height:10px}
+  .camera-actions.two{grid-template-columns:1fr;gap:8px}.camera-actions button,.camera-actions .btn{min-height:54px}.status{font-size:12px;min-height:18px}.hero-compact{display:none}.mobile-help{display:block}
+  .result-top{display:grid;grid-template-columns:128px 1fr;gap:12px;align-items:center;margin-bottom:10px}.result-top>.badge{grid-column:1/-1;justify-self:start}.image-experience{gap:7px}.report-image{width:128px;height:164px;border-radius:24px}.score-ring{width:112px;height:112px;justify-self:center}.score-number{font-size:38px}.aiImageControls{grid-template-columns:1fr;gap:5px}.chipbtn{min-height:36px;padding:8px 5px;font-size:10px}.image-save{min-height:38px;padding:8px;font-size:11px}.memory-card-note{font-size:10.5px;text-align:center}
+  .profile-card{padding:15px;border-radius:23px;margin-bottom:10px;box-shadow:0 14px 38px rgba(65,43,22,.08)}.profile-head{display:block}.confidence{display:inline-flex;margin-top:6px}.profile-card .lead{margin-bottom:8px}.reason-list{gap:7px;margin-top:10px}.reason{padding:10px;border-radius:15px;font-size:12.5px}.metric-grid{grid-template-columns:1fr}.metric{padding:11px;border-radius:16px}.metric-head{font-size:12px}.result-actions{grid-template-columns:1fr}.result-actions button,.result-actions .btn{min-height:54px}
+  .cta-layout{display:block}.cta-summary{padding:16px;border-radius:24px;margin-bottom:10px}.cta-summary h1{font-size:31px!important}.archive-form input{min-height:52px;font-size:16px;border-radius:16px}.archive-form button{min-height:56px}.disclaimer{font-size:10.8px}.link-grid{grid-template-columns:1fr 1fr}.link-card{padding:11px 8px;font-size:12px}.mobile-only{display:block}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a class="brand" href="https://www.lunebeauty.de/" aria-label="Lune Beauty Website">
+      <span class="brand-mark">
+        <img src="assets/img/logo.png" alt="Lune Beauty Logo" onerror="luneLogoFallback(this)">
+        <span class="brand-letter">LB</span>
+      </span>
+      <span><small>Lune Beauty</small><b>Skin Check</b></span>
+    </a>
+    <a class="back" href="https://www.lunebeauty.de/">← Website</a>
+  </div>
+
+  <div class="stepper" aria-label="Skin Check Ablauf">
+    <div class="steps">
+      <div class="step active" data-step="1">1 Foto</div>
+      <div class="step" data-step="2">2 Analyse</div>
+      <div class="step" data-step="3">3 Anfrage</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: FOTO -->
+  <section id="scan" class="screen active">
+    <div class="photo-shell">
+      <div class="card camera-card">
+        <span class="badge">Schritt 1 · Foto</span>
+        <h1>Dein Skin Check in 60 Sekunden.</h1>
+        <p class="lead">Foto aufnehmen. Hautprofil verstehen. Empfehlung erhalten.</p>
+
+        <div class="promise" aria-label="Vorteile">
+          <div><span>🔒</span>privat</div>
+          <div><span>✨</span>verständlich</div>
+          <div><span>🌙</span>Lune Tipp</div>
+        </div>
+
+        <label class="consent"><input id="privacyConsent" type="checkbox"> <span>Ich akzeptiere den kosmetischen Skin Check. Das Foto bleibt privat. Keine medizinische Diagnose.</span></label>
+
+        <details class="details-card mobile-help">
+          <summary>Kurze Tipps für ein gutes Ergebnis</summary>
+          <div class="details-body">
+            <div class="scanTips">
+              <span class="tip">Fensterlicht</span>
+              <span class="tip">frontal</span>
+              <span class="tip">ruhig halten</span>
+              <span class="tip">wenn möglich ohne Make-up</span>
+            </div>
+            <p class="micro">Nur wenn du am Ende aktiv eine Anfrage sendest, werden Hautprofil, Score und Empfehlung an Lune Beauty übertragen. Nicht das Foto.</p>
+          </div>
+        </details>
+
+        <div class="cameraCircle" aria-label="Kamera Vorschau">
+          <video id="video" autoplay muted playsinline></video>
+          <canvas id="hud" class="hud"></canvas>
+          <div class="guide"></div>
+        </div>
+
+        <div class="quality">
+          <div class="qitem"><strong>Gesicht</strong><span id="faceDot" class="qdot"></span></div>
+          <div class="qitem"><strong>Licht</strong><span id="lightDot" class="qdot"></span></div>
+          <div class="qitem"><strong>Stabil</strong><span id="stableDot" class="qdot"></span></div>
+        </div>
+
+        <div class="camera-actions two">
+          <button id="startCameraBtn" disabled>Kamera starten</button>
+          <button id="captureBtn" class="dark" disabled>Analyse erstellen</button>
+        </div>
+        <button class="secondary" id="retryCameraBtn" style="width:100%;margin-top:9px">Kamera neu starten</button>
+        <div id="cameraStatus" class="status">Bitte Datenschutz bestätigen und Kamera starten.</div>
+      </div>
+
+      <div class="card hero-compact">
+        <span class="badge">Lune Beauty Worms</span>
+        <h2>3 Schritte. Klar. Persönlich.</h2>
+        <p class="lead">Ein mobil optimierter Beauty-Check: Foto, verständliche Analyse und direkte Anfrage bei Lune Beauty.</p>
+        <div class="scanTips">
+          <span class="tip">Fensterlicht</span>
+          <span class="tip">frontal</span>
+          <span class="tip">ohne Make-up</span>
+        </div>
+        <div class="experience-line" aria-label="Skin Check Erlebnis">
+          <div class="xp-item"><span>📸</span>Foto</div>
+          <div class="xp-item"><span>🔍</span>Beauty Map</div>
+          <div class="xp-item"><span>🌙</span>Lune Card</div>
+        </div>
+        <p class="micro">Nur Profil, Score und Empfehlung werden gesendet, wenn du am Ende aktiv eine Beratung anfragst. Das Foto wird nicht übertragen.</p>
+        <div class="link-grid">
+          <a class="link-card" href="https://www.lunebeauty.de/#services">Behandlungen</a>
+          <a class="link-card" href="https://www.lunebeauty.de/#contact">Kontakt</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: ANALYSE -->
+  <section id="result" class="screen">
+    <div class="result-layout">
+      <div class="card result-top">
+        <span class="badge">Schritt 2 · Analyse</span>
+        <div class="image-experience">
+          <div class="report-image"><canvas id="finalImage"></canvas></div>
+          <div class="aiImageControls" aria-label="Bildmodus">
+            <button type="button" class="chipbtn active" data-imgmode="signature">Signature</button>
+            <button type="button" class="chipbtn" data-imgmode="map">Beauty Map</button>
+            <button type="button" class="chipbtn" data-imgmode="glow">Lune Glow</button>
+          </div>
+          <button id="saveBeautyCardBtn" type="button" class="secondary image-save">Beauty Card speichern</button>
+          <div class="memory-card-note"><span class="pulse-dot"></span> Foto bleibt privat · Card für Kundin</div>
+        </div>
+        <div class="score-ring">
+          <canvas id="scoreRing" width="160" height="160"></canvas>
+          <div id="score" class="score-number">0</div>
+        </div>
+        <p class="micro" style="text-align:center;margin:0">Kosmetischer Gesamtscore aus sichtbaren Beauty-Merkmalen</p>
+      </div>
+
+      <div>
+        <div class="profile-card">
+          <div class="profile-head">
+            <div>
+              <span class="badge">Dein Lune Hautprofil</span>
+              <h2 id="profileName">-</h2>
+            </div>
+            <span id="confidence" class="confidence">-</span>
+          </div>
+          <p id="profileText" class="lead"></p>
+          <div id="skinStory" class="skin-story"></div>
+          <h3 style="font-size:21px;margin-top:14px">Dein Hautbild in 3 Punkten</h3>
+          <div id="topInsights" class="insight-list"></div>
+          <details class="details-card">
+            <summary>Warum diese Empfehlung?</summary>
+            <div id="reasons" class="reason-list details-body"></div>
+          </details>
+        </div>
+
+        <details class="details-card">
+          <summary>Alle Beauty-Merkmale ansehen</summary>
+          <div class="details-body">
+            <div id="metrics" class="metric-grid"></div>
+          </div>
+        </details>
+
+        <div class="profile-card">
+          <span class="badge">Empfohlene Behandlung</span>
+          <h3 id="treatmentName">-</h3>
+          <p id="treatmentText" class="lead"></p>
+          <div id="treatmentTags" class="tagrow"></div>
+          <div class="mobile-bottom-bar">
+            <button id="goCtaBtn" class="dark">Weiter zur Anfrage</button>
+            <div class="cta-fixed-hint">Dein Foto wird nicht übertragen.</div>
+          </div>
+          <div class="result-actions">
+            <button class="secondary" id="newScanBtn">Neue Analyse</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: CTA -->
+  <section id="cta" class="screen">
+    <div class="cta-layout">
+      <div class="cta-summary">
+        <span class="badge">Schritt 3 · Anfrage</span>
+        <h1 style="font-size:38px">Fast fertig.</h1>
+        <p class="lead">Schick dein Hautprofil an Lune Beauty. Das Studio meldet sich persönlich zur Beratung.</p>
+        <div class="reason-list">
+          <div class="reason"><b id="ctaProfile">Hautprofil wird übernommen</b></div>
+          <div class="reason"><b id="ctaTreatment">Behandlung wird übernommen</b></div>
+          <div class="reason">Foto wird nicht übertragen.</div>
+        </div>
+        <div class="result-actions">
+          <button id="backToResultBtn" class="secondary">Zurück zur Analyse</button>
+          <a class="btn secondary" href="https://www.lunebeauty.de/">Zur Website</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Kontakt für Rückmeldung</h2>
+        <p class="micro">Telefon oder E-Mail reicht. Das Studio sieht automatisch deine Empfehlung.</p>
+        <div class="archive-form">
+          <div class="form-label">Name</div>
+          <input id="archiveName" placeholder="Dein Name" autocomplete="name">
+          <div class="form-label">Kontakt</div>
+          <input id="archivePhone" placeholder="Telefon / WhatsApp" inputmode="tel" autocomplete="tel">
+          <div class="form-label">Optional</div>
+          <input id="archiveEmail" placeholder="E-Mail" inputmode="email" autocomplete="email">
+          <label class="consent"><input id="archiveConsent" type="checkbox"> <span>Ich möchte, dass Lune Beauty dieses kosmetische Hautprofil zur Beratung speichert und mich kontaktieren darf.</span></label>
+          <button id="archiveBtn" class="dark">Hautprofil senden</button>
+          <div id="archiveStatus" class="archiveStatus"></div>
+        </div>
+        <p class="disclaimer">Diese Analyse dient ausschließlich der kosmetischen Orientierung. Sie ersetzt keine medizinische oder dermatologische Diagnose. Bei Hauterkrankungen, starken Entzündungen oder unklaren Veränderungen wenden Sie sich bitte an eine Dermatologin oder einen Dermatologen.</p>
+      </div>
+    </div>
+  </section>
+</div>
+<canvas id="analysisCanvas" class="hiddenCanvas"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script>
+window.LUNE_STAFF_CLOUD_API = window.LUNE_STAFF_CLOUD_API || "https://script.google.com/macros/s/AKfycbwuIb2HKqekpR2GDx86qzSKW0teD_I1C_qZVS32vwOV0WZ5LaMGtXc5h2ubrHE4eZ4e/exec";
+
+const $ = id => document.getElementById(id);
+const video = $("video"), hud = $("hud"), hctx = hud.getContext("2d");
+const finalCanvas = $("finalImage"), fctx = finalCanvas.getContext("2d");
+const analysisCanvas = $("analysisCanvas"), actx = analysisCanvas.getContext("2d", { willReadFrequently:true });
+let stream = null, cam = null, faceMesh = null, lastLandmarks = null, faceFrames = 0, lastResult = null;
+let imageMode = 'signature', capturedLandmarks = null;
+const basePhotoCanvas = document.createElement('canvas');
+const basePhotoCtx = basePhotoCanvas.getContext('2d');
+
+const TREATMENT_ARCHIVE = {
+  HYDRA_GLOW:{id:"HYDRA_GLOW", service:"Hydra Glow Facial (Aquafacial)", title:"Hydra Glow Facial", text:"Ideal bei feuchtigkeitsarmer, müder oder glanzloser Haut. Der Fokus liegt auf Feuchtigkeit, Frische und einem ruhigeren Glow.", tags:["Feuchtigkeit","Glow","Frische","sanfte Pflege"]},
+  SENSITIVE_BALANCE:{id:"SENSITIVE_BALANCE", service:"Sensi Treatment", title:"Sensitive Balance Treatment", text:"Empfohlen bei sichtbaren Rötungen oder empfindlichem Hautbild. Die Behandlung unterstützt Ruhe, Balance und sanfte Pflege.", tags:["Rötungen","Sensibilität","Beruhigung","Barriereschutz"]},
+  DEEP_CLEANSING:{id:"DEEP_CLEANSING", service:"Aknebehandlung", title:"Deep Cleansing / Clarifying Treatment", text:"Passend bei unruhiger Textur, sichtbaren Poren und Talg-Unregelmäßigkeiten. Der Fokus liegt auf Klärung und Ausgleich.", tags:["Textur","Poren","Klärung","Balance"]},
+  ANTI_AGING:{id:"ANTI_AGING", service:"Anti-Aging Behandlung", title:"Anti-Aging Lifting Treatment", text:"Geeignet bei reduzierter Augenfrische, sichtbaren Linien oder Spannkraft-Themen. Der Fokus liegt auf Glätte, Pflege und Lifting-Effekt.", tags:["Linien","Frische","Lifting","Pflege"]},
+  BRIGHTENING:{id:"BRIGHTENING", service:"Gesichtsbehandlung", title:"Brightening Facial", text:"Empfohlen bei ungleichmäßigem Hautton oder Pigment-Unregelmäßigkeiten. Der Fokus liegt auf gleichmäßigerem Erscheinungsbild und Glow.", tags:["Hautton","Pigment","Glow","Ausgleich"]},
+  RELAX_GLOW:{id:"RELAX_GLOW", service:"Relax & Glow Behandlung", title:"Relax & Glow Treatment", text:"Ideal bei müdem Hautbild und reduzierter Ausstrahlung. Die Behandlung verbindet Pflege, Entspannung und sichtbare Frische.", tags:["Müdigkeit","Glow","Wellness","Frische"]},
+  CLASSIC:{id:"CLASSIC", service:"Basisbehandlung Gesicht", title:"Classic Beauty Facial", text:"Für ein bereits ausgeglichenes Hautbild. Die Behandlung hilft, den guten Zustand zu erhalten und die Haut regelmäßig zu pflegen.", tags:["Erhaltung","Pflege","Balance","Routine"]}
+};
+
+const PROFILES = [
+  {id:"sensitive", name:"Sensible Haut mit sichtbaren Rötungen", treatment:"SENSITIVE_BALANCE", when:m=>m.rednessProblem>48, confidence:m=>m.rednessProblem, text:"Ihr Hautbild zeigt eine erhöhte Rötungs-Tendenz. Kosmetisch wirkt die Haut empfindlicher und profitiert wahrscheinlich von beruhigender Pflege."},
+  {id:"dehydrated", name:"Feuchtigkeitsarme Haut mit reduziertem Glow", treatment:"HYDRA_GLOW", when:m=>m.hydration<62 && m.glow<68, confidence:m=>(100-m.hydration)*.65+(100-m.glow)*.35, text:"Die sichtbaren Merkmale sprechen für weniger Glow und eine feuchtigkeitsarme Tendenz. Eine hydratisierende Behandlung ist hier sinnvoll."},
+  {id:"texture", name:"Unruhige Textur / Poren-Tendenz", treatment:"DEEP_CLEANSING", when:m=>m.textureProblem>48, confidence:m=>m.textureProblem, text:"Die Analyse erkennt eine deutlichere Textur. Kosmetisch passt dazu eine klärende Behandlung für ein ruhigeres Hautbild."},
+  {id:"tired", name:"Müdes Hautbild mit reduzierter Augenfrische", treatment:"RELAX_GLOW", when:m=>m.eyeFatigue>46 || (m.glow<62 && m.eyeFreshness<68), confidence:m=>Math.max(m.eyeFatigue,100-m.eyeFreshness), text:"Die Augenpartie und der Glow wirken etwas reduziert. Das Profil passt zu einer frischefördernden, entspannenden Behandlung."},
+  {id:"mature", name:"Anti-Aging Fokus / sichtbare Linien-Tendenz", treatment:"ANTI_AGING", when:m=>m.lineProblem>45, confidence:m=>m.lineProblem, text:"Die sichtbaren Strukturen deuten kosmetisch auf einen Anti-Aging-Fokus hin. Pflege, Glättung und Frische stehen im Vordergrund."},
+  {id:"uneven", name:"Ungleichmäßiger Hautton / Pigment-Tendenz", treatment:"BRIGHTENING", when:m=>m.uniformity<64, confidence:m=>100-m.uniformity, text:"Das Hautbild zeigt eine ungleichmäßigere Tonalität. Eine ausgleichende Glow-Behandlung kann optisch unterstützen."},
+  {id:"balanced", name:"Ausgeglichenes Hautbild", treatment:"CLASSIC", when:m=>true, confidence:m=>Math.max(62, Math.round(m.overall)), text:"Die sichtbaren Merkmale wirken insgesamt ausgeglichen. Eine regelmäßige Pflegebehandlung hilft, diesen Zustand zu erhalten."}
+];
+
+function clamp(v,min=0,max=100){return Math.max(min,Math.min(max,Number.isFinite(v)?v:0));}
+function setStep(n){document.querySelectorAll('.step').forEach(el=>{const s=Number(el.dataset.step);el.classList.toggle('active',s===n);el.classList.toggle('done',s<n);});}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');setStep(id==='scan'?1:id==='result'?2:3);window.scrollTo({top:0,behavior:'smooth'});}
+function setDot(id,state){const el=$(id);el.className='qdot '+(state==='ok'?'ok':state==='warn'?'warn':'');}
+function apiReady(){return /^https:\/\/script\.google\.com\//i.test(String(window.LUNE_STAFF_CLOUD_API||''));}
+
+$("privacyConsent").addEventListener("change",e=>$("startCameraBtn").disabled=!e.target.checked);
+$("startCameraBtn").onclick=startCamera;
+$("retryCameraBtn").onclick=startCamera;
+$("newScanBtn").onclick=()=>location.reload();
+$("goCtaBtn").onclick=()=>openCta();
+const stickyCtaBtn=$("stickyCtaBtn"); if(stickyCtaBtn) stickyCtaBtn.onclick=()=>openCta();
+$("backToResultBtn").onclick=()=>show('result');
+document.querySelectorAll('[data-imgmode]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    imageMode = btn.dataset.imgmode || 'signature';
+    document.querySelectorAll('[data-imgmode]').forEach(b=>b.classList.toggle('active', b===btn));
+    renderFinalImage(imageMode);
+  });
+});
+$("saveBeautyCardBtn").onclick=()=>downloadBeautyCard();
+
+function openCta(){
+  if(!lastResult) return;
+  $("ctaProfile").textContent=lastResult.profile.name;
+  $("ctaTreatment").textContent=lastResult.treatment.title;
+  show('cta');
+  setTimeout(()=>$("archiveName").focus({preventScroll:true}),420);
+}
+
+async function startCamera(){
+  try{
+    $("cameraStatus").textContent="Kamera wird gestartet…";
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:900},height:{ideal:900}},audio:false});
+    video.srcObject=stream; await video.play();
+    if(!faceMesh){
+      faceMesh=new FaceMesh({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`});
+      faceMesh.setOptions({maxNumFaces:1,refineLandmarks:true,minDetectionConfidence:.65,minTrackingConfidence:.62});
+      faceMesh.onResults(onFaceResults);
+    }
+    if(cam) try{cam.stop();}catch(_){ }
+    cam=new Camera(video,{onFrame:()=>faceMesh.send({image:video}),width:video.videoWidth||640,height:video.videoHeight||640});
+    cam.start();
+    $("cameraStatus").textContent="Positioniere dein Gesicht im Kreis.";
+    $("startCameraBtn").textContent="Kamera läuft";
+    document.body.classList.add('camera-started');
+    $("startCameraBtn").disabled=true;
+  }catch(err){
+    $("cameraStatus").innerHTML='<span class="error">Kamera konnte nicht gestartet werden. Bitte Kamerazugriff erlauben oder die Seite über HTTPS öffnen.</span>';
+    $("startCameraBtn").disabled=false;
+  }
+}
+
+function onFaceResults(r){
+  if(!r.multiFaceLandmarks || !r.multiFaceLandmarks.length){lastLandmarks=null;faceFrames=0;setDot('faceDot','');setDot('stableDot','');$("captureBtn").disabled=true;return;}
+  lastLandmarks=r.multiFaceLandmarks[0]; faceFrames=Math.min(faceFrames+1,8);
+  hud.width=video.videoWidth||640; hud.height=video.videoHeight||640;
+  drawMesh(lastLandmarks,hud.width,hud.height);
+  const light=estimateLight();
+  setDot('faceDot','ok'); setDot('stableDot',faceFrames>4?'ok':'warn'); setDot('lightDot',light>72?'ok':light>48?'warn':'');
+  $("captureBtn").disabled=!(faceFrames>4 && light>45);
+  $("cameraStatus").textContent=(faceFrames>4 && light>45)?"Bereit für die Analyse.":"Kurz ruhig bleiben und auf gutes Licht achten.";
+}
+
+function drawMesh(lm,w,h){
+  hctx.clearRect(0,0,w,h); hctx.strokeStyle="rgba(255,255,255,.38)"; hctx.lineWidth=.6;
+  if(typeof FACEMESH_TESSELATION !== 'undefined'){
+    FACEMESH_TESSELATION.forEach(([a,b])=>{const p1=lm[a],p2=lm[b];hctx.beginPath();hctx.moveTo(p1.x*w,p1.y*h);hctx.lineTo(p2.x*w,p2.y*h);hctx.stroke();});
+  }
+}
+function estimateLight(){
+  if(!video.videoWidth) return 0;
+  const c=analysisCanvas, ctx=actx;c.width=80;c.height=80;ctx.drawImage(video,0,0,80,80);
+  const d=ctx.getImageData(0,0,80,80).data;let s=0,n=0;for(let i=0;i<d.length;i+=16){s+=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2]);n++;}return s/n;
+}
+
+$("captureBtn").onclick=()=>{
+  if(!lastLandmarks){$("cameraStatus").textContent="Kein Gesicht erkannt.";return;}
+  const crop = getFaceCrop(lastLandmarks);
+  const W=260,H=320; finalCanvas.width=W; finalCanvas.height=H; analysisCanvas.width=W; analysisCanvas.height=H;
+  basePhotoCanvas.width=W; basePhotoCanvas.height=H;
+  actx.drawImage(video,crop.sx,crop.sy,crop.sw,crop.sh,0,0,W,H);
+  basePhotoCtx.clearRect(0,0,W,H);
+  basePhotoCtx.drawImage(video,crop.sx,crop.sy,crop.sw,crop.sh,0,0,W,H);
+  capturedLandmarks = lastLandmarks.map(p=>({
+    x: ((p.x*video.videoWidth)-crop.sx)/crop.sw*W,
+    y: ((p.y*video.videoHeight)-crop.sy)/crop.sh*H
+  }));
+  try{stream.getTracks().forEach(t=>t.stop());cam.stop();}catch(_){ }
+  imageMode='signature';
+  document.querySelectorAll('[data-imgmode]').forEach(b=>b.classList.toggle('active', b.dataset.imgmode==='signature'));
+  lastResult=buildAnalysis(); renderResult(lastResult); show('result');
+};
+
+function getFaceCrop(lm){
+  let minX=1e9,minY=1e9,maxX=0,maxY=0,w=video.videoWidth,h=video.videoHeight;
+  lm.forEach(p=>{let x=p.x*w,y=p.y*h;minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);});
+  const fw=maxX-minX, fh=maxY-minY, padX=fw*.38, padTop=fh*.46, padBottom=fh*.28;
+  let sx=Math.max(0,minX-padX), sy=Math.max(0,minY-padTop), ex=Math.min(w,maxX+padX), ey=Math.min(h,maxY+padBottom);
+  return {sx,sy,sw:ex-sx,sh:ey-sy};
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+function zoneStats(img,w,h,z){
+  const [x1,y1,x2,y2]=z.map((v,i)=> i%2===0?Math.round(v*w):Math.round(v*h));
+  let n=0, lSum=0, l2=0, red=0, chroma=0, edge=0, edgeN=0;
+  for(let y=Math.max(1,y1);y<Math.min(h-1,y2);y+=2){
+    for(let x=Math.max(1,x1);x<Math.min(w-1,x2);x+=2){
+      const dx=(x/w-.5)/.42, dy=(y/h-.52)/.5; if(dx*dx+dy*dy>1.1) continue;
+      const i=(y*w+x)*4, r=img[i], g=img[i+1], b=img[i+2];
+      const lum=.2126*r+.7152*g+.0722*b; const rr=Math.max(0,r-(g+b)/2);
+      lSum+=lum; l2+=lum*lum; red+=rr; chroma+=Math.abs(r-g)+Math.abs(r-b)+Math.abs(g-b); n++;
+      const ir=(y*w+x+1)*4, ib=((y+1)*w+x)*4;
+      const lR=.2126*img[ir]+.7152*img[ir+1]+.0722*img[ir+2], lB=.2126*img[ib]+.7152*img[ib+1]+.0722*img[ib+2];
+      edge+=Math.abs(lum-lR)+Math.abs(lum-lB); edgeN+=2;
+    }
+  }
+  const avg=n?lSum/n:0, std=n?Math.sqrt(Math.max(0,l2/n-avg*avg)):0;
+  return {avg,std,red:n?red/n:0,chroma:n?chroma/n:0,edge:edgeN?edge/edgeN:0};
+}
+
+function buildAnalysis(){
+  const W=analysisCanvas.width,H=analysisCanvas.height,img=actx.getImageData(0,0,W,H).data;
+  const full=zoneStats(img,W,H,[.14,.12,.86,.88]);
+  const cheeks=zoneStats(img,W,H,[.12,.38,.88,.68]);
+  const eyes=zoneStats(img,W,H,[.18,.25,.82,.43]);
+  const forehead=zoneStats(img,W,H,[.25,.12,.75,.30]);
+  const center=zoneStats(img,W,H,[.28,.30,.72,.72]);
+  const uniformity=clamp(100 - (full.std*1.25 + full.chroma*.22));
+  const rednessProblem=clamp((cheeks.red-8)*4.4 + (cheeks.chroma-full.chroma)*.28);
+  const textureProblem=clamp((center.edge-5)*5.2 + center.std*.65);
+  const eyeFatigue=clamp((full.avg-eyes.avg)*1.15 + (eyes.edge-6)*2.1);
+  const lineProblem=clamp((forehead.edge-5.2)*6.3 + forehead.std*.28);
+  const glow=clamp((full.avg-55)*.95 - full.std*.38 - rednessProblem*.10 + 18);
+  const hydration=clamp(glow*.58 + (100-textureProblem)*.28 + uniformity*.14);
+  const redness=clamp(100-rednessProblem), texture=clamp(100-textureProblem), eyeFreshness=clamp(100-eyeFatigue), lines=clamp(100-lineProblem);
+  const overall=Math.round(uniformity*.20 + redness*.16 + texture*.18 + eyeFreshness*.15 + glow*.16 + hydration*.15);
+  const metrics={overall,uniformity:Math.round(uniformity),redness:Math.round(redness),texture:Math.round(texture),eyeFreshness:Math.round(eyeFreshness),glow:Math.round(glow),hydration:Math.round(hydration),lines:Math.round(lines),rednessProblem:Math.round(rednessProblem),textureProblem:Math.round(textureProblem),eyeFatigue:Math.round(eyeFatigue),lineProblem:Math.round(lineProblem)};
+  const profile=chooseProfile(metrics), treatment=TREATMENT_ARCHIVE[profile.treatment];
+  const reasons=buildReasons(metrics,profile);
+  return {createdAt:new Date().toISOString(),metrics,profile,treatment,reasons};
+}
+function chooseProfile(m){
+  const matches=PROFILES.filter(p=>p.when(m)).map(p=>({...p, conf:Math.round(clamp(p.confidence(m),45,94))}));
+  matches.sort((a,b)=>b.conf-a.conf);return matches[0];
+}
+function buildReasons(m,p){
+  const arr=[];
+  if(m.hydration<64) arr.push(`Feuchtigkeit/Glow wirkt reduziert (${m.hydration}/100).`);
+  if(m.rednessProblem>35) arr.push(`Es zeigt sich eine Rötungs-Tendenz im Wangen-/Gesichtsbereich.`);
+  if(m.textureProblem>35) arr.push(`Die Textur wirkt etwas unruhiger, daher ist eine ausgleichende Pflege sinnvoll.`);
+  if(m.eyeFatigue>32) arr.push(`Die Augenpartie wirkt weniger frisch.`);
+  if(m.lineProblem>35) arr.push(`Feine Linien/Struktur wirken im oberen Gesichtsbereich sichtbarer.`);
+  if(m.uniformity<70) arr.push(`Der Hautton wirkt nicht vollkommen gleichmäßig.`);
+  if(!arr.length) arr.push(`Die sichtbaren Merkmale sind insgesamt ausgeglichen und stabil.`);
+  return arr.slice(0,4);
+}
+
+
+function shortProfileName(name){
+  const s=String(name||'Hautprofil');
+  if(s.includes('Feuchtigkeitsarme')) return 'Feuchtigkeitsarme Haut';
+  if(s.includes('Sensible')) return 'Sensible Haut';
+  if(s.includes('Textur')) return 'Unruhige Textur';
+  if(s.includes('Müdes')) return 'Müdes Hautbild';
+  if(s.includes('Anti-Aging')) return 'Anti-Aging Fokus';
+  if(s.includes('Ungleichmäßiger')) return 'Unebener Hautton';
+  return s.slice(0,34);
+}
+function drawSoftLabel(ctx,x,y,text){
+  ctx.save();
+  ctx.font='800 10px Inter, sans-serif';
+  const w=ctx.measureText(text).width+18;
+  ctx.fillStyle='rgba(255,250,243,.88)';
+  ctx.strokeStyle='rgba(195,160,99,.62)';
+  ctx.lineWidth=1;
+  roundRect(ctx,x,y,w,24,12); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#6f5632'; ctx.fillText(text,x+9,y+16);
+  ctx.restore();
+}
+function drawPoint(ctx,x,y,label){
+  ctx.save();
+  ctx.fillStyle='rgba(195,160,99,.95)';
+  ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=2; ctx.stroke();
+  if(label) drawSoftLabel(ctx,x+8,y-13,label);
+  ctx.restore();
+}
+function renderFinalImage(mode='signature'){
+  if(!basePhotoCanvas.width) return;
+  const W=finalCanvas.width||260,H=finalCanvas.height||320;
+  fctx.clearRect(0,0,W,H);
+  fctx.save();
+  roundRect(fctx,0,0,W,H,34); fctx.clip();
+  fctx.drawImage(basePhotoCanvas,0,0,W,H);
+
+  if(mode==='glow'){
+    fctx.globalAlpha=.22;
+    const g=fctx.createRadialGradient(W*.5,H*.34,10,W*.5,H*.36,W*.72);
+    g.addColorStop(0,'rgba(255,245,220,.72)');
+    g.addColorStop(.48,'rgba(231,207,154,.22)');
+    g.addColorStop(1,'rgba(195,160,99,0)');
+    fctx.fillStyle=g; fctx.fillRect(0,0,W,H);
+    fctx.globalAlpha=.16; fctx.fillStyle='#fffaf3'; fctx.fillRect(0,0,W,H);
+  }
+
+  if(mode==='map' && capturedLandmarks){
+    fctx.globalAlpha=.38;
+    fctx.strokeStyle='rgba(255,255,255,.72)';
+    fctx.lineWidth=.55;
+    if(typeof FACEMESH_TESSELATION !== 'undefined'){
+      FACEMESH_TESSELATION.forEach(([a,b])=>{
+        const p1=capturedLandmarks[a],p2=capturedLandmarks[b];
+        if(!p1||!p2) return;
+        fctx.beginPath(); fctx.moveTo(p1.x,p1.y); fctx.lineTo(p2.x,p2.y); fctx.stroke();
+      });
+    }
+    fctx.globalAlpha=1;
+    drawPoint(fctx,W*.50,H*.18,'Glow');
+    drawPoint(fctx,W*.28,H*.46,'Rötung');
+    drawPoint(fctx,W*.72,H*.46,'Balance');
+    drawPoint(fctx,W*.50,H*.58,'Textur');
+    drawPoint(fctx,W*.50,H*.33,'Augenfrische');
+  }
+
+  if(mode==='signature'){
+    fctx.globalAlpha=.30;
+    const top=fctx.createLinearGradient(0,0,0,H);
+    top.addColorStop(0,'rgba(47,42,36,.22)');
+    top.addColorStop(.46,'rgba(47,42,36,0)');
+    top.addColorStop(1,'rgba(47,42,36,.46)');
+    fctx.fillStyle=top; fctx.fillRect(0,0,W,H);
+    fctx.globalAlpha=1;
+    fctx.strokeStyle='rgba(231,207,154,.76)';
+    fctx.lineWidth=1.2;
+    fctx.beginPath();
+    fctx.ellipse(W*.5,H*.42,W*.31,H*.38,0,0,Math.PI*2);
+    fctx.stroke();
+    drawSoftLabel(fctx,14,14,'Lune Skin Check');
+  }
+
+  if(mode==='glow'){
+    drawSoftLabel(fctx,14,14,'Lune Glow Preview');
+    fctx.save();
+    fctx.globalAlpha=.32;
+    fctx.strokeStyle='rgba(195,160,99,.9)';
+    fctx.lineWidth=1;
+    for(let i=0;i<5;i++){
+      fctx.beginPath();
+      fctx.arc(W*.5,H*.42,54+i*13,-.2,Math.PI+.25);
+      fctx.stroke();
+    }
+    fctx.restore();
+  }
+
+  if(lastResult){
+    fctx.save();
+    const panelH=64;
+    fctx.globalAlpha=.92;
+    fctx.fillStyle='rgba(255,250,243,.90)';
+    roundRect(fctx,12,H-panelH-12,W-24,panelH,20); fctx.fill();
+    fctx.globalAlpha=1;
+    fctx.fillStyle='#c3a063';
+    fctx.font='700 28px Playfair Display, serif';
+    fctx.fillText(String(lastResult.metrics.overall),24,H-38);
+    fctx.font='900 9px Inter, sans-serif';
+    fctx.fillText('SCORE',28,H-24);
+    fctx.fillStyle='#3a3025';
+    fctx.font='900 12px Inter, sans-serif';
+    fctx.fillText(shortProfileName(lastResult.profile.name),74,H-43);
+    fctx.fillStyle='#7b6a50';
+    fctx.font='700 10px Inter, sans-serif';
+    fctx.fillText(lastResult.treatment.title.slice(0,28),74,H-25);
+    fctx.restore();
+  }
+  fctx.restore();
+}
+function downloadBeautyCard(){
+  if(!lastResult || !basePhotoCanvas.width){return;}
+  const c=document.createElement('canvas'), ctx=c.getContext('2d');
+  c.width=1080; c.height=1350;
+  const grad=ctx.createLinearGradient(0,0,0,c.height);
+  grad.addColorStop(0,'#fffaf3'); grad.addColorStop(1,'#f2e4cf');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,c.width,c.height);
+
+  ctx.fillStyle='#2f2a24';
+  ctx.textAlign='center';
+  ctx.font='700 54px Playfair Display, serif';
+  ctx.fillText('Lune Beauty',540,105);
+  ctx.font='900 24px Inter, sans-serif';
+  ctx.fillStyle='#9a7a45';
+  ctx.fillText('DIGITALER SKIN CHECK',540,145);
+
+  const x=140,y=205,w=800,h=850;
+  ctx.save();
+  roundRect(ctx,x,y,w,h,70); ctx.clip();
+  ctx.drawImage(basePhotoCanvas,x,y,w,h);
+  ctx.globalAlpha=.28;
+  const glow=ctx.createRadialGradient(540,430,40,540,520,620);
+  glow.addColorStop(0,'rgba(255,246,220,.8)');
+  glow.addColorStop(1,'rgba(195,160,99,0)');
+  ctx.fillStyle=glow; ctx.fillRect(x,y,w,h);
+  ctx.globalAlpha=1;
+  ctx.restore();
+
+  ctx.strokeStyle='rgba(195,160,99,.72)';
+  ctx.lineWidth=6;
+  roundRect(ctx,x,y,w,h,70); ctx.stroke();
+
+  ctx.fillStyle='rgba(255,250,243,.94)';
+  roundRect(ctx,185,920,710,190,44); ctx.fill();
+  ctx.fillStyle='#c3a063';
+  ctx.textAlign='left';
+  ctx.font='700 84px Playfair Display, serif';
+  ctx.fillText(String(lastResult.metrics.overall),235,1045);
+  ctx.font='900 22px Inter, sans-serif';
+  ctx.fillText('SCORE',252,1076);
+  ctx.fillStyle='#2f2a24';
+  ctx.font='900 34px Inter, sans-serif';
+  wrapText(ctx,shortProfileName(lastResult.profile.name),395,1000,450,39);
+  ctx.fillStyle='#7b6a50';
+  ctx.font='700 24px Inter, sans-serif';
+  wrapText(ctx,lastResult.treatment.title,395,1072,450,30);
+
+  ctx.textAlign='center';
+  ctx.fillStyle='#2f2a24';
+  ctx.font='700 32px Playfair Display, serif';
+  ctx.fillText('Deine Beauty-Empfehlung',540,1185);
+  ctx.fillStyle='#7b6a50';
+  ctx.font='600 24px Inter, sans-serif';
+  wrapText(ctx,'Dieses Foto bleibt privat. Die Karte dient als persönliche Erinnerung an den Lune Skin Check.',230,1232,620,32);
+  ctx.fillStyle='#9a7a45';
+  ctx.font='900 22px Inter, sans-serif';
+  ctx.fillText('www.lunebeauty.de',540,1300);
+
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/png');
+  a.download='lune-skin-check-beauty-card.png';
+  a.click();
+}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+  const words=String(text||'').split(/\s+/), align=ctx.textAlign;
+  let line='', yy=y;
+  for(const word of words){
+    const test=line?line+' '+word:word;
+    if(ctx.measureText(test).width>maxWidth && line){
+      ctx.fillText(line,align==='center'?x+maxWidth/2:x,yy);
+      line=word; yy+=lineHeight;
+    }else line=test;
+  }
+  if(line) ctx.fillText(line,align==='center'?x+maxWidth/2:x,yy);
+}
+
+
+function levelText(val){
+  val = Number(val)||0;
+  if(val >= 82) return 'sehr gut';
+  if(val >= 68) return 'gut';
+  if(val >= 52) return 'leicht reduziert';
+  return 'braucht Aufmerksamkeit';
+}
+function metricMeaning(key,val){
+  const levels = {
+    Glow:['Der Teint wirkt frisch und lebendig.','Der Glow ist gut, kann aber noch unterstützt werden.','Der Teint wirkt etwas matt. Feuchtigkeit und Aktivierung können helfen.','Der Glow wirkt deutlich reduziert. Eine Frische-Behandlung passt gut.'],
+    Hydration:['Die Haut wirkt gut versorgt.','Die Feuchtigkeit wirkt solide.','Die Haut zeigt eine feuchtigkeitsarme Tendenz.','Die Haut wirkt durstig. Eine hydratisierende Behandlung ist sinnvoll.'],
+    Gleichmäßigkeit:['Der Hautton wirkt sehr ausgeglichen.','Der Hautton wirkt überwiegend ruhig.','Der Hautton wirkt etwas ungleichmäßig.','Das Hautbild wirkt deutlich unruhiger und profitiert von Ausgleich.'],
+    Rötungsruhe:['Die Haut wirkt sehr ruhig.','Die Rötungsbalance wirkt gut.','Es zeigen sich leichte Rötungszonen.','Beruhigende Pflege steht im Vordergrund.'],
+    Textur:['Die Textur wirkt fein.','Die Textur wirkt insgesamt gut.','Die Haut wirkt stellenweise etwas unruhig.','Klärung und Glättung wären passend.'],
+    Augenfrische:['Die Augenpartie wirkt frisch.','Die Augenfrische wirkt gut.','Die Augenpartie wirkt leicht müde.','Frische und Entspannung stehen im Fokus.'],
+    Linienruhe:['Die Linienwirkung ist sehr ruhig.','Die Linienwirkung ist normal.','Es zeigen sich leichte Linien-Tendenzen.','Pflege, Frische und Lifting-Fokus passen gut.']
+  };
+  const idx = val>=82?0:val>=68?1:val>=52?2:3;
+  return (levels[key]||['','','',''])[idx] || '';
+}
+function buildTopInsights(r){
+  const items=[
+    {key:'Glow', val:r.metrics.glow, action:'mehr Frische und Ausstrahlung'},
+    {key:'Feuchtigkeit', val:r.metrics.hydration, action:'mehr Feuchtigkeit und Glow'},
+    {key:'Hautton', val:r.metrics.uniformity, action:'ein gleichmäßigeres Hautbild'},
+    {key:'Hautruhe', val:r.metrics.redness, action:'beruhigende Pflege'},
+    {key:'Textur', val:r.metrics.texture, action:'ein feineres Hautbild'},
+    {key:'Augenfrische', val:r.metrics.eyeFreshness, action:'wacherer Blick'},
+    {key:'Linienruhe', val:r.metrics.lines, action:'Glätte und Lifting-Fokus'}
+  ];
+  const sorted=items.sort((a,b)=>a.val-b.val).slice(0,3);
+  return sorted.map((it,i)=>`<div class="insight-card"><div class="insight-no">${i+1}</div><div><b>${escapeHtml(it.key)} · ${escapeHtml(levelText(it.val))}</b><span>${escapeHtml(metricMeaning(it.key==='Feuchtigkeit'?'Hydration':it.key==='Hautton'?'Gleichmäßigkeit':it.key==='Hautruhe'?'Rötungsruhe':it.key, it.val))} Ziel: ${escapeHtml(it.action)}.</span></div></div>`).join('');
+}
+function buildSkinStory(r){
+  const t = r.treatment.title;
+  const p = r.profile.name;
+  const low = [
+    ['Glow', r.metrics.glow], ['Feuchtigkeit', r.metrics.hydration], ['Textur', r.metrics.texture], ['Augenfrische', r.metrics.eyeFreshness], ['Hautruhe', r.metrics.redness]
+  ].sort((a,b)=>a[1]-b[1]).slice(0,2).map(x=>x[0]).join(' und ');
+  return `Deine Skin Story: Dein Hautbild zeigt heute vor allem ${escapeHtml(p.toLowerCase())}. Besonders ${escapeHtml(low)} stehen im Fokus. Deshalb empfiehlt Lune Beauty: ${escapeHtml(t)}.`;
+}
+
+function renderResult(r){
+  renderFinalImage(imageMode);
+  $("profileName").textContent=r.profile.name; $("profileText").textContent=r.profile.text; $("confidence").textContent=`Sicherheit ${r.profile.conf}%`;
+  $("skinStory").innerHTML=buildSkinStory(r);
+  $("topInsights").innerHTML=buildTopInsights(r);
+  $("reasons").innerHTML=r.reasons.map(x=>`<div class="reason">${escapeHtml(x)}</div>`).join('');
+  const labels=[['Glow',r.metrics.glow],['Hydration',r.metrics.hydration],['Gleichmäßigkeit',r.metrics.uniformity],['Rötungsruhe',r.metrics.redness],['Textur',r.metrics.texture],['Augenfrische',r.metrics.eyeFreshness],['Linienruhe',r.metrics.lines]];
+  $("metrics").innerHTML=labels.map(([label,val])=>`<div class="metric"><div class="metric-head"><span>${label}</span><span class="metric-level">${levelText(val)}</span></div><div class="bar"><span style="width:${val}%"></span></div><div class="metric-meaning">${metricMeaning(label,val)}</div></div>`).join('');
+  $("treatmentName").textContent=r.treatment.title; $("treatmentText").textContent=r.treatment.text;
+  $("treatmentTags").innerHTML=r.treatment.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('');
+  $("ctaProfile").textContent=r.profile.name;
+  $("ctaTreatment").textContent=r.treatment.title;
+  animateScore(r.metrics.overall);
+}
+function animateScore(val){const ctx=$("scoreRing").getContext('2d');let p=0;(function loop(){ctx.clearRect(0,0,160,160);ctx.lineWidth=13;ctx.strokeStyle='#eee2d0';ctx.beginPath();ctx.arc(80,80,68,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#c3a063';ctx.beginPath();ctx.arc(80,80,68,-Math.PI/2,(p/100)*Math.PI*2-Math.PI/2);ctx.stroke();p+=(val-p)*.1;$("score").textContent=Math.round(p);if(Math.abs(val-p)>0.35)requestAnimationFrame(loop);})();}
+function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+function hiddenPost(url,payload){
+  return new Promise(resolve=>{
+    const name='skinArchive_'+Date.now();const iframe=document.createElement('iframe');iframe.name=name;iframe.style.display='none';document.body.appendChild(iframe);
+    const form=document.createElement('form');form.method='POST';form.action=url;form.target=name;form.style.display='none';
+    Object.entries(payload).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=String(v??'');form.appendChild(input);});
+    document.body.appendChild(form);iframe.addEventListener('load',()=>setTimeout(resolve,250),{once:true});form.submit();setTimeout(resolve,1700);setTimeout(()=>{form.remove();iframe.remove();},6500);
+  });
+}
+$("archiveBtn").onclick=async()=>{
+  if(!lastResult){return;}
+  const name=$("archiveName").value.trim(), phone=$("archivePhone").value.trim(), email=$("archiveEmail").value.trim();
+  if(!phone && !email){$("archiveStatus").innerHTML='<span class="error">Bitte Telefon oder E-Mail angeben.</span>';return;}
+  if(!$("archiveConsent").checked){$("archiveStatus").innerHTML='<span class="error">Bitte Zustimmung zur Speicherung bestätigen.</span>';return;}
+  if(!apiReady()){$("archiveStatus").innerHTML='<span class="error">Cloud ist noch nicht verbunden.</span>';return;}
+  const btn=$("archiveBtn"), old=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="loading"></span> Wird gesendet…';
+  const r=lastResult;
+  const payload={
+    action:'publicSkinAnalysis', source:'skin-ai', page:location.href, name:name||'Skin Check Kundin', phone, email,
+    profileId:r.profile.id, profileName:r.profile.name, confidence:r.profile.conf,
+    treatmentId:r.treatment.id, treatmentName:r.treatment.title, recommendedService:r.treatment.service,
+    score:r.metrics.overall, scores:JSON.stringify(r.metrics), reasons:JSON.stringify(r.reasons), consent:'yes', consentText:'Kosmetisches Hautprofil darf zur Beratung gespeichert werden. Foto wird nicht übertragen.'
+  };
+  try{
+    await hiddenPost(window.LUNE_STAFF_CLOUD_API,payload);
+    $("archiveStatus").innerHTML='<div class="success-box">Vielen Dank. Ihre Skin-Check Anfrage wurde gesendet.<br>Lune Beauty meldet sich in Kürze zur Terminabstimmung.<span class="small">Sie werden automatisch zur Website zurückgeleitet…</span><a class="btn secondary" style="margin-top:12px;width:100%" href="https://www.lunebeauty.de/">Jetzt zur Website</a></div>';
+    setTimeout(()=>{ window.location.href='https://www.lunebeauty.de/'; }, 4200);
+  }
+  catch(e){$("archiveStatus").innerHTML='<span class="error">Senden nicht möglich. Bitte später erneut versuchen.</span>';}
+  finally{btn.disabled=false;btn.innerHTML=old;}
+};
+</script>
+</body>
+</html>
