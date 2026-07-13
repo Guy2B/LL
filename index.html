@@ -1588,6 +1588,82 @@
     })();
   </script>
 
+  
+<script>
+  /* Service pages → index booking engine: preselect treatment via ?service=...#booking */
+  (function(){
+    function normalize(v){
+      return String(v || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, ' ');
+    }
+
+    function serviceAlias(value){
+      var s = normalize(value);
+      var map = {
+        'hydra glow facial': 'Hydra Glow Facial (Aquafacial)',
+        'hydra glow facial (aquafacial)': 'Hydra Glow Facial (Aquafacial)',
+        'farbe entfernen': 'Farbe entfernen (Hände)'
+      };
+      return map[s] || value || '';
+    }
+
+    function preselectServiceFromUrl(){
+      var params = new URLSearchParams(window.location.search || '');
+      var service = params.get('service');
+      if(!service) return;
+
+      service = serviceAlias(decodeURIComponent(service));
+      var form = document.getElementById('booking-form');
+      if(!form) return;
+
+      var select = form.querySelector('select[name="service"]');
+      if(select && service){
+        var target = normalize(service);
+        Array.from(select.options).forEach(function(opt){
+          var optionText = normalize(opt.value || opt.textContent);
+          if(optionText === target){
+            select.value = opt.value || opt.textContent;
+          }
+        });
+      }
+
+      var selected = document.getElementById('selected-service');
+      if(selected){
+        selected.classList.remove('hidden');
+        var span = selected.querySelector('span') || selected;
+        span.textContent = 'Ausgewählte Behandlung: ' + service;
+      }
+
+      var price = document.getElementById('selected-price');
+      if(price){
+        price.classList.remove('hidden');
+        price.textContent = 'Bitte wählen Sie Ihren Wunschtermin.';
+      }
+
+      if(window.location.hash !== '#booking'){
+        history.replaceState(null, '', window.location.pathname + window.location.search + '#booking');
+      }
+
+      setTimeout(function(){
+        if(window.LuneScrollToBookingForm){
+          window.LuneScrollToBookingForm({ focus:true, source:'service-page' });
+        } else {
+          form.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      }, 350);
+    }
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', preselectServiceFromUrl);
+    } else {
+      preselectServiceFromUrl();
+    }
+  })();
+</script>
+
+
   <script src="assets/js/booking-cloud.js"></script>
 
   <script src="assets/js/particles.js"></script>
