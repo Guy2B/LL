@@ -836,49 +836,49 @@
 
   <div class="slider-shell" id="studioSlider">
     <div class="slider-track">
-      <article class="studio-slide">
-        <img src="assets/img/studio-0.webp" alt="Willkommen bei Lune Beauty Studio" loading="eager">
+      <article class="studio-slide" data-index="0">
+        <img src="assets/img/studio-0.webp" alt="Eingangsbereich und Willkommensschild des Lune Beauty Studios" loading="eager">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-2.webp" alt="Lune Beauty Studio Behandlungsliege und ruhige Atmosphäre" loading="eager">
+      <article class="studio-slide" data-index="1">
+        <img src="assets/img/studio-2.webp" alt="Lune Beauty Studio Behandlungsliege und Geräte in ruhiger Atmosphäre" loading="eager">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-3.webp" alt="Lune Beauty Studio Maniküre" loading="lazy">
+      <article class="studio-slide" data-index="2">
+        <img src="assets/img/studio-3.webp" alt="Heller Manikürtisch für professionelle Nagelpflege" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-4.webp" alt="Lune Beauty Produkte und Pflegeambiente" loading="lazy">
+      <article class="studio-slide" data-index="3">
+        <img src="assets/img/studio-4.webp" alt="Elegantes Regal mit hochwertigen Lune Beauty Pflegeprodukten" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-5.webp" alt="Gesichtsbehandlung bei Lune Beauty" loading="lazy">
+      <article class="studio-slide" data-index="4">
+        <img src="assets/img/studio-5.webp" alt="Entspannende Gesichtsbehandlung bei Lune Beauty" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-6.webp" alt="Lune Beauty Studio Fusspflege" loading="lazy">
+      <article class="studio-slide" data-index="5">
+        <img src="assets/img/studio-6.webp" alt="Professionelles Podologie- und Fußpflege-Equipment" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-9.webp" alt="Lune Beauty Studio Glow" loading="lazy">
+      <article class="studio-slide" data-index="6">
+        <img src="assets/img/studio-9.webp" alt="Feuchtigkeitsspendende Tuchmasken-Behandlung für strahlende Haut" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-12.webp" alt="Kosmetikstudio Detail und Licht" loading="lazy">
+      <article class="studio-slide" data-index="7">
+        <img src="assets/img/studio-12.webp" alt="Steriles Werkzeug und Feinmechanik für Maniküre und Pediküre" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-13.webp" alt="Behandlungsraum Lune Beauty" loading="lazy">
+      <article class="studio-slide" data-index="8">
+        <img src="assets/img/studio-13.webp" alt="Gemütlicher Wartebereich mit Sesseln und frischen Blumen" loading="lazy">
       </article>
-      <article class="studio-slide">
-        <img src="assets/img/studio-14.webp" alt="Lune Beauty Pflegeerlebnis" loading="lazy">
+      <article class="studio-slide" data-index="9">
+        <img src="assets/img/studio-14.webp" alt="Entspannende Perspektive während einer Gesichtsbehandlung" loading="lazy">
       </article>
     </div>
 
     <div class="slide-caption" aria-live="polite">
       <div>
-        <strong id="slideTitle">Ruhige Atmosphäre</strong>
-        <span id="slideText">Ein Raum für Ankommen, Loslassen und hochwertige Pflege.</span>
+        <strong id="slideTitle">Willkommen bei Lune</strong>
+        <span id="slideText">Ihr Ort für Schönheit, Pflege und wohlverdiente Auszeiten.</span>
       </div>
-      <div class="slider-counter" id="slideCounter">1/8</div>
+      <div class="slider-counter" id="slideCounter">1/10</div>
     </div>
 
     <button class="slider-btn prev" type="button" aria-label="Vorheriges Bild">‹</button>
     <button class="slider-btn next" type="button" aria-label="Nächstes Bild">›</button>
-    <div class="slider-dots" aria-label="Slider Navigation"></div>
+    <div class="slider-dots" role="tablist" aria-label="Slider Navigation"></div>
   </div>
 </section>
 
@@ -949,15 +949,36 @@
     if (!slider || !track || !slides.length || !dotsContainer || !prevBtn || !nextBtn) return;
 
     const captions = [
-      ["Ruhige Atmosphäre", "Ein Raum zum Ankommen, Loslassen und Wohlfühlen."],
-      ["Sanfte Details", "Warme Texturen, weiches Licht und ein Gefühl von Ruhe."],
-      ["Pflege im Fokus", "Hochwertige Behandlungen, abgestimmt auf Ihre Haut und Ihr Wohlbefinden."],
-      ["Gesichtsbehandlung", "Jede Behandlung wird bewusst, ruhig und individuell begleitet."],
-      ["Studio Moment", "Kleine Details schaffen ein gepflegtes, hochwertiges Ambiente."],
-      ["Licht & Ruhe", "Ein weiches Umfeld, das Entspannung und Schönheit zusammenführt."],
-      ["Persönliche Auszeit", "Ein Ort, an dem Pflege bewusst erlebt wird."],
-      ["Lune Experience", "Premium Kosmetik mit Ruhe, Nähe und Aufmerksamkeit."]
-    ];
+  // 0: studio-0.webp (Kundenstopper / Eingang)
+  ["Willkommen bei Lune", "Ihr Ort für Schönheit, Pflege und wohlverdiente Auszeiten."],
+
+  // 1: studio-2.webp (Behandlungsliege mit Apparativer Kosmetik)
+  ["Ruhige Atmosphäre", "Ein modern ausgestatteter Raum zum Ankommen, Loslassen und Wohlfühlen."],
+
+  // 2: studio-3.webp (Maniküre / Nagelpflege-Tisch)
+  ["Präzise Maniküre", "Gepflegte Hände und stilvolles Design in hellem, entspanntem Ambiente."],
+
+  // 3: studio-4.webp (Produktregal)
+  ["Exklusive Pflege", "Sorgfältig ausgewählte Premium-Produkte für Ihre optimale Hautpflege."],
+
+  // 4: studio-5.webp (Gesichtsbehandlung Profil / Vaporisator)
+  ["Sanfte Verwöhnzeit", "Individuell abgestimmte Gesichtsbehandlungen für Ihr persönliches Wohlbefinden."],
+
+  // 5: studio-6.webp (Fußpflege & Instrumente)
+  ["Professionelle Pediküre", "Hygienische, präzise Fußpflege mit modernster Technik."],
+
+  // 6: studio-9.webp (Tuchmaske & Gesichts-Glow)
+  ["Glow & Frische", "Intensive Feuchtigkeit und Regeneration für einen strahlenden Teint."],
+
+  // 7: studio-12.webp (Detailaufnahme Instrumente)
+  ["Höchste Standards", "Präzision und Sterilität bis ins kleinste Detail für Ihre Sicherheit."],
+
+  // 8: studio-13.webp (Wartebereich / Sessel & Tisch)
+  ["Entspannter Empfang", "Genießen Sie die Vorfreude auf Ihre Behandlung in gemütlicher Atmosphäre."],
+
+  // 9: studio-14.webp (Perspektive der Kundin auf der Liege)
+  ["Lune Experience", "Persönliche Betreuung, absolute Ruhe und volle Aufmerksamkeit für Sie."]
+];
 
     let current = 0;
     let timer = null;
