@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<style>
+  /* MOBILE FIX: reduce photo size only on this page */
+  @media (max-width: 768px) {
+    .owner-photo img {
+      width: 80%;
+      max-width: 260px;
+      margin: 0 auto;
+      display: block;
+      border-radius: 12px;
+    }
+
+    .owner-card {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .owner-content {
+      text-align: left;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    /* Center signature on mobile */
+    .signature-block {
+      text-align: center;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .signature-img {
+      display: block;
+      margin: 0 auto;
+      max-width: 120px;
+    }
+  }
+
+  /* Center photo vertically ONLY on this page */
+  .owner-card {
+    display: flex;
+    align-items: center;
+  }
+
+  .owner-photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Center signature ONLY on this page */
+  .owner-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* THIS is the missing piece */
+  }
+
+  .signature-block {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .signature-img {
+    display: block;
+    margin: 0 auto;
+    max-width: 140px; /* optional, looks premium */
+    opacity: 0.9;     /* optional, looks elegant */
+  }
+</style>
+
+<head>
+  <!-- Google tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M53TVG84SK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-M53TVG84SK');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Inhaberin – Lune Beauty Worms</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Staatlich anerkannte Kosmetikerin, Make-up-Artist und Hair-Stylistin in Worms. Professionelle Hautpflege, Gesichtsbehandlungen, Anti-Aging, Aquafacial und Beauty-Expertise.">
+  <meta name="keywords" content="Kosmetikerin Worms, Beauty Studio Worms, Gesichtsbehandlung Worms, Aquafacial Worms, Anti-Aging Worms, Hautpflege Worms, Make-up Artist Worms, Kosmetikstudio Worms">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/lune-premium.css">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- HEADER (identique aux autres pages) -->
+  <header class="top-nav">
+    <div class="nav-inner">
+      <a href="index.html">
+        <img src="assets/img/logo.png" class="brand-logo" alt="Lune Beauty Logo">
+      </a>
+
+      <ul class="nav-links">
+      <li><a href="index.html#hero">Home</a></li>
+      <li><a href="index.html#services">Behandlungen</a></li>
+      <li><a href="index.html#pricing">Preise</a></li>
+      <li><a href="index.html#booking">Termin anfragen</a></li>
+      <li><a href="index.html#contact">Kontakt</a></li>
+      <li><a href="skin-ai.html">Skin Check</a></li>
+      <li><a href="studio.html" class="active" aria-current="page">Studio</a></li>
+      <li><a href="inhaberin.html" class="active" aria-current="page">Inhaberin</a></li>
+    </ul>
+
+      <button class="nav-toggle">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="nav-divider"></div>
+
+  <!-- SECTION 1 : INHABERIN -->
+  <section class="section reveal-up">
+    <div class="section-inner owner-wrapper">
+
+      <h1 class="section-title"></h1>
+
+      <div class="owner-card">
+        <div class="owner-photo">
+          <img src="assets/img/pic1.JPG" alt="Inhaberin Lune Beauty">
+        </div>
+
+        <div class="owner-content">
+          <span class="owner-eyebrow">Lune Beauty Studio</span>
+          <h3 class="owner-name">Ihre Gastgeberin</h3>
+
+          <p class="owner-text">
+            Ich bin staatlich anerkannte <strong>Kosmetikerin</strong>, <strong>Make-up-Artist</strong>
+            und <strong>Hair-Stylist</strong>. In den vergangenen Jahren durfte ich in
+            verschiedenen renommierten Kosmetikstudios in Deutschland und Frankreich
+            wertvolle Erfahrungen sammeln.
+          </p>
+
+          <p class="owner-text">
+            Diese internationale Praxis hat meine Arbeitsweise geprägt: eine Verbindung
+            aus präziser Fachkompetenz, ästhetischem Feingefühl und einem tiefen Verständnis
+            für die Bedürfnisse unterschiedlicher Hauttypen. Jede Behandlung soll nicht nur
+            die Haut verschönern, sondern auch Ruhe, Wohlbefinden und ein Gefühl von
+            Ankommen schenken.
+          </p>
+
+          <p class="owner-text">
+            Heute setze ich meine gesamte Expertise in <strong>Worms</strong> ein, mit dem
+            Ziel, einen Ort zu schaffen, an dem Qualität, Achtsamkeit und echte Hingabe
+            spürbar werden. Lune Beauty ist mein persönliches Herzensprojekt, ein Studio,
+            das ich mit viel Liebe und Sorgfalt aufgebaut habe.
+          </p>
+
+          <p class="owner-text">
+            Ich freue mich darauf, Sie persönlich kennenzulernen und Ihnen ein
+            Behandlungserlebnis zu bieten, das lange nachklingt.
+          </p>
+
+          <div class="signature-block reveal-up">
+            <img src="assets/img/logo.png" alt="Unterschrift" class="signature-img">
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2 : WARUM LUNE BEAUTY (BOX IDENTIQUE) -->
+  <section class="section reveal-up">
+  <div class="section-inner owner-wrapper">
+
+    <h2 class="section-title"></h2>
+
+    <div class="owner-card">
+
+      <!-- PHOTO UNIQUE -->
+      <div class="owner-photo">
+        <img src="assets/img/pic2.JPG" alt="Lune Beauty Studio">
+      </div>
+
+      <!-- TEXTE DES DEUX SECTIONS -->
+      <div class="owner-content">
+
+        <!-- PARAGRAPHE 1 : -->
+        <h3 class="owner-name" style="margin-top:2rem;">Warum Lune Beauty</h3>
+        <p class="owner-text">
+          Lune Beauty steht für eine Hautpflege, die über reine Behandlung hinausgeht. 
+          Jede Anwendung verbindet moderne, wirkungsvolle Methoden mit einer Atmosphäre, 
+          die Ruhe, Wärme und echtes Wohlbefinden schenkt. Als staatlich anerkannte Kosmetikerin mit internationaler Erfahrung 
+          vereine ich präzise Fachkompetenz mit einem tiefen Verständnis für die Bedürfnisse unterschiedlicher Hauttypen, 
+          für Ergebnisse, die sichtbar sind und sich spürbar gut anfühlen.
+        </p>
+
+        <p class="owner-text">
+          Mein Studio in Worms bietet Gesichtsbehandlungen, Anti-Aging,
+          Aquafacial, Maniküre, Pediküre und individuelle Beauty-Konzepte,
+          immer mit dem Ziel, natürliche Schönheit zu betonen und die Haut
+          langfristig zu stärken.
+        </p>
+
+        <p class="owner-text">
+          Lune Beauty ist die richtige Wahl für alle, die Wert auf Qualität,
+          Achtsamkeit und echte Fachkompetenz legen.
+        </p>
+
+        <!-- PARAGRAPHE 2 : KOSMETIKERIN IN WORMS -->
+        <h3 class="owner-name" style="margin-top:2rem;">Kosmetikerin in Worms</h3>
+
+        <p class="owner-text">
+          Lune Beauty befindet sich im Herzen von Worms und bietet moderne Kosmetikbehandlungen für Kundinnen aus Worms, 
+          Pfeddersheim, Hochheim, Abenheim, Herrnsheim und dem gesamten Rhein-Neckar-Raum; einschließlich Lampertheim (mit Hofheim und Rosengarten) sowie Frankenthal.
+        </p>
+
+        <p class="owner-text">
+          Ich arbeite mit hochwertigen Produkten und lege großen Wert auf eine Beratung, die individuell auf Ihre Haut und Ihre Wünsche abgestimmt ist.
+        </p>
+
+        <p class="owner-text">
+          Lune Beauty ist die ideale Adresse für Gesichtsbehandlungen,
+          Anti-Aging, Aquafacial, Maniküre und Fußpflege in Worms;  ein Ort, an dem Schönheit, Entspannung und Qualität zusammenfinden.
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+  <p>© 2026 Lune Beauty · Kosmetikstudio in Worms</p>
+
+  <p style="margin-top:12px; opacity:0.75;">
+    <a href="impressum.html">Impressum</a> ·
+    <a href="agb.html">AGB</a> ·
+    <a href="datenschutz.html">Datenschutz</a>
+  </p>
+
+  <p style="margin-top:12px; opacity:0.75;">
+    <a href="studio.html">Kosmetikstudio Worms</a>
+    <span>·</span>
+    <a href="gesichtsbehandlung-worms.html">Gesichtsbehandlung Worms</a>
+    <span>·</span>
+    <a href="manikuere-pedikuere-worms.html">Maniküre &amp; Fußpflege Worms</a>
+    <span>·</span>
+    <a href="augenpflege-worms.html">Augenpflege Worms</a>
+  </p>
+</footer>
+
+
+  <!-- STICKY BUTTON -->
+  <a href="index.html#booking" id="sticky-book-inhaberin" class="sticky-book-btn">
+    Termin buchen
+  </a>
+
+  <script src="assets/js/ui.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
