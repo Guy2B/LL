@@ -384,7 +384,7 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
       <div class="row"><select id="bService"></select><select id="bStatus"><option>angefragt</option><option>bestätigt</option><option>angekommen</option><option>beendet</option><option>storniert</option></select></div>
       <div class="row"><input id="bDate" type="date"><input id="bTime" type="time" value="10:00"></div>
       <textarea id="bNotes" placeholder="Notiz / Storno-Grund"></textarea>
-      <div class="bookingActions"><button class="gold" id="bookingSaveBtn" onclick="saveBooking()">Termin speichern</button><button class="secondary" onclick="newBookingForm()">Neuer Termin</button><button class="bad" onclick="cancelBookingFromForm()">Termin stornieren</button></div>
+      <div class="bookingActions"><button class="gold" id="bookingSaveBtn" onclick="saveBooking()">Termin speichern</button><button class="secondary" onclick="newBookingForm()">Neuer Termin</button><button class="bad" onclick="cancelBookingFromForm()">Termin stornieren</button><button class="bad" onclick="deleteTestBookingFromForm()">Testtermin endgültig löschen</button></div>
       <p class="small">Storno innerhalb von 24 Stunden wird automatisch als kostenpflichtig markiert.</p>
     </div>
     <div class="card" id="bookingDetail"><h2>Rendez-vous</h2><p class="small">Termin anklicken, um Details, Kunde oder Rechnung zu öffnen.</p></div>
@@ -839,6 +839,106 @@ function cancelBooking(id){
   b.status="storniert";b.cancelledAt=new Date().toISOString();b.cancellationReason=reason||"Storniert";b.cancellationFee=fee;b.notes=b.notes?b.notes+"\nStorno: "+b.cancellationReason:"Storno: "+b.cancellationReason;
   persist(); openBooking(id);
 }
+
+async function deleteTestBookingFromForm(){
+  const id=$("bookingEditId")?.value||"";
+  if(!id){
+    alert("Bitte zuerst den Testtermin in der Agenda öffnen.");
+    return;
+  }
+  await deleteTestBooking(id);
+}
+
+async function deleteTestBooking(id){
+  const booking=db.bookings.find(b=>String(b.id)===String(id));
+  if(!booking){
+    alert("Termin nicht gefunden.");
+    return;
+  }
+
+  const linkedInvoices=(db.invoices||[]).filter(i=>String(i.bookingId||"")===String(id));
+  if(linkedInvoices.length){
+    alert("Dieser Termin ist mit einer Rechnung verbunden und kann nicht als Testtermin gelöscht werden.");
+    return;
+  }
+
+  const customer=(db.customers||[]).find(c=>String(c.id||"")===String(booking.customerId||""));
+  const customerName=(customer&&customer.name)||booking.name||"Unbekannt";
+  const customerId=customer?String(customer.id||""):"";
+  const customerEmail=String((customer&&customer.email)||booking.email||"").trim().toLowerCase();
+  const customerPhone=String((customer&&customer.phone)||booking.phone||"").replace(/\s+/g,"").trim();
+
+  const confirmed=confirm(
+    'ACHTUNG: Testtermin von "'+customerName+'" endgültig löschen?\n\n'+
+    "Nur dieser Termin wird gelöscht. Die Test-Kundenakte wird nur entfernt, wenn sie mit keinen anderen Terminen, Rechnungen oder Skin Checks verbunden ist.\n\n"+
+    "Diese Aktion kann nicht rückgängig gemacht werden."
+  );
+  if(!confirmed)return;
+
+  // Sicherheitskopie vor der Löschung.
+  try{
+    localStorage.setItem(
+      KEY+"_before_delete_test_"+new Date().toISOString().replace(/[:.]/g,"-"),
+      JSON.stringify(db)
+    );
+  }catch(e){}
+
+  // Nur den ausgewählten Termin löschen.
+  db.bookings=(db.bookings||[]).filter(b=>String(b.id)!==String(id));
+
+  let customerDeleted=false;
+
+  if(customer){
+    const sameCustomer=function(item){
+      if(!item)return false;
+      if(customerId&&String(item.customerId||"")===customerId)return true;
+
+      const itemEmail=String(item.email||"").trim().toLowerCase();
+      if(customerEmail&&itemEmail&&itemEmail===customerEmail)return true;
+
+      const itemPhone=String(item.phone||"").replace(/\s+/g,"").trim();
+      return !!(customerPhone&&itemPhone&&itemPhone===customerPhone);
+    };
+
+    const hasOtherBookings=(db.bookings||[]).some(sameCustomer);
+    const hasInvoices=(db.invoices||[]).some(sameCustomer);
+    const hasSkinChecks=(db.skinAnalyses||[]).some(sameCustomer);
+
+    if(!hasOtherBookings&&!hasInvoices&&!hasSkinChecks){
+      db.customers=(db.customers||[]).filter(c=>String(c.id)!==customerId);
+      customerDeleted=true;
+    }
+  }
+
+  // Sauvegarde locale et actualisation immédiate de l'interface.
+  persist();
+  newBookingForm();
+  renderAll();
+
+  // Envoyer l'état nettoyé vers le Cloud pour éviter que le test revienne.
+  let cloudMessage="Cloud non connecté : suppression enregistrée seulement sur cet appareil.";
+  try{
+    if(
+      window.LuneStaffCloudSync&&
+      typeof window.LuneStaffCloudSync.isReady==="function"&&
+      window.LuneStaffCloudSync.isReady()&&
+      typeof window.LuneStaffCloudSync.push==="function"
+    ){
+      await window.LuneStaffCloudSync.push();
+      cloudMessage="Cloud synchronisé.";
+    }
+  }catch(error){
+    cloudMessage="La suppression locale est faite, mais la synchronisation Cloud a échoué. Cliquez ensuite sur la synchronisation Cloud.";
+    console.error("Suppression test : erreur Cloud",error);
+  }
+
+  alert(
+    "Testtermin wurde endgültig gelöscht.\n"+
+    (customerDeleted?"Die unbenutzte Test-Kundenakte wurde ebenfalls gelöscht.\n":"Die Kundenakte wurde behalten, weil sie noch mit anderen Daten verbunden ist.\n")+
+    cloudMessage
+  );
+}
+
 function cancelBookingFromForm(){let id=$("bookingEditId").value;if(!id)return alert("Bitte zuerst einen Termin öffnen oder bearbeiten.");cancelBooking(id);}
 function setBookingStatus(id,status){let b=db.bookings.find(x=>x.id===id);if(!b)return;b.status=status;persist();openBooking(id);}
 function invoicesForBooking(id){return db.invoices.filter(i=>i.bookingId===id);}
