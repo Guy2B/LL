@@ -1,7 +1,23 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <!-- Google tag (gtag.js) -->
+
+<script id="lune-darkmode-v10-boot">
+  (function(){
+    try{
+      var saved = localStorage.getItem('lune-beauty-theme');
+      document.documentElement.setAttribute(
+        'data-theme',
+        saved === 'dark' ? 'dark' : 'light'
+      );
+    }catch(error){
+      document.documentElement.setAttribute('data-theme','light');
+    }
+  })();
+</script>
+
+
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-M53TVG84SK"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -382,9 +398,613 @@
   }
 </style>
 
+
+
+
+
+
+
+
+<style id="lune-instagram-v8-css">
+  /* ==============================================
+     LUNE BEAUTY — CLEAN VIDEO CARDS V8
+     No Instagram iframe, no black bars, no cropping
+  ============================================== */
+  .instagram-v8{
+    position:relative;
+    overflow:hidden;
+    padding:clamp(72px,8vw,118px) 0;
+    background:
+      radial-gradient(circle at 12% 8%,rgba(206,174,103,.13),transparent 26%),
+      radial-gradient(circle at 90% 90%,rgba(166,126,70,.10),transparent 24%),
+      linear-gradient(180deg,#fbf7f0 0%,#f3eadc 100%);
+  }
+
+  .instagram-v8-inner{
+    width:min(1180px,calc(100% - 34px));
+    margin:0 auto;
+  }
+
+  .instagram-v8-head{
+    max-width:790px;
+    margin:0 auto 42px;
+    text-align:center;
+  }
+
+  .instagram-v8-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:13px;
+    color:#a67a36;
+    font-size:.7rem;
+    font-weight:800;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+  }
+
+  .instagram-v8-kicker::before,
+  .instagram-v8-kicker::after{
+    content:"";
+    width:44px;
+    height:1px;
+    background:linear-gradient(90deg,transparent,#caa966);
+  }
+
+  .instagram-v8-kicker::after{
+    background:linear-gradient(90deg,#caa966,transparent);
+  }
+
+  .instagram-v8 h2{
+    margin:0 0 13px;
+    color:#2e271f;
+    font-family:'Playfair Display',serif;
+    font-size:clamp(2.35rem,4.7vw,4.45rem);
+    line-height:1;
+    letter-spacing:-.045em;
+  }
+
+  .instagram-v8-head p{
+    max-width:660px;
+    margin:0 auto;
+    color:#756959;
+    font-size:.98rem;
+    line-height:1.7;
+  }
+
+  .instagram-v8-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:22px;
+    align-items:start;
+  }
+
+  .instagram-v8-card{
+    overflow:hidden;
+    border:1px solid rgba(190,153,83,.32);
+    border-radius:28px;
+    background:#fffdf9;
+    box-shadow:0 28px 70px rgba(67,49,30,.14);
+    transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;
+  }
+
+  .instagram-v8-card:nth-child(2){
+    transform:translateY(-14px);
+  }
+
+  .instagram-v8-card:hover{
+    transform:translateY(-7px);
+    border-color:rgba(190,153,83,.62);
+    box-shadow:0 36px 90px rgba(67,49,30,.19);
+  }
+
+  .instagram-v8-card:nth-child(2):hover{
+    transform:translateY(-21px);
+  }
+
+  .instagram-v8-card-top{
+    min-height:92px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:20px;
+    border-bottom:1px solid rgba(190,153,83,.18);
+    background:linear-gradient(135deg,#fff,#f7efe2);
+  }
+
+  .instagram-v8-title-wrap{
+    min-width:0;
+  }
+
+  .instagram-v8-index{
+    display:block;
+    margin-bottom:5px;
+    color:#b78b45;
+    font-size:.66rem;
+    font-weight:850;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+
+  .instagram-v8-card h3{
+    margin:0;
+    color:#332b22;
+    font-family:'Playfair Display',serif;
+    font-size:1.25rem;
+    line-height:1.15;
+    overflow-wrap:normal;
+    word-break:normal;
+    hyphens:none;
+  }
+
+  .instagram-v8-reel-link{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:#9d7132;
+    text-decoration:none;
+    font-size:.7rem;
+    font-weight:850;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+
+  .instagram-v8-reel-link::before{
+    content:"▶";
+    display:grid;
+    place-items:center;
+    width:27px;
+    height:27px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#493b2a,#8b6633);
+    color:#fff7e7;
+    font-size:8px;
+  }
+
+  .instagram-v8-media{
+    position:relative;
+    aspect-ratio:9/14;
+    overflow:hidden;
+    background:#e9dfd2;
+  }
+
+  .instagram-v8-media video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    object-position:center;
+    background:#e9dfd2;
+  }
+
+  .instagram-v8-media::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(180deg,transparent 65%,rgba(24,18,13,.18));
+  }
+
+  .instagram-v8-card-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    min-height:62px;
+    padding:14px 17px;
+    border-top:1px solid rgba(190,153,83,.16);
+    background:#fffdf9;
+  }
+
+  .instagram-v8-handle{
+    color:#564a3c;
+    font-size:.78rem;
+    font-weight:800;
+    white-space:nowrap;
+  }
+
+  .instagram-v8-social-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .instagram-v8-social{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:#9d7132;
+    text-decoration:none;
+    font-size:.76rem;
+    font-weight:850;
+    white-space:nowrap;
+  }
+
+  .instagram-v8-actions{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:38px;
+  }
+
+  .instagram-v8-btn{
+    min-height:50px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:13px 24px;
+    border-radius:999px;
+    text-decoration:none;
+    font-size:.84rem;
+    font-weight:850;
+  }
+
+  .instagram-v8-btn.primary{
+    color:#fff9ed;
+    background:linear-gradient(135deg,#352b21,#75552b);
+    box-shadow:0 15px 36px rgba(67,49,30,.18);
+  }
+
+  .instagram-v8-btn.secondary{
+    color:#332b22;
+    border:1px solid rgba(190,153,83,.34);
+    background:rgba(255,255,255,.82);
+  }
+
+  @media(max-width:980px){
+    .instagram-v8-grid{
+      grid-template-columns:1fr;
+      max-width:600px;
+      margin:0 auto;
+    }
+
+    .instagram-v8-card,
+    .instagram-v8-card:nth-child(2){
+      transform:none;
+    }
+
+    .instagram-v8-card:hover,
+    .instagram-v8-card:nth-child(2):hover{
+      transform:translateY(-5px);
+    }
+
+    .instagram-v8-media{
+      aspect-ratio:9/13;
+    }
+  }
+
+  @media(max-width:620px){
+    .instagram-v8{
+      padding:58px 0;
+    }
+
+    .instagram-v8-inner{
+      width:min(100% - 16px,600px);
+    }
+
+    .instagram-v8-card{
+      border-radius:23px;
+    }
+
+    .instagram-v8-card-top{
+      min-height:82px;
+      padding:16px 15px;
+    }
+
+    .instagram-v8-card h3{
+      font-size:1.08rem;
+    }
+
+    .instagram-v8-reel-link{
+      font-size:.62rem;
+    }
+
+    .instagram-v8-media{
+      aspect-ratio:9/14;
+    }
+
+    .instagram-v8-card-foot{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+
+    .instagram-v8-actions{
+      flex-direction:column;
+    }
+
+    .instagram-v8-btn{
+      width:100%;
+    }
+  }
+</style>
+
+
+
+<style id="lune-darkmode-v10-css">
+  /* ===================================================
+     LUNE BEAUTY — SAFE PREMIUM DARK MODE V10
+     Scoped styling: no global color destruction
+  =================================================== */
+  :root{
+    --lb-bg:#fbf8f3;
+    --lb-bg-soft:#f5ecdf;
+    --lb-surface:#ffffff;
+    --lb-surface-2:#fffaf3;
+    --lb-text:#2d261f;
+    --lb-muted:#766a5a;
+    --lb-gold:#b38743;
+    --lb-gold-soft:#dec184;
+    --lb-border:rgba(166,122,54,.24);
+    --lb-shadow:0 24px 70px rgba(67,49,30,.13);
+  }
+
+  html[data-theme="dark"]{
+    color-scheme:dark;
+    --lb-bg:#12100e;
+    --lb-bg-soft:#1a1511;
+    --lb-surface:#201a15;
+    --lb-surface-2:#281f18;
+    --lb-text:#fff8ee;
+    --lb-muted:#d0c2af;
+    --lb-gold:#d9b467;
+    --lb-gold-soft:#f0d59b;
+    --lb-border:rgba(217,180,103,.26);
+    --lb-shadow:0 26px 80px rgba(0,0,0,.42);
+  }
+
+  body{
+    background:var(--lb-bg);
+    color:var(--lb-text);
+    transition:background-color .3s ease,color .3s ease;
+  }
+
+  /* Header only */
+  html[data-theme="dark"] header,
+  html[data-theme="dark"] .site-header,
+  html[data-theme="dark"] .navbar{
+    background:rgba(18,16,14,.94)!important;
+    border-color:var(--lb-border)!important;
+    box-shadow:0 8px 28px rgba(0,0,0,.22);
+  }
+
+  html[data-theme="dark"] header a,
+  html[data-theme="dark"] .site-header a,
+  html[data-theme="dark"] .navbar a{
+    color:#fff8ee!important;
+  }
+
+  /* General section background, without forcing every child color */
+  html[data-theme="dark"] main,
+  html[data-theme="dark"] section{
+    background-color:var(--lb-bg);
+  }
+
+  /* Titles */
+  html[data-theme="dark"] section > h2,
+  html[data-theme="dark"] section > .section-title,
+  html[data-theme="dark"] .section-head h2,
+  html[data-theme="dark"] .booking-section h2,
+  html[data-theme="dark"] .testimonials-section h2{
+    color:var(--lb-text)!important;
+  }
+
+  /* Paragraphs that are directly on dark surfaces */
+  html[data-theme="dark"] .section-subtitle,
+  html[data-theme="dark"] .section-lead,
+  html[data-theme="dark"] .section-description{
+    color:var(--lb-muted)!important;
+  }
+
+  /* Cards */
+  html[data-theme="dark"] .service-card,
+  html[data-theme="dark"] .price-card,
+  html[data-theme="dark"] .testimonial-card,
+  html[data-theme="dark"] .booking-card,
+  html[data-theme="dark"] .contact-card,
+  html[data-theme="dark"] .studio-card{
+    background:var(--lb-surface)!important;
+    color:var(--lb-text)!important;
+    border-color:var(--lb-border)!important;
+    box-shadow:var(--lb-shadow)!important;
+  }
+
+  /* Accordion fixes: this was the main visibility problem */
+  html[data-theme="dark"] details{
+    background:var(--lb-surface)!important;
+    border-color:var(--lb-border)!important;
+    color:var(--lb-text)!important;
+    box-shadow:0 14px 36px rgba(0,0,0,.20);
+  }
+
+  html[data-theme="dark"] details summary{
+    background:var(--lb-surface)!important;
+    color:var(--lb-text)!important;
+  }
+
+  html[data-theme="dark"] details[open] summary{
+    background:var(--lb-surface-2)!important;
+    border-bottom-color:var(--lb-border)!important;
+  }
+
+  html[data-theme="dark"] details p,
+  html[data-theme="dark"] details li,
+  html[data-theme="dark"] details span{
+    color:var(--lb-muted)!important;
+  }
+
+  /* Form fields */
+  html[data-theme="dark"] input,
+  html[data-theme="dark"] textarea,
+  html[data-theme="dark"] select{
+    background:#17130f!important;
+    color:#fff8ee!important;
+    border-color:var(--lb-border)!important;
+  }
+
+  html[data-theme="dark"] input::placeholder,
+  html[data-theme="dark"] textarea::placeholder{
+    color:#9f927f!important;
+  }
+
+  /* Keep light buttons readable in dark mode */
+  html[data-theme="dark"] .btn-light,
+  html[data-theme="dark"] .button-light,
+  html[data-theme="dark"] .price-button,
+  html[data-theme="dark"] .booking-button.secondary{
+    background:#fffaf2!important;
+    color:#2d261f!important;
+    border-color:#ead8b5!important;
+  }
+
+  /* WhatsApp floating card */
+  html[data-theme="dark"] .whatsapp-card,
+  html[data-theme="dark"] .contact-float,
+  html[data-theme="dark"] .floating-contact{
+    background:#211a15!important;
+    color:#fff8ee!important;
+    border-color:var(--lb-border)!important;
+  }
+
+  html[data-theme="dark"] .whatsapp-card p,
+  html[data-theme="dark"] .contact-float p,
+  html[data-theme="dark"] .floating-contact p{
+    color:#c9baa7!important;
+  }
+
+  /* Theme toggle */
+  .lune-theme-toggle{
+    position:fixed;
+    top:18px;
+    right:18px;
+    z-index:9999;
+    width:46px;
+    height:46px;
+    display:grid;
+    place-items:center;
+    border:1px solid var(--lb-border);
+    border-radius:50%;
+    background:rgba(255,255,255,.88);
+    color:#2d261f;
+    box-shadow:0 10px 30px rgba(46,39,31,.14);
+    cursor:pointer;
+    backdrop-filter:blur(12px);
+    transition:transform .2s ease,background .25s ease,color .25s ease;
+  }
+
+  html[data-theme="dark"] .lune-theme-toggle{
+    background:rgba(32,26,21,.92);
+    color:var(--lb-gold-soft);
+    box-shadow:0 12px 34px rgba(0,0,0,.38);
+  }
+
+  .lune-theme-toggle:hover{
+    transform:translateY(-2px);
+  }
+
+  .lune-theme-toggle svg{
+    width:21px;
+    height:21px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  .lune-theme-toggle .icon-sun{display:none;}
+  html[data-theme="dark"] .lune-theme-toggle .icon-moon{display:none;}
+  html[data-theme="dark"] .lune-theme-toggle .icon-sun{display:block;}
+
+  /* Instagram premium section */
+  .instagram-v8{
+    background:
+      radial-gradient(circle at 12% 8%,rgba(206,174,103,.13),transparent 26%),
+      radial-gradient(circle at 90% 90%,rgba(166,126,70,.10),transparent 24%),
+      linear-gradient(180deg,#fbf7f0 0%,#f3eadc 100%);
+  }
+
+  html[data-theme="dark"] .instagram-v8{
+    background:
+      radial-gradient(circle at 15% 10%,rgba(217,180,103,.11),transparent 25%),
+      radial-gradient(circle at 88% 88%,rgba(217,180,103,.07),transparent 25%),
+      linear-gradient(145deg,#17130f 0%,#211913 50%,#100d0b 100%);
+  }
+
+  html[data-theme="dark"] .instagram-v8 h2,
+  html[data-theme="dark"] .instagram-v8-card h3,
+  html[data-theme="dark"] .instagram-v8-handle{
+    color:#fff8ee!important;
+  }
+
+  html[data-theme="dark"] .instagram-v8-head p{
+    color:#cdbfab!important;
+  }
+
+  html[data-theme="dark"] .instagram-v8-card{
+    background:var(--lb-surface)!important;
+    border-color:var(--lb-border)!important;
+    box-shadow:var(--lb-shadow)!important;
+  }
+
+  html[data-theme="dark"] .instagram-v8-card-top{
+    background:linear-gradient(135deg,#241c16,#17130f)!important;
+    border-color:var(--lb-border)!important;
+  }
+
+  html[data-theme="dark"] .instagram-v8-card-foot{
+    background:#17130f!important;
+    border-color:var(--lb-border)!important;
+  }
+
+  html[data-theme="dark"] .instagram-v8-reel-link,
+  html[data-theme="dark"] .instagram-v8-social{
+    color:var(--lb-gold-soft)!important;
+  }
+
+  html[data-theme="dark"] .instagram-v8-btn.secondary{
+    background:rgba(255,255,255,.05)!important;
+    color:#fff8ee!important;
+    border-color:var(--lb-border)!important;
+  }
+
+  @media(max-width:900px){
+    .lune-theme-toggle{
+      top:12px;
+      right:12px;
+      width:42px;
+      height:42px;
+    }
+  }
+</style>
+
 </head>
 
 <body>
+
+<button
+  type="button"
+  class="lune-theme-toggle"
+  id="luneThemeToggle"
+  aria-label="Dunkelmodus aktivieren"
+  aria-pressed="false"
+  title="Hell-/Dunkelmodus"
+>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+  </svg>
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path>
+  </svg>
+</button>
+
+
 <div id="whatsapp-box" aria-label="Persönlicher Kontakt">
 
   <div class="wa-header">
@@ -1232,6 +1852,143 @@
 
   </div>
 </section>
+
+
+
+
+
+
+<!-- ===============================
+     INSTAGRAM CLEAN VIDEO BLOCKS V8
+=============================== -->
+<section id="instagram" class="section instagram-v8 reveal-up">
+  <div class="instagram-v8-inner">
+
+    <div class="instagram-v8-head">
+      <span class="instagram-v8-kicker">Lune Beauty auf Instagram</span>
+      <h2>Beauty Moments</h2>
+      <p>
+        Drei ausgewählte Einblicke in unsere Behandlungen,
+        unser Studio und die Atmosphäre von Lune Beauty.
+      </p>
+    </div>
+
+    <div class="instagram-v8-grid">
+
+      <article class="instagram-v8-card">
+        <div class="instagram-v8-card-top">
+          <div class="instagram-v8-title-wrap">
+            <span class="instagram-v8-index">Reel 01</span>
+            <h3>Lune Beauty Moment</h3>
+          </div>
+          <a class="instagram-v8-reel-link"
+             href="https://www.instagram.com/reel/DbS9b2To20K/?igsh=YjlqNGVoNG5id212"
+             target="_blank" rel="noopener noreferrer">
+            Reel ansehen
+          </a>
+        </div>
+
+        <div class="instagram-v8-media">
+          <video muted loop playsinline preload="metadata">
+            <source src="assets/video/reel-01.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <div class="instagram-v8-card-foot">
+          <span class="instagram-v8-handle">@lunebeauty2</span>
+          <div class="instagram-v8-social-actions">
+            <a class="instagram-v8-social"
+               href="https://www.instagram.com/reel/DbS9b2To20K/?igsh=YjlqNGVoNG5id212"
+               target="_blank" rel="noopener noreferrer">♡ Liken</a>
+            <a class="instagram-v8-social"
+               href="https://www.instagram.com/reel/DbS9b2To20K/?igsh=YjlqNGVoNG5id212"
+               target="_blank" rel="noopener noreferrer">💬 Kommentieren</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="instagram-v8-card">
+        <div class="instagram-v8-card-top">
+          <div class="instagram-v8-title-wrap">
+            <span class="instagram-v8-index">Reel 02</span>
+            <h3>Signature Experience</h3>
+          </div>
+          <a class="instagram-v8-reel-link"
+             href="https://www.instagram.com/reel/DZ4pV5rIyKl/?igsh=MTUxNWQxZmI1Zm1pcg=="
+             target="_blank" rel="noopener noreferrer">
+            Reel ansehen
+          </a>
+        </div>
+
+        <div class="instagram-v8-media">
+          <video muted loop playsinline preload="metadata">
+            <source src="assets/video/reel-02.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <div class="instagram-v8-card-foot">
+          <span class="instagram-v8-handle">@lunebeauty2</span>
+          <div class="instagram-v8-social-actions">
+            <a class="instagram-v8-social"
+               href="https://www.instagram.com/reel/DZ4pV5rIyKl/?igsh=MTUxNWQxZmI1Zm1pcg=="
+               target="_blank" rel="noopener noreferrer">♡ Liken</a>
+            <a class="instagram-v8-social"
+               href="https://www.instagram.com/reel/DZ4pV5rIyKl/?igsh=MTUxNWQxZmI1Zm1pcg=="
+               target="_blank" rel="noopener noreferrer">💬 Kommentieren</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="instagram-v8-card">
+        <div class="instagram-v8-card-top">
+          <div class="instagram-v8-title-wrap">
+            <span class="instagram-v8-index">Reel 03</span>
+            <h3>Beauty &amp; Atmosphäre</h3>
+          </div>
+          <a class="instagram-v8-reel-link"
+             href="https://www.instagram.com/reel/DaNcjb0IkgN/?igsh=MTcxcmxzZ3FwM2JkNw=="
+             target="_blank" rel="noopener noreferrer">
+            Reel ansehen
+          </a>
+        </div>
+
+        <div class="instagram-v8-media">
+          <video muted loop playsinline preload="metadata">
+            <source src="assets/video/reel-03.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <div class="instagram-v8-card-foot">
+          <span class="instagram-v8-handle">@lunebeauty2</span>
+          <div class="instagram-v8-social-actions">
+            <a class="instagram-v8-social"
+               href="https://www.instagram.com/reel/DaNcjb0IkgN/?igsh=MTcxcmxzZ3FwM2JkNw=="
+               target="_blank" rel="noopener noreferrer">♡ Liken</a>
+            <a class="instagram-v8-social"
+               href="https://www.instagram.com/reel/DaNcjb0IkgN/?igsh=MTcxcmxzZ3FwM2JkNw=="
+               target="_blank" rel="noopener noreferrer">💬 Kommentieren</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="instagram-v8-actions">
+      <a class="instagram-v8-btn primary"
+         href="https://www.instagram.com/lunebeauty2/"
+         target="_blank" rel="noopener noreferrer">
+        Instagram öffnen · @lunebeauty2
+      </a>
+
+      <a class="instagram-v8-btn secondary" href="#booking">
+        Termin anfragen
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
 <!-- ===============================
         Booking Card
 =============================== -->
@@ -1690,5 +2447,90 @@
 <a href="#booking" id="sticky-book" class="sticky-book hidden">
   Termin anfragen
 </a>
+
+<script id="lune-instagram-v8-video-control">
+  (function(){
+    function initLuneReels(){
+      var videos = document.querySelectorAll('.instagram-v8-media video');
+      if(!videos.length) return;
+
+      if(!('IntersectionObserver' in window)){
+        videos.forEach(function(video){
+          video.play().catch(function(){});
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            entry.target.play().catch(function(){});
+          }else{
+            entry.target.pause();
+          }
+        });
+      }, {threshold:.35});
+
+      videos.forEach(function(video){
+        observer.observe(video);
+      });
+    }
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded',initLuneReels);
+    }else{
+      initLuneReels();
+    }
+  })();
+</script>
+
+
+
+<script id="lune-darkmode-v10-script">
+  (function(){
+    var root = document.documentElement;
+    var key = 'lune-beauty-theme';
+
+    function apply(theme){
+      root.setAttribute('data-theme',theme);
+
+      var button = document.getElementById('luneThemeToggle');
+      if(button){
+        var isDark = theme === 'dark';
+        button.setAttribute('aria-pressed',isDark ? 'true' : 'false');
+        button.setAttribute(
+          'aria-label',
+          isDark ? 'Hellmodus aktivieren' : 'Dunkelmodus aktivieren'
+        );
+      }
+    }
+
+    function init(){
+      var button = document.getElementById('luneThemeToggle');
+      if(!button) return;
+
+      apply(root.getAttribute('data-theme') || 'light');
+
+      button.addEventListener('click',function(){
+        var next = root.getAttribute('data-theme') === 'dark'
+          ? 'light'
+          : 'dark';
+
+        apply(next);
+
+        try{
+          localStorage.setItem(key,next);
+        }catch(error){}
+      });
+    }
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded',init);
+    }else{
+      init();
+    }
+  })();
+</script>
+
 </body>
 </html>
