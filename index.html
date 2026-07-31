@@ -405,324 +405,338 @@
 
 
 
-<style id="lune-instagram-v8-css">
-  /* ==============================================
-     LUNE BEAUTY — CLEAN VIDEO CARDS V8
-     No Instagram iframe, no black bars, no cropping
-  ============================================== */
-  .instagram-v8{
+
+<style id="lune-instagram-v9-css">
+  /* ==========================================================
+     LUNE BEAUTY — INSTAGRAM PREMIUM V9
+     Official Instagram embeds, compact cards, no local MP4 files
+  ========================================================== */
+  .instagram-v9{
+    --ig-gold:#c99643;
+    --ig-gold-soft:#e2c486;
+    --ig-ink:#17130f;
+    --ig-cream:#fbf7f0;
+    --ig-muted:#756959;
     position:relative;
     overflow:hidden;
-    padding:clamp(72px,8vw,118px) 0;
+    padding:clamp(64px,7vw,104px) 0;
     background:
-      radial-gradient(circle at 12% 8%,rgba(206,174,103,.13),transparent 26%),
-      radial-gradient(circle at 90% 90%,rgba(166,126,70,.10),transparent 24%),
-      linear-gradient(180deg,#fbf7f0 0%,#f3eadc 100%);
+      radial-gradient(circle at 50% 4%,rgba(201,150,67,.12),transparent 31%),
+      linear-gradient(180deg,#fcf9f4 0%,#f4ebdf 100%);
+    isolation:isolate;
   }
 
-  .instagram-v8-inner{
-    width:min(1180px,calc(100% - 34px));
+  .instagram-v9::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.26;
+    background-image:
+      linear-gradient(rgba(201,150,67,.08) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(201,150,67,.08) 1px,transparent 1px);
+    background-size:42px 42px;
+    mask-image:linear-gradient(to bottom,transparent,black 18%,black 78%,transparent);
+    z-index:-1;
+  }
+
+  .instagram-v9-inner{
+    width:min(1260px,calc(100% - 34px));
     margin:0 auto;
   }
 
-  .instagram-v8-head{
-    max-width:790px;
-    margin:0 auto 42px;
+  .instagram-v9-head{
+    max-width:800px;
+    margin:0 auto clamp(30px,4vw,48px);
     text-align:center;
   }
 
-  .instagram-v8-kicker{
+  .instagram-v9-kicker{
     display:inline-flex;
     align-items:center;
     gap:12px;
-    margin-bottom:13px;
-    color:#a67a36;
-    font-size:.7rem;
+    margin-bottom:14px;
+    color:#a97527;
+    font-size:.69rem;
     font-weight:800;
     letter-spacing:.22em;
     text-transform:uppercase;
   }
 
-  .instagram-v8-kicker::before,
-  .instagram-v8-kicker::after{
+  .instagram-v9-kicker::before,
+  .instagram-v9-kicker::after{
     content:"";
-    width:44px;
+    width:46px;
     height:1px;
-    background:linear-gradient(90deg,transparent,#caa966);
+    background:linear-gradient(90deg,transparent,var(--ig-gold));
   }
 
-  .instagram-v8-kicker::after{
-    background:linear-gradient(90deg,#caa966,transparent);
+  .instagram-v9-kicker::after{
+    background:linear-gradient(90deg,var(--ig-gold),transparent);
   }
 
-  .instagram-v8 h2{
-    margin:0 0 13px;
-    color:#2e271f;
+  .instagram-v9 h2{
+    margin:0;
+    color:#2c251e;
     font-family:'Playfair Display',serif;
-    font-size:clamp(2.35rem,4.7vw,4.45rem);
-    line-height:1;
-    letter-spacing:-.045em;
+    font-size:clamp(2.7rem,5.6vw,5.3rem);
+    font-weight:600;
+    line-height:.94;
+    letter-spacing:-.055em;
   }
 
-  .instagram-v8-head p{
+  .instagram-v9-head p{
     max-width:660px;
-    margin:0 auto;
-    color:#756959;
-    font-size:.98rem;
-    line-height:1.7;
+    margin:18px auto 0;
+    color:var(--ig-muted);
+    font-size:clamp(.94rem,1.2vw,1.05rem);
+    line-height:1.72;
   }
 
-  .instagram-v8-grid{
+  .instagram-v9-grid{
     display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:22px;
+    gap:clamp(16px,2vw,24px);
     align-items:start;
   }
 
-  .instagram-v8-card{
+  .instagram-v9-card{
+    position:relative;
     overflow:hidden;
-    border:1px solid rgba(190,153,83,.32);
-    border-radius:28px;
-    background:#fffdf9;
-    box-shadow:0 28px 70px rgba(67,49,30,.14);
+    border:1px solid rgba(201,150,67,.55);
+    border-radius:25px;
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.06),transparent 30%),
+      #17130f;
+    box-shadow:
+      0 24px 55px rgba(42,31,19,.18),
+      0 0 0 1px rgba(255,255,255,.03) inset;
     transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;
   }
 
-  .instagram-v8-card:nth-child(2){
-    transform:translateY(-14px);
+  .instagram-v9-card::after{
+    content:"";
+    position:absolute;
+    left:12%;
+    right:12%;
+    bottom:-12px;
+    height:24px;
+    border-radius:50%;
+    background:rgba(201,150,67,.32);
+    filter:blur(18px);
+    pointer-events:none;
   }
 
-  .instagram-v8-card:hover{
+  .instagram-v9-card:hover{
     transform:translateY(-7px);
-    border-color:rgba(190,153,83,.62);
-    box-shadow:0 36px 90px rgba(67,49,30,.19);
+    border-color:rgba(226,196,134,.9);
+    box-shadow:
+      0 34px 75px rgba(42,31,19,.24),
+      0 0 0 1px rgba(255,255,255,.05) inset;
   }
 
-  .instagram-v8-card:nth-child(2):hover{
-    transform:translateY(-21px);
-  }
-
-  .instagram-v8-card-top{
-    min-height:92px;
+  .instagram-v9-card-head{
+    min-height:82px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:14px;
-    padding:20px;
-    border-bottom:1px solid rgba(190,153,83,.18);
-    background:linear-gradient(135deg,#fff,#f7efe2);
+    gap:16px;
+    padding:17px 18px 15px;
+    border-bottom:1px solid rgba(201,150,67,.28);
   }
 
-  .instagram-v8-title-wrap{
-    min-width:0;
-  }
-
-  .instagram-v8-index{
+  .instagram-v9-index{
     display:block;
     margin-bottom:5px;
-    color:#b78b45;
-    font-size:.66rem;
+    color:var(--ig-gold);
+    font-size:.64rem;
     font-weight:850;
     letter-spacing:.18em;
     text-transform:uppercase;
   }
 
-  .instagram-v8-card h3{
+  .instagram-v9-card h3{
     margin:0;
-    color:#332b22;
+    color:#fff8ed;
     font-family:'Playfair Display',serif;
-    font-size:1.25rem;
-    line-height:1.15;
-    overflow-wrap:normal;
-    word-break:normal;
-    hyphens:none;
+    font-size:clamp(1.08rem,1.5vw,1.35rem);
+    line-height:1.12;
   }
 
-  .instagram-v8-reel-link{
+  .instagram-v9-open{
     flex:0 0 auto;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    color:#9d7132;
-    text-decoration:none;
-    font-size:.7rem;
-    font-weight:850;
-    letter-spacing:.09em;
-    text-transform:uppercase;
-    white-space:nowrap;
-  }
-
-  .instagram-v8-reel-link::before{
-    content:"▶";
+    width:39px;
+    height:39px;
     display:grid;
     place-items:center;
-    width:27px;
-    height:27px;
+    border:1px solid rgba(201,150,67,.78);
     border-radius:50%;
-    background:linear-gradient(135deg,#493b2a,#8b6633);
-    color:#fff7e7;
-    font-size:8px;
+    color:var(--ig-gold-soft);
+    text-decoration:none;
+    font-size:1.08rem;
+    transition:background .2s ease,color .2s ease,transform .2s ease;
   }
 
-  .instagram-v8-media{
+  .instagram-v9-open:hover{
+    background:var(--ig-gold);
+    color:#17130f;
+    transform:rotate(8deg);
+  }
+
+  /* Instagram iframe is clipped inside a controlled premium viewport.
+     The top crop removes the redundant audio/profile metadata band. */
+  .instagram-v9-embed{
     position:relative;
-    aspect-ratio:9/14;
+    height:clamp(490px,48vw,560px);
     overflow:hidden;
-    background:#e9dfd2;
+    background:#0d0b09;
   }
 
-  .instagram-v8-media video{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    display:block;
-    object-fit:cover;
-    object-position:center;
-    background:#e9dfd2;
+  .instagram-v9-embed .instagram-media{
+    margin:0 !important;
+    min-width:100% !important;
+    width:100% !important;
+    border:0 !important;
+    background:#fff !important;
   }
 
-  .instagram-v8-media::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    background:linear-gradient(180deg,transparent 65%,rgba(24,18,13,.18));
+  .instagram-v9-embed iframe{
+    position:absolute !important;
+    top:-58px !important;
+    left:0 !important;
+    width:100% !important;
+    max-width:none !important;
+    min-width:100% !important;
+    height:calc(100% + 118px) !important;
+    border:0 !important;
   }
 
-  .instagram-v8-card-foot{
+  .instagram-v9-foot{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    min-height:62px;
-    padding:14px 17px;
-    border-top:1px solid rgba(190,153,83,.16);
-    background:#fffdf9;
+    padding:14px 17px 16px;
+    border-top:1px solid rgba(201,150,67,.28);
+    background:#17130f;
   }
 
-  .instagram-v8-handle{
-    color:#564a3c;
-    font-size:.78rem;
-    font-weight:800;
-    white-space:nowrap;
-  }
-
-  .instagram-v8-social-actions{
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-
-  .instagram-v8-social{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    color:#9d7132;
-    text-decoration:none;
+  .instagram-v9-handle{
+    color:#f9edda;
     font-size:.76rem;
-    font-weight:850;
-    white-space:nowrap;
+    font-weight:800;
   }
 
-  .instagram-v8-actions{
+  .instagram-v9-foot a{
+    color:var(--ig-gold-soft);
+    text-decoration:none;
+    font-size:.74rem;
+    font-weight:800;
+  }
+
+  .instagram-v9-actions{
     display:flex;
     justify-content:center;
     flex-wrap:wrap;
-    gap:12px;
-    margin-top:38px;
+    gap:13px;
+    margin-top:35px;
   }
 
-  .instagram-v8-btn{
-    min-height:50px;
+  .instagram-v9-btn{
+    min-height:52px;
     display:inline-flex;
     align-items:center;
     justify-content:center;
+    gap:10px;
     padding:13px 24px;
     border-radius:999px;
     text-decoration:none;
-    font-size:.84rem;
+    font-size:.8rem;
     font-weight:850;
+    letter-spacing:.04em;
   }
 
-  .instagram-v8-btn.primary{
-    color:#fff9ed;
-    background:linear-gradient(135deg,#352b21,#75552b);
-    box-shadow:0 15px 36px rgba(67,49,30,.18);
+  .instagram-v9-btn.primary{
+    color:#fff8ed;
+    border:1px solid rgba(226,196,134,.62);
+    background:linear-gradient(135deg,#15120f,#3d2c19);
+    box-shadow:0 15px 34px rgba(42,31,19,.2);
   }
 
-  .instagram-v8-btn.secondary{
+  .instagram-v9-btn.secondary{
     color:#332b22;
-    border:1px solid rgba(190,153,83,.34);
-    background:rgba(255,255,255,.82);
+    border:1px solid rgba(201,150,67,.42);
+    background:rgba(255,255,255,.76);
   }
 
-  @media(max-width:980px){
-    .instagram-v8-grid{
+  html[data-theme="dark"] .instagram-v9{
+    background:
+      radial-gradient(circle at 50% 4%,rgba(217,180,103,.12),transparent 31%),
+      linear-gradient(145deg,#15110e,#211913 55%,#100d0b);
+  }
+
+  html[data-theme="dark"] .instagram-v9 h2{color:#fff8ee;}
+  html[data-theme="dark"] .instagram-v9-head p{color:#cdbfab;}
+  html[data-theme="dark"] .instagram-v9-btn.secondary{
+    color:#fff8ee;
+    background:rgba(255,255,255,.05);
+    border-color:rgba(217,180,103,.32);
+  }
+
+  @media(max-width:1020px){
+    .instagram-v9-grid{
       grid-template-columns:1fr;
-      max-width:600px;
+      max-width:590px;
       margin:0 auto;
     }
 
-    .instagram-v8-card,
-    .instagram-v8-card:nth-child(2){
-      transform:none;
-    }
-
-    .instagram-v8-card:hover,
-    .instagram-v8-card:nth-child(2):hover{
-      transform:translateY(-5px);
-    }
-
-    .instagram-v8-media{
-      aspect-ratio:9/13;
+    .instagram-v9-embed{
+      height:640px;
     }
   }
 
   @media(max-width:620px){
-    .instagram-v8{
-      padding:58px 0;
+    .instagram-v9{
+      padding:54px 0 62px;
     }
 
-    .instagram-v8-inner{
-      width:min(100% - 16px,600px);
+    .instagram-v9-inner{
+      width:min(100% - 16px,590px);
     }
 
-    .instagram-v8-card{
-      border-radius:23px;
+    .instagram-v9-kicker::before,
+    .instagram-v9-kicker::after{
+      width:28px;
     }
 
-    .instagram-v8-card-top{
-      min-height:82px;
-      padding:16px 15px;
+    .instagram-v9-card{
+      border-radius:21px;
     }
 
-    .instagram-v8-card h3{
-      font-size:1.08rem;
+    .instagram-v9-card-head{
+      min-height:74px;
+      padding:14px;
     }
 
-    .instagram-v8-reel-link{
-      font-size:.62rem;
+    .instagram-v9-embed{
+      height:545px;
     }
 
-    .instagram-v8-media{
-      aspect-ratio:9/14;
+    .instagram-v9-embed iframe{
+      top:-54px !important;
+      height:calc(100% + 110px) !important;
     }
 
-    .instagram-v8-card-foot{
-      flex-direction:column;
-      align-items:flex-start;
-    }
-
-    .instagram-v8-actions{
+    .instagram-v9-actions{
       flex-direction:column;
     }
 
-    .instagram-v8-btn{
+    .instagram-v9-btn{
       width:100%;
     }
   }
 </style>
+
 
 
 
@@ -979,6 +993,136 @@
       right:12px;
       width:42px;
       height:42px;
+    }
+  }
+</style>
+
+
+<style id="lune-instagram-v9-compact-fix">
+  /* Compact official Instagram embeds:
+     keeps the Reel and controls visible while reducing the empty comment zone */
+  .instagram-v9-embed{
+    clip-path:inset(0 round 0);
+  }
+
+  .instagram-v9-card{
+    contain:paint;
+  }
+
+  @media(min-width:1021px){
+    .instagram-v9-embed iframe{
+      top:-58px !important;
+      height:calc(100% + 145px) !important;
+    }
+  }
+</style>
+
+
+
+
+
+<style id="lune-instagram-v10-ci-white-gold">
+  /* ==========================================================
+     LUNE BEAUTY — CI WHITE & GOLD
+     Keep like / comment / share visible, remove black framing
+  ========================================================== */
+  .instagram-v9-card{
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,251,244,.98)) !important;
+    border:1px solid rgba(201,150,67,.62) !important;
+    box-shadow:
+      0 24px 60px rgba(96,72,39,.14),
+      0 0 0 1px rgba(255,255,255,.85) inset !important;
+  }
+
+  .instagram-v9-card::after{
+    background:rgba(201,150,67,.24) !important;
+  }
+
+  .instagram-v9-card-head{
+    background:
+      radial-gradient(circle at 15% 10%,rgba(226,196,134,.18),transparent 34%),
+      linear-gradient(180deg,#fffdf9 0%,#fbf4e8 100%) !important;
+    border-bottom:1px solid rgba(201,150,67,.34) !important;
+  }
+
+  .instagram-v9-card h3{
+    color:#31271d !important;
+  }
+
+  .instagram-v9-open{
+    color:#9f6f24 !important;
+    border-color:rgba(201,150,67,.72) !important;
+    background:#fffdf9 !important;
+  }
+
+  .instagram-v9-open:hover{
+    color:#fff !important;
+    background:linear-gradient(135deg,#b77c25,#d8ae62) !important;
+  }
+
+  .instagram-v9-embed{
+    background:#fff !important;
+    height:clamp(520px,50vw,590px) !important;
+  }
+
+  .instagram-v9-embed::after{
+    height:6px !important;
+    background:linear-gradient(90deg,#fffdf9,#f6ead6,#fffdf9) !important;
+    border-top:1px solid rgba(201,150,67,.2) !important;
+  }
+
+  .instagram-v9-foot{
+    background:
+      linear-gradient(180deg,#fffdf9 0%,#fbf2e4 100%) !important;
+    border-top:1px solid rgba(201,150,67,.30) !important;
+  }
+
+  .instagram-v9-handle{
+    color:#4e3d2c !important;
+  }
+
+  .instagram-v9-foot a{
+    color:#9f6f24 !important;
+  }
+
+  .instagram-v9-actions .primary{
+    background:
+      linear-gradient(135deg,#fffdf9,#f5e7cf) !important;
+    color:#3a2c20 !important;
+    border:1px solid rgba(201,150,67,.62) !important;
+    box-shadow:0 14px 34px rgba(96,72,39,.14) !important;
+  }
+
+  .instagram-v9-actions .primary:hover{
+    background:
+      linear-gradient(135deg,#f8ead2,#fffdf9) !important;
+  }
+
+  html[data-theme="dark"] .instagram-v9-card,
+  html[data-theme="dark"] .instagram-v9-card-head,
+  html[data-theme="dark"] .instagram-v9-foot{
+    background:
+      linear-gradient(180deg,#fffdf9 0%,#f8efdf 100%) !important;
+  }
+
+  html[data-theme="dark"] .instagram-v9-card h3{
+    color:#31271d !important;
+  }
+
+  html[data-theme="dark"] .instagram-v9-handle{
+    color:#4e3d2c !important;
+  }
+
+  @media(max-width:1020px){
+    .instagram-v9-embed{
+      height:650px !important;
+    }
+  }
+
+  @media(max-width:620px){
+    .instagram-v9-embed{
+      height:575px !important;
     }
   }
 </style>
@@ -1858,135 +2002,122 @@
 
 
 
-<!-- ===============================
-     INSTAGRAM CLEAN VIDEO BLOCKS V8
-=============================== -->
-<section id="instagram" class="section instagram-v8 reveal-up">
-  <div class="instagram-v8-inner">
 
-    <div class="instagram-v8-head">
-      <span class="instagram-v8-kicker">Lune Beauty auf Instagram</span>
+<!-- ===============================
+     INSTAGRAM PREMIUM V9 — OFFICIAL REELS
+=============================== -->
+<section id="instagram" class="section instagram-v9 reveal-up">
+  <div class="instagram-v9-inner">
+
+    <div class="instagram-v9-head">
+      <span class="instagram-v9-kicker">Lune Beauty auf Instagram</span>
       <h2>Beauty Moments</h2>
       <p>
-        Drei ausgewählte Einblicke in unsere Behandlungen,
+        Drei echte Instagram Reels mit Einblicken in unsere Behandlungen,
         unser Studio und die Atmosphäre von Lune Beauty.
       </p>
     </div>
 
-    <div class="instagram-v8-grid">
+    <div class="instagram-v9-grid">
 
-      <article class="instagram-v8-card">
-        <div class="instagram-v8-card-top">
-          <div class="instagram-v8-title-wrap">
-            <span class="instagram-v8-index">Reel 01</span>
+      <article class="instagram-v9-card">
+        <div class="instagram-v9-card-head">
+          <div>
+            <span class="instagram-v9-index">Reel 01</span>
             <h3>Lune Beauty Moment</h3>
           </div>
-          <a class="instagram-v8-reel-link"
-             href="https://www.instagram.com/reel/DbS9b2To20K/?igsh=YjlqNGVoNG5id212"
-             target="_blank" rel="noopener noreferrer">
-            Reel ansehen
-          </a>
+          <a class="instagram-v9-open"
+             href="https://www.instagram.com/reel/DbS9b2To20K/"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Reel 01 auf Instagram öffnen">↗</a>
         </div>
 
-        <div class="instagram-v8-media">
-          <video muted loop playsinline preload="metadata">
-            <source src="assets/video/reel-01.mp4" type="video/mp4">
-          </video>
+        <div class="instagram-v9-embed">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DbS9b2To20K/"
+            data-instgrm-version="14">
+          </blockquote>
         </div>
 
-        <div class="instagram-v8-card-foot">
-          <span class="instagram-v8-handle">@lunebeauty2</span>
-          <div class="instagram-v8-social-actions">
-            <a class="instagram-v8-social"
-               href="https://www.instagram.com/reel/DbS9b2To20K/?igsh=YjlqNGVoNG5id212"
-               target="_blank" rel="noopener noreferrer">♡ Liken</a>
-            <a class="instagram-v8-social"
-               href="https://www.instagram.com/reel/DbS9b2To20K/?igsh=YjlqNGVoNG5id212"
-               target="_blank" rel="noopener noreferrer">💬 Kommentieren</a>
-          </div>
+        <div class="instagram-v9-foot">
+          <span class="instagram-v9-handle">@lunebeauty2</span>
+          <a href="https://www.instagram.com/reel/DbS9b2To20K/"
+             target="_blank" rel="noopener noreferrer">Auf Instagram ansehen →</a>
         </div>
       </article>
 
-      <article class="instagram-v8-card">
-        <div class="instagram-v8-card-top">
-          <div class="instagram-v8-title-wrap">
-            <span class="instagram-v8-index">Reel 02</span>
+      <article class="instagram-v9-card">
+        <div class="instagram-v9-card-head">
+          <div>
+            <span class="instagram-v9-index">Reel 02</span>
             <h3>Signature Experience</h3>
           </div>
-          <a class="instagram-v8-reel-link"
-             href="https://www.instagram.com/reel/DZ4pV5rIyKl/?igsh=MTUxNWQxZmI1Zm1pcg=="
-             target="_blank" rel="noopener noreferrer">
-            Reel ansehen
-          </a>
+          <a class="instagram-v9-open"
+             href="https://www.instagram.com/reel/DZ4pV5rIyKl/"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Reel 02 auf Instagram öffnen">↗</a>
         </div>
 
-        <div class="instagram-v8-media">
-          <video muted loop playsinline preload="metadata">
-            <source src="assets/video/reel-02.mp4" type="video/mp4">
-          </video>
+        <div class="instagram-v9-embed">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DZ4pV5rIyKl/"
+            data-instgrm-version="14">
+          </blockquote>
         </div>
 
-        <div class="instagram-v8-card-foot">
-          <span class="instagram-v8-handle">@lunebeauty2</span>
-          <div class="instagram-v8-social-actions">
-            <a class="instagram-v8-social"
-               href="https://www.instagram.com/reel/DZ4pV5rIyKl/?igsh=MTUxNWQxZmI1Zm1pcg=="
-               target="_blank" rel="noopener noreferrer">♡ Liken</a>
-            <a class="instagram-v8-social"
-               href="https://www.instagram.com/reel/DZ4pV5rIyKl/?igsh=MTUxNWQxZmI1Zm1pcg=="
-               target="_blank" rel="noopener noreferrer">💬 Kommentieren</a>
-          </div>
+        <div class="instagram-v9-foot">
+          <span class="instagram-v9-handle">@lunebeauty2</span>
+          <a href="https://www.instagram.com/reel/DZ4pV5rIyKl/"
+             target="_blank" rel="noopener noreferrer">Auf Instagram ansehen →</a>
         </div>
       </article>
 
-      <article class="instagram-v8-card">
-        <div class="instagram-v8-card-top">
-          <div class="instagram-v8-title-wrap">
-            <span class="instagram-v8-index">Reel 03</span>
+      <article class="instagram-v9-card">
+        <div class="instagram-v9-card-head">
+          <div>
+            <span class="instagram-v9-index">Reel 03</span>
             <h3>Beauty &amp; Atmosphäre</h3>
           </div>
-          <a class="instagram-v8-reel-link"
-             href="https://www.instagram.com/reel/DaNcjb0IkgN/?igsh=MTcxcmxzZ3FwM2JkNw=="
-             target="_blank" rel="noopener noreferrer">
-            Reel ansehen
-          </a>
+          <a class="instagram-v9-open"
+             href="https://www.instagram.com/reel/DaNcjb0IkgN/"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Reel 03 auf Instagram öffnen">↗</a>
         </div>
 
-        <div class="instagram-v8-media">
-          <video muted loop playsinline preload="metadata">
-            <source src="assets/video/reel-03.mp4" type="video/mp4">
-          </video>
+        <div class="instagram-v9-embed">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DaNcjb0IkgN/"
+            data-instgrm-version="14">
+          </blockquote>
         </div>
 
-        <div class="instagram-v8-card-foot">
-          <span class="instagram-v8-handle">@lunebeauty2</span>
-          <div class="instagram-v8-social-actions">
-            <a class="instagram-v8-social"
-               href="https://www.instagram.com/reel/DaNcjb0IkgN/?igsh=MTcxcmxzZ3FwM2JkNw=="
-               target="_blank" rel="noopener noreferrer">♡ Liken</a>
-            <a class="instagram-v8-social"
-               href="https://www.instagram.com/reel/DaNcjb0IkgN/?igsh=MTcxcmxzZ3FwM2JkNw=="
-               target="_blank" rel="noopener noreferrer">💬 Kommentieren</a>
-          </div>
+        <div class="instagram-v9-foot">
+          <span class="instagram-v9-handle">@lunebeauty2</span>
+          <a href="https://www.instagram.com/reel/DaNcjb0IkgN/"
+             target="_blank" rel="noopener noreferrer">Auf Instagram ansehen →</a>
         </div>
       </article>
 
     </div>
 
-    <div class="instagram-v8-actions">
-      <a class="instagram-v8-btn primary"
+    <div class="instagram-v9-actions">
+      <a class="instagram-v9-btn primary"
          href="https://www.instagram.com/lunebeauty2/"
          target="_blank" rel="noopener noreferrer">
-        Instagram öffnen · @lunebeauty2
+        Folgen auf Instagram · @lunebeauty2
       </a>
 
-      <a class="instagram-v8-btn secondary" href="#booking">
+      <a class="instagram-v9-btn secondary" href="#booking">
         Termin anfragen
       </a>
     </div>
 
   </div>
 </section>
+
 
 
 <!-- ===============================
@@ -2177,7 +2308,7 @@
   <!-- Lune Beauty Staff Cloud Booking -->
   <script>
     /* Après déploiement du Google Apps Script Staff Cloud, collez ici l'URL Web App. */
-    window.LUNE_STAFF_CLOUD_API = "https://script.google.com/macros/s/AKfycbzmMizNh9DMVQCOPt4qREPcvNzqM_CIZcvBUJBiK7T3vkH_5iEoqeJ0LoirUolHV7oEZw/exec";
+    window.LUNE_STAFF_CLOUD_API = "https://script.google.com/macros/s/AKfycbxwSXy9BDki3Y2h-BUsMUXqcV4TZ1UP7Obahzsu5YK3Iz7COZudrRb0VdWMzMCkA3E/exec";
   </script>
 
 
@@ -2433,7 +2564,7 @@
       Après le déploiement du Google Apps Script, collez ici l'URL Web App.
       Exemple: https://script.google.com/macros/s/AKfycb.../exec
     */
-    window.LUNE_TESTIMONIALS_API = "https://script.google.com/macros/s/AKfycbw3HWHq5M0F4Mew8dBIzcoL60wUh9hG6ojWk1p8SOZ4kRwgOJ1k9AT-XxjS9n9yR63u/exec";
+    window.LUNE_TESTIMONIALS_API = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzmMizNh9DMVQCOPt4qREPcvNzqM_CIZcvBUJBiK7T3vkH_5iEoqeJ0LoirUolHV7oEZw/exec";
   </script>
   <script src="assets/js/testimonials-cloud.js"></script>
   <script>
@@ -2532,5 +2663,7 @@
   })();
 </script>
 
+
+<script async src="https://www.instagram.com/embed.js"></script>
 </body>
 </html>
