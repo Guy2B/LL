@@ -3,33 +3,8 @@
 
   const API_URL = String(window.LUNE_TESTIMONIALS_API || "").trim();
   const PLACEHOLDER_API = "PASTE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-  const DEFAULT_TESTIMONIALS = [
-    {
-      name: "Kundin aus Worms",
-      rating: 5,
-      message: "Sehr ruhige Atmosphäre und eine Behandlung, bei der man sofort abschalten kann."
-    },
-    {
-      name: "Stammkundin",
-      rating: 5,
-      message: "Professionell, sanft und sehr aufmerksam. Meine Haut fühlt sich jedes Mal sichtbar gepflegter an."
-    },
-    {
-      name: "Lune Beauty Kundin",
-      rating: 5,
-      message: "Ich habe mich sehr wohlgefühlt. Alles war sauber, stilvoll und persönlich."
-    },
-    {
-      name: "Kundin",
-      rating: 5,
-      message: "Die Beratung war ehrlich und die Behandlung genau auf meine Haut abgestimmt."
-    },
-    {
-      name: "Beauty Kundin",
-      rating: 5,
-      message: "Ein schönes Studio, angenehme Ruhe und ein Ergebnis, das man direkt sieht."
-    }
-  ];
+  const BACKUP_NAMES = ["Jess M.", "Angela", "Klaudia", "Batuhan"];
+  const BACKUP_STORAGE_KEY = "lune_testimonials_real_backup_v1";
 
   let selectedRating = 5;
   let testimonials = [];
@@ -78,7 +53,7 @@
     return initial ? `${first} ${initial}.`.slice(0, 45) : first.slice(0, 40);
   }
 
-  const CONSENT_TEXT = "Ich bin einverstanden, dass meine Bewertung auf dieser Webseite veröffentlicht wird. Ich kann diese Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen.";
+  const CONSENT_TEXT = "Ich bin einverstanden, dass meine Bewertung mit meinem angegebenen Vornamen bzw. Vornamen + Initiale auf dieser Webseite veröffentlicht wird. Ich kann diese Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen.";
 
   function normalizeItems(items) {
     return (Array.isArray(items) ? items : [])
@@ -91,20 +66,77 @@
       .filter((item) => item.message.trim().length > 0);
   }
 
+  function testimonialKey(item) {
+    return [
+      String(item.name || "").trim().toLowerCase(),
+      String(item.message || "").trim().toLowerCase(),
+      String(Number(item.rating) || 5)
+    ].join("|");
+  }
+
+  function dedupeItems(items) {
+    const seen = new Set();
+    return normalizeItems(items).filter((item) => {
+      const key = testimonialKey(item);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function readBackupTestimonials() {
+    try {
+      return dedupeItems(JSON.parse(localStorage.getItem(BACKUP_STORAGE_KEY) || "[]"));
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function saveRealBackup(items) {
+    const normalized = dedupeItems(items);
+    const preferred = BACKUP_NAMES
+      .map((wantedName) =>
+        normalized.find(
+          (item) =>
+            String(item.name || "").trim().toLowerCase() ===
+            wantedName.toLowerCase()
+        )
+      )
+      .filter(Boolean);
+
+    const backup = dedupeItems(
+      preferred.length ? preferred : normalized.slice(0, 4)
+    ).slice(0, 4);
+
+    if (!backup.length) return;
+
+    try {
+      localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(backup));
+    } catch (_) {}
+  }
+
   function visibleItems() {
-    // Les avis publiés dans la Google Sheet passent en premier.
-    // Tant qu'il y a moins de 5 avis réels, on garde les avis de départ
-    // pour éviter une section vide ou trop pauvre au lancement du site.
-    const real = normalizeItems(testimonials);
-    if (real.length >= 5) return real;
-    return real.concat(DEFAULT_TESTIMONIALS.slice(0, 5 - real.length));
+    const live = dedupeItems(testimonials);
+    if (live.length) return live;
+    return readBackupTestimonials();
   }
 
   function render() {
     const track = $("testimonialTrack");
     if (!track) return;
 
-    const items = visibleItems().length ? visibleItems() : DEFAULT_TESTIMONIALS;
+    const items = visibleItems();
+    if (!items.length) {
+      currentIndex = 0;
+      track.style.transform = "translateX(0)";
+      track.innerHTML = `
+        <article class="testimonial-card cloud-testimonial-card active" aria-hidden="false">
+          <p>Die Kundenstimmen werden geladen…</p>
+        </article>
+      `;
+      return;
+    }
+
     currentIndex = Math.max(0, Math.min(currentIndex, items.length - 1));
 
     track.innerHTML = items.map((item, index) => `
@@ -136,7 +168,8 @@
   }
 
   function go(delta) {
-    const count = Math.max(1, visibleItems().length);
+    const count = visibleItems().length;
+    if (!count) return;
     currentIndex = (currentIndex + delta + count) % count;
     render();
   }
@@ -174,7 +207,7 @@
 
   async function loadTestimonials() {
     if (!API_URL || API_URL === PLACEHOLDER_API) {
-      testimonials = DEFAULT_TESTIMONIALS;
+      testimonials = readBackupTestimonials();
       render();
       setStatus("", "info");
       return;
@@ -182,11 +215,21 @@
 
     try {
       const data = await jsonp(API_URL);
-      testimonials = normalizeItems(data.items || data.testimonials || data);
+      const liveItems = dedupeItems(data.items || data.testimonials || data);
+
+      if (liveItems.length) {
+        testimonials = liveItems;
+        saveRealBackup(liveItems);
+      } else {
+        testimonials = readBackupTestimonials();
+      }
+
+      currentIndex = Math.min(currentIndex, Math.max(0, visibleItems().length - 1));
       render();
       setStatus("", "info");
     } catch (err) {
-      testimonials = testimonials.length ? testimonials : DEFAULT_TESTIMONIALS;
+      testimonials = readBackupTestimonials();
+      currentIndex = Math.min(currentIndex, Math.max(0, visibleItems().length - 1));
       render();
       setStatus("", "info");
     }
@@ -325,9 +368,8 @@
     setupForm();
     setupNavigation();
 
-    // Affichage immédiat: les 5 Bewertungen de départ apparaissent tout de suite,
-    // même si Google Apps Script est lent ou inaccessible.
-    testimonials = DEFAULT_TESTIMONIALS;
+    // Affichage immédiat du dernier backup réel enregistré sur cet appareil.
+    testimonials = readBackupTestimonials();
     currentIndex = 0;
     render();
 
