@@ -31,7 +31,7 @@
     }
   ];
   const BACKUP_NAMES = BACKUP_TESTIMONIALS.map((item) => item.name);
-  const BACKUP_STORAGE_KEY = "lune_testimonials_real_backup_v3";
+  const BACKUP_STORAGE_KEY = "lune_testimonials_real_backup_v4";
 
   let selectedRating = 5;
   let testimonials = [];
@@ -94,22 +94,70 @@
       .filter((item) => item.message.trim().length > 0);
   }
 
+  function normalizeReviewText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[“”„"'’`´]/g, "")
+      .replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
   function testimonialKey(item) {
     return [
-      String(item.name || "").trim().toLowerCase(),
-      String(item.message || "").trim().toLowerCase(),
+      normalizeReviewText(item.name),
+      normalizeReviewText(item.message),
       String(Number(item.rating) || 5)
     ].join("|");
   }
 
-  function dedupeItems(items) {
-    const seen = new Set();
-    return normalizeItems(items).filter((item) => {
-      const key = testimonialKey(item);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+  function messageTokens(value) {
+    return new Set(
+      normalizeReviewText(value)
+        .split(" ")
+        .filter((word) => word.length > 2)
+    );
+  }
+
+  function similarity(a, b) {
+    const setA = messageTokens(a);
+    const setB = messageTokens(b);
+    if (!setA.size || !setB.size) return 0;
+
+    let common = 0;
+    setA.forEach((word) => {
+      if (setB.has(word)) common += 1;
     });
+
+    return common / Math.max(setA.size, setB.size);
+  }
+
+  function sameReview(a, b) {
+    const sameName =
+      normalizeReviewText(a.name) === normalizeReviewText(b.name);
+    const sameRating =
+      Number(a.rating || 5) === Number(b.rating || 5);
+
+    if (!sameName || !sameRating) return false;
+
+    const sameMessage =
+      normalizeReviewText(a.message) === normalizeReviewText(b.message);
+
+    return sameMessage || similarity(a.message, b.message) >= 0.72;
+  }
+
+  function dedupeItems(items) {
+    const unique = [];
+
+    normalizeItems(items).forEach((item) => {
+      if (!unique.some((existing) => sameReview(existing, item))) {
+        unique.push(item);
+      }
+    });
+
+    return unique;
   }
 
   function readBackupTestimonials() {
@@ -157,8 +205,15 @@
 
     if (!live.length) return backup;
 
-    const combined = dedupeItems(live.concat(backup));
-    return combined.length >= 5 ? combined : backup;
+    const liveNames = new Set(
+      live.map((item) => normalizeReviewText(item.name))
+    );
+
+    const missingBackups = backup.filter((item) => {
+      return !liveNames.has(normalizeReviewText(item.name));
+    });
+
+    return dedupeItems(live.concat(missingBackups));
   }
 
   function render() {
@@ -247,7 +302,7 @@
         reject(new Error("API Kundenstimmen non joignable"));
       };
 
-      script.src = `${url}${sep}callback=${encodeURIComponent(cb)}&_=${Date.now()}`;
+      script.src = `${url}${sep}action=publicTestimonials&callback=${encodeURIComponent(cb)}&_=${Date.now()}`;
       document.head.appendChild(script);
     });
   }
@@ -371,6 +426,7 @@
       setStatus(`Kundenstimme wird als ${publishName} veröffentlicht…`, "info");
 
       await submitViaHiddenForm({
+        action: "publicTestimonial",
         name: publishName,
         rating: selectedRating,
         message,
