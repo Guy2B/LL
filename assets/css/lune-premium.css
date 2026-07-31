@@ -3777,6 +3777,62 @@ details summary {
     padding: 12px 18px;
   }
 
+/* =====================================================
+   PREISE — PREMIUM ACCORDION OPENING
+===================================================== */
 
+#pricing details.acc {
+  scroll-margin-top: 120px;
+  transition:
+    border-color .45s ease,
+    box-shadow .45s ease,
+    background-color .45s ease;
+}
+
+#pricing details.acc .acc-list {
+  transform-origin: top;
+}
+
+#pricing details.acc[open] .acc-list {
+  animation: lunePriceReveal .72s cubic-bezier(.22,.72,.22,1) both;
+}
+
+#pricing details.acc.premium-opening {
+  border-color: rgba(195, 160, 99, .72) !important;
+  box-shadow:
+    0 20px 55px rgba(76, 55, 28, .13),
+    0 0 0 1px rgba(195, 160, 99, .18),
+    0 0 32px rgba(218, 181, 111, .16) !important;
+}
+
+#pricing details.acc.premium-opening summary {
+  color: #9b712f;
+  transition: color .35s ease;
+}
+
+@keyframes lunePriceReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scaleY(.97);
+    filter: blur(2px);
+  }
+
+  55% {
+    opacity: .82;
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pricing details.acc[open] .acc-list {
+    animation: none;
+  }
+}
 
 
