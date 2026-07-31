@@ -3,13 +3,41 @@
 
   const API_URL = String(window.LUNE_TESTIMONIALS_API || "").trim();
   const PLACEHOLDER_API = "PASTE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-  const BACKUP_NAMES = ["Jess M.", "Angela", "Klaudia", "Batuhan"];
-  const BACKUP_STORAGE_KEY = "lune_testimonials_real_backup_v1";
+  const BACKUP_TESTIMONIALS = [
+    {
+      name: "Jess M.",
+      rating: 5,
+      message: "Es War ein schönes Moment. Vielen Dank @Lunebeauty"
+    },
+    {
+      name: "Angela",
+      rating: 5,
+      message: "Ein sehr schönes, angenehmes und freundliches Ambiente. Man fühlt sich sofort wohl. Die Gastfreundschaft ist hervorragend und das Personal ist sehr herzlich. Ich kann diesen Ort nur weiterempfehlen!"
+    },
+    {
+      name: "Klaudia",
+      rating: 5,
+      message: "Super! Sehr empfehlenswert. Es war super entspannt. Ich habe mich sehr wohl gefühlt. Mein Haut sieht jetzt so schön aus."
+    },
+    {
+      name: "Batuhan",
+      rating: 5,
+      message: "Es war von Anfang bis Ende sehr angenehm und verlief reibungslos. Man wird herzlich empfangen. Die Behandlung war genauso gut, wie es versprochen wurde. Ambiente, Duft und Musik waren vollkommen im Einklang. Sehr empfehlenswert."
+    },
+    {
+      name: "Sophie K.",
+      rating: 5,
+      message: "Ich habe mich vom ersten Moment an wohlgefühlt. Die Behandlung war professionell, entspannend und das Ergebnis hat meine Erwartungen übertroffen. Meine Haut fühlt sich viel frischer und gepflegter an. Ich komme definitiv wieder und kann Lune Beauty von Herzen weiterempfehlen!"
+    }
+  ];
+  const BACKUP_NAMES = BACKUP_TESTIMONIALS.map((item) => item.name);
+  const BACKUP_STORAGE_KEY = "lune_testimonials_real_backup_v3";
 
   let selectedRating = 5;
   let testimonials = [];
   let currentIndex = 0;
   let autoplayId = null;
+  let renderedSignature = "";
 
   const $ = (id) => document.getElementById(id);
 
@@ -85,10 +113,18 @@
   }
 
   function readBackupTestimonials() {
+    const defaults = dedupeItems(BACKUP_TESTIMONIALS);
+
     try {
-      return dedupeItems(JSON.parse(localStorage.getItem(BACKUP_STORAGE_KEY) || "[]"));
+      const stored = dedupeItems(
+        JSON.parse(localStorage.getItem(BACKUP_STORAGE_KEY) || "[]")
+      );
+
+      // Toujours conserver les 5 vrais avis intégrés.
+      // Un ancien cache contenant seulement Jess M. ne doit jamais remplacer les autres.
+      return dedupeItems(stored.concat(defaults));
     } catch (_) {
-      return [];
+      return defaults;
     }
   }
 
@@ -106,7 +142,7 @@
 
     const backup = dedupeItems(
       preferred.length ? preferred : normalized.slice(0, 4)
-    ).slice(0, 4);
+    ).slice(0, 5);
 
     if (!backup.length) return;
 
@@ -117,8 +153,12 @@
 
   function visibleItems() {
     const live = dedupeItems(testimonials);
-    if (live.length) return live;
-    return readBackupTestimonials();
+    const backup = readBackupTestimonials();
+
+    if (!live.length) return backup;
+
+    const combined = dedupeItems(live.concat(backup));
+    return combined.length >= 5 ? combined : backup;
   }
 
   function render() {
@@ -126,44 +166,51 @@
     if (!track) return;
 
     const items = visibleItems();
-    if (!items.length) {
-      currentIndex = 0;
-      track.style.transform = "translateX(0)";
-      track.innerHTML = `
-        <article class="testimonial-card cloud-testimonial-card active" aria-hidden="false">
-          <p>Die Kundenstimmen werden geladen…</p>
-        </article>
-      `;
-      return;
-    }
+    if (!items.length) return;
 
     currentIndex = Math.max(0, Math.min(currentIndex, items.length - 1));
 
-    track.innerHTML = items.map((item, index) => `
-      <article class="testimonial-card cloud-testimonial-card ${index === currentIndex ? "active" : ""}" aria-hidden="${index === currentIndex ? "false" : "true"}">
-        <div class="testimonial-stars" aria-label="${esc(item.rating)} von 5 Sternen">${starsHtml(item.rating)}</div>
-        <p>“${esc(item.message)}”</p>
-        <strong>${esc(item.name)}</strong>
-      </article>
-    `).join("");
+    const signature = items.map(testimonialKey).join("||");
 
-    // Fix: l'ancien CSS met .testimonial-card en opacity:0.
-    // On donne donc explicitement la classe active + les styles minimums.
-    track.style.display = "flex";
-    track.style.width = "100%";
-    track.style.transition = "transform .45s ease";
-    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    // Ne reconstruire les cartes que lorsque les données changent.
+    // Ainsi, le navigateur peut réellement animer le déplacement du track.
+    if (signature !== renderedSignature) {
+      track.innerHTML = items.map((item, index) => `
+        <article class="testimonial-card cloud-testimonial-card ${index === currentIndex ? "active" : ""}" aria-hidden="${index === currentIndex ? "false" : "true"}">
+          <div class="testimonial-stars" aria-label="${esc(item.rating)} von 5 Sternen">${starsHtml(item.rating)}</div>
+          <p>“${esc(item.message)}”</p>
+          <strong>${esc(item.name)}</strong>
+        </article>
+      `).join("");
+      renderedSignature = signature;
+    }
+
+    track.style.setProperty("display", "flex", "important");
+    track.style.setProperty("flex-wrap", "nowrap", "important");
+    track.style.setProperty("width", "100%", "important");
+    track.style.setProperty("transition", "transform .55s cubic-bezier(.22,.61,.36,1)", "important");
+    track.style.setProperty("will-change", "transform", "important");
 
     Array.from(track.children).forEach((card, index) => {
       const isActive = index === currentIndex;
       card.classList.toggle("active", isActive);
       card.setAttribute("aria-hidden", isActive ? "false" : "true");
-      card.style.flex = "0 0 100%";
-      card.style.minWidth = "100%";
-      card.style.maxWidth = "100%";
-      card.style.opacity = isActive ? "1" : "0";
-      card.style.visibility = "visible";
-      card.style.transform = isActive ? "scale(1)" : "scale(.96)";
+      card.style.setProperty("flex", "0 0 100%", "important");
+      card.style.setProperty("min-width", "100%", "important");
+      card.style.setProperty("max-width", "100%", "important");
+      card.style.setProperty("width", "100%", "important");
+      card.style.setProperty("opacity", "1", "important");
+      card.style.setProperty("visibility", "visible", "important");
+      card.style.setProperty("position", "relative", "important");
+      card.style.setProperty("inset", "auto", "important");
+    });
+
+    requestAnimationFrame(() => {
+      track.style.setProperty(
+        "transform",
+        `translate3d(-${currentIndex * 100}%, 0, 0)`,
+        "important"
+      );
     });
   }
 
@@ -343,12 +390,62 @@
     });
   }
 
-  function setupNavigation() {
-    $("prevTestimonial")?.addEventListener("click", () => go(-1));
-    $("nextTestimonial")?.addEventListener("click", () => go(1));
-
+  function restartAutoplay() {
     clearInterval(autoplayId);
-    autoplayId = setInterval(() => go(1), 8000);
+    autoplayId = setInterval(() => go(1), 6500);
+  }
+
+  function setupNavigation() {
+    const prev = $("prevTestimonial");
+    const next = $("nextTestimonial");
+    const track = $("testimonialTrack");
+
+    prev?.addEventListener("click", (event) => {
+      event.preventDefault();
+      go(-1);
+      restartAutoplay();
+    });
+
+    next?.addEventListener("click", (event) => {
+      event.preventDefault();
+      go(1);
+      restartAutoplay();
+    });
+
+    // Navigation au clavier.
+    prev?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        go(-1);
+        restartAutoplay();
+      }
+    });
+
+    next?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        go(1);
+        restartAutoplay();
+      }
+    });
+
+    // Swipe mobile.
+    let startX = null;
+    track?.addEventListener("pointerdown", (event) => {
+      startX = event.clientX;
+      track.setPointerCapture?.(event.pointerId);
+    });
+
+    track?.addEventListener("pointerup", (event) => {
+      if (startX === null) return;
+      const distance = event.clientX - startX;
+      startX = null;
+      if (Math.abs(distance) < 45) return;
+      go(distance > 0 ? -1 : 1);
+      restartAutoplay();
+    });
+
+    restartAutoplay();
   }
 
   function injectSmallStyles() {
@@ -358,6 +455,9 @@
       .testimonial-consent input{width:auto;margin-top:.18rem;flex:0 0 auto}
       .testimonial-status{min-height:1.2rem;font-size:.9rem;margin:.6rem 0}.testimonial-status[data-type="success"]{color:#2f7d32}.testimonial-status[data-type="error"]{color:#a0352b}.testimonial-status[data-type="warn"]{color:#9a6a20}
       .testimonial-stars{letter-spacing:.12em;margin-bottom:.7rem;color:#d4af37}.rating-input span.active{color:#d4af37}
+      .testimonials-slider,.testimonial-slider,.testimonial-viewport{overflow:hidden!important}
+      #testimonialTrack{display:flex!important;flex-wrap:nowrap!important;transform:translate3d(0,0,0);will-change:transform}
+      #testimonialTrack>.testimonial-card{flex:0 0 100%!important;width:100%!important;min-width:100%!important;max-width:100%!important;opacity:1!important;visibility:visible!important;position:relative!important}
     `;
     document.head.appendChild(style);
   }
@@ -368,7 +468,7 @@
     setupForm();
     setupNavigation();
 
-    // Affichage immédiat du dernier backup réel enregistré sur cet appareil.
+    // Affichage immédiat des cinq vrais avis, sans message de chargement.
     testimonials = readBackupTestimonials();
     currentIndex = 0;
     render();
