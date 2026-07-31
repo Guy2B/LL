@@ -296,7 +296,7 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
       <div class="small brandClaim">Kundinnen · Termine · Umsatz · Lager</div>
     </div>
   </div>
-  <button class="secondary siteBtn" onclick="location.href='index.html'">Zur Webseite</button>
+  <button class="secondary siteBtn" type="button" onclick="window.open('index.html','_blank','noopener')">Zur Webseite</button>
 </header>
 <main>
 <section id="loginBox" class="card"><h2>Staff Zugang</h2><div class="row"><input id="pinInput" type="password" placeholder="Code"><button onclick="doLogin()">Einloggen</button></div><p id="loginError" class="small" style="color:#b83227"></p></section>
@@ -632,8 +632,22 @@ function reorderLimit(p){let n=startStock(p);if(n<=0)return Number(p?.min||0);if
 function needsReorder(p){return totalStock(p)<=reorderLimit(p);}
 function reorderSuggestion(p){let target=startStock(p);let missing=Math.ceil(Math.max(0,target-totalStock(p)));return Math.max(1,missing);}
 if(typeof structuredClone!=="function"){window.structuredClone=obj=>JSON.parse(JSON.stringify(obj));}
+/* V24: resilient storage. A blocked localStorage must not prevent login. */
+const safeStorage=(()=>{
+  const memory=new Map(); let nativeStore=null;
+  try{nativeStore=window.localStorage;const probe=KEY+"__probe";nativeStore.setItem(probe,"1");nativeStore.removeItem(probe);}catch(e){nativeStore=null;console.warn("Local storage unavailable; temporary memory storage is active.",e);}
+  return {
+    getItem(key){try{return nativeStore?nativeStore.getItem(key):(memory.has(key)?memory.get(key):null);}catch(e){return memory.has(key)?memory.get(key):null;}},
+    setItem(key,value){const text=String(value);memory.set(key,text);try{if(nativeStore)nativeStore.setItem(key,text);}catch(e){console.warn("Storage write failed",e);}},
+    removeItem(key){memory.delete(key);try{if(nativeStore)nativeStore.removeItem(key);}catch(e){}},
+    clear(){memory.clear();try{if(nativeStore)nativeStore.clear();}catch(e){}},
+    key(index){try{return nativeStore?nativeStore.key(index):Array.from(memory.keys())[index]||null;}catch(e){return Array.from(memory.keys())[index]||null;}},
+    get length(){try{return nativeStore?nativeStore.length:memory.size;}catch(e){return memory.size;}}
+  };
+})();
 let db=loadDb();
-if(localStorage.getItem(CLEAN_START_FLAG)!=="done"){resetOperationalData(false,true);}
+/* Non-destructive startup: never erase customers, bookings or invoices automatically. */
+if(safeStorage.getItem(CLEAN_START_FLAG)!=="done") safeStorage.setItem(CLEAN_START_FLAG,"done");
 let agendaMode="day";
 let setupUnlocked=false;
 
@@ -649,24 +663,24 @@ function defaultDb(){
 function loadDb(){
   let base=defaultDb();
   try{
-    let s=localStorage.getItem(KEY);
+    let s=safeStorage.getItem(KEY);
     if(s) base=Object.assign(base,JSON.parse(s));
   }catch(e){}
   return normalizeDb(base);
 }
-function persist(){localStorage.setItem(KEY,JSON.stringify(db));renderAll();}
+function persist(){safeStorage.setItem(KEY,JSON.stringify(db));renderAll();}
 function resetOperationalData(confirmFirst=true,auto=false){
   const msg="Testdaten wirklich zurücksetzen?\n\nGelöscht werden: Kunden, Termine, Rechnungen, Zahlungen, Verbrauchs-/Lagerbewegungen und Rechnungszähler.\nBehalten werden: Produkte/Lager-Basis, Institut-Stock, Service-Rezepte und Einstellungen.";
   if(confirmFirst&&!confirm(msg))return;
-  try{localStorage.setItem(KEY+"_before_import",JSON.stringify(db));localStorage.setItem(KEY+"_before_reset_"+new Date().toISOString().replace(/[:.]/g,"-"),JSON.stringify(db));}catch(e){}
+  try{safeStorage.setItem(KEY+"_before_import",JSON.stringify(db));safeStorage.setItem(KEY+"_before_reset_"+new Date().toISOString().replace(/[:.]/g,"-"),JSON.stringify(db));}catch(e){}
   const keepSettings=structuredClone((db&&db.settings)||defaultDb().settings);
   const keepServices=(db&&Array.isArray(db.services)&&db.services.length)?structuredClone(db.services):structuredClone(seedServices);
   const keepRecipes=structuredClone((db&&db.recipes)||seedRecipes);
   keepSettings.dailyCounters={};
   db=normalizeDb({settings:keepSettings,services:keepServices,products:structuredClone(seedProducts),recipes:keepRecipes,bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[]});
-  localStorage.setItem(KEY,JSON.stringify(db));
-  localStorage.setItem(CLEAN_START_FLAG,"done");
-  if(auto){try{localStorage.setItem(KEY+"_auto_clean_start_at",new Date().toISOString());}catch(e){} return;}
+  safeStorage.setItem(KEY,JSON.stringify(db));
+  safeStorage.setItem(CLEAN_START_FLAG,"done");
+  if(auto){try{safeStorage.setItem(KEY+"_auto_clean_start_at",new Date().toISOString());}catch(e){} return;}
   renderAll(); loadSettings(); tab("dashboard");
   if($("resetStatus"))$("resetStatus").textContent="Testdaten wurden zurückgesetzt. Der vorherige Stand ist lokal unter 'Vor Reset/Import zurück' wiederherstellbar.";
   alert("Testdaten wurden zurückgesetzt. Produkte, Grundlager, Institut-Stock, Service-Rezepte und Einstellungen bleiben erhalten.");
@@ -681,7 +695,7 @@ async function resetOperationalDataCloud(){
     alert("Abgebrochen. Es wurde nichts gelöscht.");
     return;
   }
-  try{localStorage.setItem(KEY+"_before_cloud_reset_"+new Date().toISOString().replace(/[:.]/g,"-"),JSON.stringify(db));}catch(e){}
+  try{safeStorage.setItem(KEY+"_before_cloud_reset_"+new Date().toISOString().replace(/[:.]/g,"-"),JSON.stringify(db));}catch(e){}
   if($("resetStatus"))$("resetStatus").textContent="Cloud-Löschung wird ausgeführt…";
   try{
     if(!(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady())){
@@ -693,9 +707,9 @@ async function resetOperationalDataCloud(){
     const res=await window.LuneStaffCloudSync.clearOperationalData({clearLogs:true});
     // Après suppression côté serveur, on importe l'état Cloud nettoyé afin que les anciens clients ne restent pas localement.
     if(window.LuneStaffCloudSync.pull) await window.LuneStaffCloudSync.pull();
-    try{localStorage.removeItem("lune_staff_seen_request_ids_v16");localStorage.removeItem("lune_staff_seen_request_ids_v18");}catch(e){}
+    try{safeStorage.removeItem("lune_staff_seen_request_ids_v16");safeStorage.removeItem("lune_staff_seen_request_ids_v18");}catch(e){}
     if(typeof normalizeDb==="function")db=normalizeDb(db);
-    localStorage.setItem(KEY,JSON.stringify(db));
+    safeStorage.setItem(KEY,JSON.stringify(db));
     renderAll(); loadSettings(); tab("dashboard");
     if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.refresh)window.LuneStaffLiveNotifications.refresh();
     const detail=res&&res.deleted?` · vorher gelöscht: ${res.deleted.customers||0} Kunden, ${res.deleted.bookings||0} Anfragen/RDV, ${res.deleted.skinAnalyses||0} Skin Checks`:"";
@@ -757,24 +771,18 @@ function nextInvoiceNumber(){
 }
 
 function doLogin(){
-  if($("pinInput").value.trim()===PIN){
-    $("loginBox").classList.add("hidden");
-    $("app").classList.remove("hidden");
-    init();
-    try{window.dispatchEvent(new CustomEvent("lune:staff-login"));}catch(_){}
-    setTimeout(async()=>{
-      try{
-        if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()){
-          if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.status)window.LuneStaffLiveNotifications.status("Cloud import…","ok");
-          await window.LuneStaffCloudSync.pull();
-          if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.check)await window.LuneStaffLiveNotifications.check();
-          if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.refresh)window.LuneStaffLiveNotifications.refresh();
-        }
-      }catch(e){
-        console.warn("Cloud import after login failed",e);
-      }
-    },650);
-  }else $("loginError").textContent="Code incorrect.";
+  const pinInput=$("pinInput"), loginBox=$("loginBox"), app=$("app"), errorBox=$("loginError");
+  if(!pinInput||!loginBox||!app){if(errorBox)errorBox.textContent="Technischer Fehler: Login-Oberfläche unvollständig.";console.error("Login UI incomplete");return;}
+  if(pinInput.value.trim()!==PIN){if(errorBox)errorBox.textContent="Code incorrect.";pinInput.focus();return;}
+  if(errorBox)errorBox.textContent="";
+  loginBox.classList.add("hidden"); app.classList.remove("hidden");
+  try{init();}catch(e){
+    console.error("CRM initialization failed",e);
+    const dashboard=$("dashboard");
+    if(dashboard){document.querySelectorAll(".view").forEach(v=>v.classList.add("hidden"));dashboard.classList.remove("hidden");const box=$("nextActionText");if(box)box.textContent="CRM geöffnet; ein Modul konnte nicht initialisiert werden: "+(e.message||e);}
+  }
+  try{window.dispatchEvent(new CustomEvent("lune:staff-login"));}catch(_){}
+  setTimeout(async()=>{try{if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()){if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.status)window.LuneStaffLiveNotifications.status("Cloud import…","ok");await window.LuneStaffCloudSync.pull();if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.check)await window.LuneStaffLiveNotifications.check();if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.refresh)window.LuneStaffLiveNotifications.refresh();}}catch(e){console.warn("Cloud import after login failed",e);}},650);
 }
 function logout(){$("app").classList.add("hidden");$("loginBox").classList.remove("hidden");$("pinInput").value="";}
 function tab(n){if((n==="settings"||n==="payments"||n==="admin"||n==="treatments")&&!setupUnlocked){if(!requireSetupPin())return;}document.querySelectorAll(".view").forEach(v=>v.classList.add("hidden"));$(n).classList.remove("hidden");document.querySelectorAll(".tabs button[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===n));if(n==="settings")lockSettingsView();renderAll();if(window.innerWidth<901)window.scrollTo({top:0,behavior:"smooth"});}
@@ -897,7 +905,7 @@ async function deleteTestBooking(id){
 
   // Sicherheitskopie vor der Löschung.
   try{
-    localStorage.setItem(
+    safeStorage.setItem(
       KEY+"_before_delete_test_"+new Date().toISOString().replace(/[:.]/g,"-"),
       JSON.stringify(db)
     );
@@ -1494,12 +1502,12 @@ function lockSettingsView(){if(!$("setupGate")||!$("protectedSettings"))return;i
 function unlockSettings(){let v=($("setupPin")?.value||"").trim();if(v===PIN){setupUnlocked=true;if($("setupError"))$("setupError").textContent="";lockSettingsView();}else{if($("setupError"))$("setupError").textContent="Code incorrect.";}}
 function requireSetupPin(){if(setupUnlocked)return true;let v=prompt("Setup-Code:");if(v===PIN){setupUnlocked=true;lockSettingsView();return true;}alert("Code incorrect.");return false;}
 function openAdminHub(){if(!requireSetupPin())return;tab("admin");}
-function markBackupToday(kind){db.settings.backupLog=db.settings.backupLog||{};db.settings.backupLog[TODAY()]=Object.assign(db.settings.backupLog[TODAY()]||{}, {[kind||"backup"]:new Date().toISOString()});localStorage.setItem(KEY,JSON.stringify(db));renderBackupIndicator();renderTagescheck();}
+function markBackupToday(kind){db.settings.backupLog=db.settings.backupLog||{};db.settings.backupLog[TODAY()]=Object.assign(db.settings.backupLog[TODAY()]||{}, {[kind||"backup"]:new Date().toISOString()});safeStorage.setItem(KEY,JSON.stringify(db));renderBackupIndicator();renderTagescheck();}
 function backupDoneToday(){let l=(db.settings.backupLog||{})[TODAY()]||{};return !!(l.json||l.excel||l.day);}
 function backupStatusHtml(){let l=(db.settings.backupLog||{})[TODAY()]||{};let parts=[];if(l.cloud)parts.push("Cloud");if(l.json)parts.push("JSON");if(l.excel)parts.push("Excel");if(l.day)parts.push("Tagesabschluss");return backupDoneToday()?`<span class="badge ok">Backup heute: ${esc(parts.join(" + "))}</span>`:`<span class="badge warn">Backup heute fehlt</span>`;}
 function renderBackupIndicator(){let el=$("backupTodayIndicator");if(el){el.className="statusNote small "+(backupDoneToday()?"ok":"warn");el.innerHTML=backupDoneToday()?"Backup heute wurde gemacht.":"Noch kein Backup heute. Am Tagesende JSON oder Excel sichern.";}}
 function dayCheck(){db.settings.dayChecks=db.settings.dayChecks||{};db.settings.dayChecks[TODAY()]=db.settings.dayChecks[TODAY()]||{};return db.settings.dayChecks[TODAY()];}
-function saveDayCheck(){let c=dayCheck();document.querySelectorAll('[data-check]').forEach(x=>{c[x.dataset.check]=!!x.checked;});localStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();}
+function saveDayCheck(){let c=dayCheck();document.querySelectorAll('[data-check]').forEach(x=>{c[x.dataset.check]=!!x.checked;});safeStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();}
 function renderTagescheck(){if(!$("tagescheck"))return;let c=dayCheck();document.querySelectorAll('[data-check]').forEach(x=>{x.checked=!!c[x.dataset.check];});let keys=["startAgenda","startPayments","startStock","startDevice","endPayments","endInvoices","endBackupJson","endBackupExcel"];let done=keys.filter(k=>c[k]).length;let pct=Math.round(done/keys.length*100);let paidToday=db.invoices.filter(i=>i.status==="bezahlt"&&(i.paidDate||i.invoiceDate)===TODAY()).length;let open=db.invoices.filter(i=>i.status==="erstellt").length;let low=db.products.filter(needsReorder).length;if($("dayCheckStatus")){$("dayCheckStatus").className="statusNote small "+(pct===100?"ok":"warn");$("dayCheckStatus").innerHTML=`Progression checklist: <b>${done}/${keys.length}</b> · ${backupStatusHtml()}`;}if($("dayCheckSummary"))$("dayCheckSummary").innerHTML=`<div class="dayProgress"><span style="width:${pct}%"></span></div><p>${backupStatusHtml()}</p><p>Factures payées aujourd'hui: <b>${paidToday}</b> · Factures ouvertes: <b>${open}</b> · Nachbestellen: <b>${low}</b></p><p class="small">Conseil: utiliser le bouton unique “Tagesabschluss” en fin de journée.</p>`;renderBackupIndicator();}
 function adjustStock(){let p=db.products.find(x=>x.id===$("adjustProduct")?.value),area=$("adjustArea")?.value,qty=Number($("adjustQty")?.value),reason=$("adjustReason")?.value||"Inventur-Korrektur",note=$("adjustNote")?.value||"";if(!p)return alert("Bitte Produkt wählen.");if(!Number.isFinite(qty)||qty<0)return alert("Bitte neuen realen Bestand eingeben.");let field=area==="institut"?"stockInstitut":"stockLager",old=Number(p[field]||0),delta=qty-old;p[field]=qty;addMovement(p,delta,area,area,reason,note||"Inventur");persist();alert(`Bestand korrigiert: ${p.sku} · ${old} → ${qty}`);}
 function renderInvoiceHelper(){
@@ -1547,7 +1555,7 @@ function dl(n,c,t="text/csv;charset=utf-8"){let a=document.createElement("a");a.
 function exportCSV(kind){let rows=db[kind]||[];if(!rows.length){alert("Keine Daten");return;}dl(`lune_${kind}_${TODAY()}.csv`,"\ufeff"+csv(rows));}
 function exportAllCSVs(){["bookings","customers","invoices","payments","products","stockMovements"].forEach(k=>{if((db[k]||[]).length)dl(`lune_${k}_${TODAY()}.csv`,"\ufeff"+csv(db[k]));});if($("backupStatus"))$("backupStatus").textContent="CSV-Export gestartet. Für Wiederherstellung bitte zusätzlich JSON-Backup speichern.";}
 function exportDay(){let d=TODAY(),pack={exportType:"lune_day_export",exportedAt:new Date().toISOString(),date:d,bookings:db.bookings.filter(x=>x.date===d),invoices:db.invoices.filter(x=>x.invoiceDate===d||x.paidDate===d||x.stornoDate===d),payments:db.payments.filter(x=>x.paymentDate===d),products:db.products,stockMovements:db.stockMovements.filter(x=>x.date===d),recipes:db.recipes,paymentReconciliation:paymentMethodSummary(d)};dl(`lune_tagesabschluss_${d}.json`,JSON.stringify(pack,null,2),"application/json");["bookings","invoices","payments","products","stockMovements"].forEach(k=>pack[k]?.length&&dl(`lune_${k}_${d}.csv`,"\ufeff"+csv(pack[k])));markBackupToday("day");}
-function backupJSON(){let pack={exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.4",exportedAt:new Date().toISOString(),data:db};dl(`lune_backup_complet_${TODAY()}.json`,JSON.stringify(pack,null,2),"application/json");markBackupToday("json");let c=dayCheck();c.endBackupJson=true;localStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();if($("backupStatus"))$("backupStatus").textContent="Backup exportiert. Datei sicher speichern, z.B. iCloud/Drive/USB.";}
+function backupJSON(){let pack={exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.4",exportedAt:new Date().toISOString(),data:db};dl(`lune_backup_complet_${TODAY()}.json`,JSON.stringify(pack,null,2),"application/json");markBackupToday("json");let c=dayCheck();c.endBackupJson=true;safeStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();if($("backupStatus"))$("backupStatus").textContent="Backup exportiert. Datei sicher speichern, z.B. iCloud/Drive/USB.";}
 function extractBackupData(raw){if(raw&&raw.exportType==="lune_staff_full_backup"&&raw.data)return raw.data;if(raw&&raw.settings&&raw.invoices&&raw.products)return raw;throw new Error("Diese Datei ist kein vollständiges Staff-Backup. Bitte eine Datei lune_backup_complet_YYYY-MM-DD.json importieren.");}
 function importBackupFile(ev){
   let file=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!file)return;
@@ -1557,14 +1565,14 @@ function importBackupFile(ev){
       let raw=JSON.parse(reader.result), incoming=normalizeDb(extractBackupData(raw));
       let info=`Backup enthält:\n- ${incoming.customers.length} Kunden\n- ${incoming.bookings.length} Termine\n- ${incoming.invoices.length} Rechnungen\n- ${incoming.payments.length} Zahlungen\n- ${incoming.products.length} Produkte\n\nAktuelle Daten werden ersetzt. Fortfahren?`;
       if(!confirm(info))return;
-      localStorage.setItem(KEY+"_before_import",JSON.stringify(db));
-      db=incoming; localStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard");
+      safeStorage.setItem(KEY+"_before_import",JSON.stringify(db));
+      db=incoming; safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard");
       alert("Backup importiert. Daten wurden wiederhergestellt. Der vorherige Stand wurde lokal als Sicherheitskopie behalten.");
     }catch(e){alert("Import fehlgeschlagen: "+e.message);}
   };
   reader.readAsText(file);
 }
-function restoreBeforeImport(){let s=localStorage.getItem(KEY+"_before_import");if(!s){alert("Keine lokale Sicherheitskopie vor Import gefunden.");return;}if(!confirm("Letzten Stand vor dem Import wiederherstellen? Aktuelle Daten werden ersetzt."))return;try{db=normalizeDb(JSON.parse(s));localStorage.setItem(KEY,JSON.stringify(db));renderAll();loadSettings();tab("dashboard");alert("Vorheriger Stand wiederhergestellt.");}catch(e){alert("Wiederherstellung fehlgeschlagen: "+e.message);}}
+function restoreBeforeImport(){let s=safeStorage.getItem(KEY+"_before_import");if(!s){alert("Keine lokale Sicherheitskopie vor Import gefunden.");return;}if(!confirm("Letzten Stand vor dem Import wiederherstellen? Aktuelle Daten werden ersetzt."))return;try{db=normalizeDb(JSON.parse(s));safeStorage.setItem(KEY,JSON.stringify(db));renderAll();loadSettings();tab("dashboard");alert("Vorheriger Stand wiederhergestellt.");}catch(e){alert("Wiederherstellung fehlgeschlagen: "+e.message);}}
 
 
 /* Excel backup/import using SheetJS. The XLSX library is loaded only when the user clicks Excel export/import. */
@@ -1613,7 +1621,7 @@ function exportExcelBackup(){
     addSheet(wb,"Service_Rezepte",recipesForExcel());
     addSheet(wb,"Staff_Backup_JSON",excelBackupChunks());
     XLSX.writeFile(wb,`Lune_Beauty_Staff_Excel_Backup_${TODAY()}.xlsx`);
-    markBackupToday("excel");let c=dayCheck();c.endBackupExcel=true;localStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();
+    markBackupToday("excel");let c=dayCheck();c.endBackupExcel=true;safeStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();
     excelSetStatus("Excel-Backup exportiert. Datei sicher speichern. Sie kann später über 'Excel importieren' wiederhergestellt werden.");
   }).catch(e=>alert(e.message));
 }
@@ -1671,7 +1679,7 @@ function importExcelFile(ev){
 - ${incoming.products.length} Produkte
 
 Aktuelle Daten werden ersetzt. Fortfahren?`))return;
-      localStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; localStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel-Backup importiert. Kompletter Staff-Stand wurde wiederhergestellt."); alert("Excel-Backup importiert."); return;
+      safeStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel-Backup importiert. Kompletter Staff-Stand wurde wiederhergestellt."); alert("Excel-Backup importiert."); return;
     }
     let incoming=structuredClone(db), changed=[];
     let productRows=excelSheetRows(wb,["Produkte_Stock","Products","Produkte","Stock"]); if(productRows.length){incoming.products=productsFromExcelRows(productRows);changed.push(`${incoming.products.length} Produkte/Lagerzeilen`);}
@@ -1685,7 +1693,7 @@ Aktuelle Daten werden ersetzt. Fortfahren?`))return;
     if(!changed.length){alert("Keine erkennbaren Staff-Tabellen im Excel gefunden. Erwartet: Produkte_Stock oder ein Staff-Excel-Backup.");return;}
     incoming=normalizeDb(incoming);
     if(!confirm(`Excel enthält erkannte Daten:\n- ${changed.join("\n- ")}\n\nAktuelle passende Bereiche werden ersetzt. Vorher wird lokal eine Sicherheitskopie gespeichert. Fortfahren?`))return;
-    localStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; localStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel importiert: "+changed.join(", ")+". Vorheriger Stand kann mit 'Vor Import zurück' wiederhergestellt werden."); alert("Excel importiert.");
+    safeStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel importiert: "+changed.join(", ")+". Vorheriger Stand kann mit 'Vor Import zurück' wiederhergestellt werden."); alert("Excel importiert.");
   }).catch(e=>alert("Excel-Import fehlgeschlagen: "+e.message));
 }
 
@@ -1766,7 +1774,7 @@ async function endOfDayCloudBackup(){
 
   try{
     if(typeof persist==="function")persist();
-    else if(typeof KEY!=="undefined")localStorage.setItem(KEY,JSON.stringify(db));
+    else if(typeof KEY!=="undefined")safeStorage.setItem(KEY,JSON.stringify(db));
   }catch(e){}
 
   try{
@@ -1787,7 +1795,7 @@ async function endOfDayCloudBackup(){
     let c=dayCheck();
     c.endBackupJson=true;
     c.endBackupExcel=true;
-    if(typeof KEY!=="undefined")localStorage.setItem(KEY,JSON.stringify(db));
+    if(typeof KEY!=="undefined")safeStorage.setItem(KEY,JSON.stringify(db));
     renderTagescheck();
     renderClose();
     renderBackupIndicator();
@@ -1856,15 +1864,15 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
   function appUnlocked(){ const app=byId('app'), login=byId('loginBox'); return !!(app && !app.classList.contains('hidden') && (!login || login.classList.contains('hidden'))); }
   function setDb(next){ try { db = next; return true; } catch(_) { return false; } }
   function esc(value){ return String(value ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
-  function readConfig(){ try { return Object.assign({apiUrl:'', token:'', auto:false}, JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}')); } catch(_) { return {apiUrl:'', token:'', auto:false}; } }
+  function readConfig(){ try { return Object.assign({apiUrl:'', token:'', auto:false}, JSON.parse(safeStorage.getItem(CONFIG_KEY) || '{}')); } catch(_) { return {apiUrl:'', token:'', auto:false}; } }
   function cloudReady(){ const c = readConfig(); return !!(c.apiUrl && c.apiUrl !== PLACEHOLDER && c.token); }
   function clientId(){
-    let id = localStorage.getItem(CLIENT_ID_KEY);
-    if(!id){ id = 'staff-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); localStorage.setItem(CLIENT_ID_KEY, id); }
+    let id = safeStorage.getItem(CLIENT_ID_KEY);
+    if(!id){ id = 'staff-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); safeStorage.setItem(CLIENT_ID_KEY, id); }
     return id;
   }
-  function seenIds(){ try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch(_) { return []; } }
-  function saveSeen(ids){ try { localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(new Set(ids)).slice(-500))); } catch(_) {} }
+  function seenIds(){ try { return JSON.parse(safeStorage.getItem(SEEN_KEY) || '[]'); } catch(_) { return []; } }
+  function saveSeen(ids){ try { safeStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(new Set(ids)).slice(-500))); } catch(_) {} }
   function today(){ try { return (typeof TODAY === 'function') ? TODAY() : new Date().toISOString().slice(0,10); } catch(_) { return new Date().toISOString().slice(0,10); } }
 
   function jsonp(action, params){
@@ -1950,7 +1958,7 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
     const addedBookings = (local.bookings || []).filter(b => !beforeIds.has(String(b.id || '')) && isOpenRequest(b));
     if(changed){
       setDb((typeof normalizeDb === 'function') ? normalizeDb(local) : local);
-      try { if(typeof KEY !== 'undefined') localStorage.setItem(KEY, JSON.stringify(getDb())); } catch(_) {}
+      try { if(typeof KEY !== 'undefined') safeStorage.setItem(KEY, JSON.stringify(getDb())); } catch(_) {}
       try { if(typeof renderAll === 'function') renderAll(); } catch(_) {}
       try { window.dispatchEvent(new CustomEvent('lune:staff-notify-merged', { detail:{changed, addedBookings} })); } catch(_) {}
     }
@@ -2118,7 +2126,7 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
         updateBadges();
         if(fresh.length) notifyFresh(fresh);
       }
-      localStorage.setItem(WATCH_KEY, new Date().toISOString());
+      safeStorage.setItem(WATCH_KEY, new Date().toISOString());
       updateCloudStatus('Cloud actif', 'ok');
     }catch(err){
       updateCloudStatus('Cloud erreur', 'bad');
@@ -2394,5 +2402,17 @@ body{min-height:100vh}
 })();
 </script>
 
+
+<script id="lune-v24-login-bootstrap">
+(function(){
+  function wireLogin(){
+    const input=document.getElementById('pinInput');
+    const button=document.querySelector('#loginBox button');
+    if(button){button.type='button';button.onclick=function(ev){ev.preventDefault();if(typeof window.doLogin==='function')window.doLogin();};}
+    if(input){input.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();if(typeof window.doLogin==='function')window.doLogin();}});setTimeout(()=>input.focus(),50);}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireLogin,{once:true});else wireLogin();
+})();
+</script>
 </body>
 </html>
