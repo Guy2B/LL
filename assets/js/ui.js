@@ -396,3 +396,56 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+// ======================================================
+// PREISE ANSEHEN — PREMIUM SCROLL + REVEAL
+// ======================================================
+
+document.querySelectorAll(
+  '.service-card-actions a[href^="#acc-"]'
+).forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const selector = link.getAttribute("href");
+    const target = document.querySelector(selector);
+
+    if (!target) return;
+
+    // Fermer proprement les autres catégories.
+    document.querySelectorAll("#pricing details.acc").forEach((details) => {
+      if (details !== target) {
+        details.removeAttribute("open");
+        details.classList.remove("premium-opening");
+      }
+    });
+
+    const targetTop =
+      target.getBoundingClientRect().top +
+      window.scrollY -
+      118;
+
+    window.scrollTo({
+      top: targetTop,
+      behavior: "smooth"
+    });
+
+    // Laisse le scroll commencer, puis révèle la catégorie.
+    window.setTimeout(() => {
+      target.classList.add("premium-opening");
+      target.setAttribute("open", "");
+
+      // Repositionnement très doux après expansion.
+      window.setTimeout(() => {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 220);
+
+      window.setTimeout(() => {
+        target.classList.remove("premium-opening");
+      }, 1700);
+    }, 520);
+  });
+});
