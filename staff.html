@@ -623,6 +623,12 @@ const EUR=v=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).fo
 const fmt=v=>Number(v||0).toLocaleString("de-DE",{maximumFractionDigits:3});
 function ymd(date=new Date()){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");}
 const TODAY=()=>ymd(new Date());
+function crmDate(value){
+  if(!value)return "—";
+  const raw=String(value);
+  const match=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? match[3]+"."+match[2]+"."+match[1].slice(-2) : raw;
+}
 const DATEKEY=()=>TODAY().replaceAll("-","");
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
 const payLabel=p=>({bar:"Bar",karte:"Karte",paypal:"PayPal",ueberweisung:"Überweisung (SEPA)"}[p]||p);
@@ -851,10 +857,16 @@ function updateBooking(id,o){
 }
 function quickBooking(){let b=addBooking({name:$("qName").value,phone:$("qPhone").value,email:$("qEmail").value,serviceId:$("qService").value,date:$("qDate").value,time:$("qTime").value,status:$("qStatus").value,notes:$("qNotes").value,source:$("qSource").value,address:$("qAddress").value});if(b){alert("Termin gespeichert");tab("agenda");openBooking(b.id);}}
 function saveBooking(){let id=$("bookingEditId").value,o=collectBookingForm();let b=id?updateBooking(id,o):addBooking(o);if(b){alert(id?"Termin geändert":"Termin gespeichert");openBooking(b.id);}}
+function focusBookingEditor(){
+  const editor=$("bookingEditId")?.closest(".card")||$("bookingEditId")?.parentElement;
+  if(editor)editor.scrollIntoView({behavior:"smooth",block:"start"});
+  setTimeout(()=>$("bName")?.focus({preventScroll:true}),420);
+}
 function newBookingForm(resetDetail=true){
   if(!$("bookingEditId"))return;
   $("bookingEditId").value="";["bName","bPhone","bEmail","bNotes"].forEach(id=>$(id).value="");$("bDate").value=$("bookingFilter")?.value||TODAY();$("bTime").value="10:00";$("bStatus").value="angefragt";$("bookingSaveBtn").textContent="Termin speichern";
   if(resetDetail&&$("bookingDetail"))$("bookingDetail").innerHTML='<h2>Terminübersicht</h2><p class="small">Termin anklicken, um Details, Kundenakte oder Rechnung zu öffnen.</p>';
+  focusBookingEditor();
 }
 function fillBookingForm(id){
   let b=db.bookings.find(x=>x.id===id); if(!b)return;
@@ -1043,7 +1055,7 @@ function openCustomer(id){
       <div class="dossierKpi"><span>Termine</span><b>${bs.length}</b></div>
       <div class="dossierKpi"><span>Rechnungen</span><b>${is.length}</b></div>
       <div class="dossierKpi"><span>Umsatz bezahlt</span><b>${EUR(revenue)}</b></div>
-      <div class="dossierKpi"><span>Nächster Termin</span><b style="font-size:15px">${nextBooking?esc(nextBooking.date+' '+nextBooking.time):'–'}</b></div>
+      <div class="dossierKpi"><span>Nächster Termin</span><b style="font-size:15px">${nextBooking?esc(crmDate(nextBooking.date)+' · '+nextBooking.time):'–'}</b></div>
     </div>
     ${warnings.join('')}
     <details class="dossierSection" open><summary>Kontaktdaten & Identität</summary><div class="dossierSectionBody customerForm">
@@ -1065,7 +1077,7 @@ function openCustomer(id){
     <div class="small" style="margin-top:12px">${lastBooking?'Letzte Behandlung: '+esc(lastBooking.date+' · '+lastBooking.service):'Noch keine abgeschlossene Behandlung.'}</div>`;
 }
 function saveCustomer(id){let c=db.customers.find(x=>x.id===id);if(!c)return;c.name=$("cName").value||"Kunde";c.phone=$("cPhone").value;c.email=$("cEmail").value;c.address=$("cAddress").value;c.notes=$("cNotes").value;c.anamnesis={skin:$("cSkin").value,allergies:$("cAllergies").value,contra:$("cContra").value,medication:$("cMedication").value,lastReaction:$("cLastReaction").value};db.bookings.forEach(b=>{if(b.customerId===id){b.name=c.name;b.phone=c.phone;b.email=c.email;}});db.invoices.forEach(i=>{if(i.customerId===id){i.customer=c.name;i.phone=c.phone;i.email=c.email;i.address=c.address;}});persist();openCustomer(id);}
-function newBookingForCustomer(id){let c=db.customers.find(x=>x.id===id);if(!c)return;tab("agenda");newBookingForm(false);$("bName").value=c.name;$("bPhone").value=c.phone||"";$("bEmail").value=c.email||"";}
+function newBookingForCustomer(id){let c=db.customers.find(x=>x.id===id);if(!c)return;tab("agenda");newBookingForm(false);$("bName").value=c.name;$("bPhone").value=c.phone||"";$("bEmail").value=c.email||"";focusBookingEditor();}
 function invoiceForCustomer(id){let c=db.customers.find(x=>x.id===id);if(!c)return;tab("invoice");resetInvoiceForm(true);$("iCustomer").value=c.name;$("iPhone").value=c.phone||"";$("iEmail").value=c.email||"";$("iAddress").value=c.address||"";}
 function paymentHint(){let p=$("iPayment").value;$("payHint").textContent=(p==="paypal"||p==="ueberweisung")?"PayPal zeigt einen PayPal.Me-Zahlungslink mit Betrag; Überweisung zeigt einen SEPA-QR mit IBAN, Betrag und Verwendungszweck.":"Bar/Karte wird als Zahlungsart gespeichert.";}
 
@@ -1854,7 +1866,7 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
   const CLIENT_ID_KEY = 'lune_staff_cloud_client_id_v1';
   const SEEN_KEY = 'lune_staff_seen_request_ids_v18';
   const WATCH_KEY = 'lune_staff_last_watch_v16';
-  const WATCH_MS = 20000;
+  const WATCH_MS = 90000;
   const PLACEHOLDER = 'PASTE_GOOGLE_APPS_SCRIPT_STAFF_CLOUD_URL_HERE';
   let watchTimer = null;
   let inFlight = false;
@@ -2100,6 +2112,10 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
           if(byId('bookingFilter') && first.date) byId('bookingFilter').value = first.date;
           if(typeof setAgendaMode === 'function') setAgendaMode('day');
           if(typeof openBooking === 'function') openBooking(first.id);
+          setTimeout(() => {
+            const detail=byId('bookingDetail');
+            if(detail)detail.scrollIntoView({behavior:'smooth',block:'start'});
+          },120);
         }catch(_){}
       }, 80);
     }
@@ -2163,7 +2179,10 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
   }
 
   window.addEventListener('lune:staff-login', () => setTimeout(init, 250));
-  window.addEventListener('lune:cloud-db-updated', () => setTimeout(() => { if(appUnlocked()){ updateBadges(); watchCloudOnce(); } }, 250));
+  window.addEventListener('lune:cloud-db-updated', () => setTimeout(() => { if(appUnlocked()) updateBadges(); }, 250));
+  document.addEventListener('visibilitychange', () => { if(document.hidden) stopWatcher(); else if(appUnlocked()) startWatcher(); });
+  window.addEventListener('online', () => { if(appUnlocked()) startWatcher(); });
+  window.addEventListener('offline', () => { stopWatcher(); updateCloudStatus('Cloud hors ligne','warn'); });
   window.addEventListener('storage', e => { if(e.key === CONFIG_KEY) startWatcher(); });
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
@@ -2237,7 +2256,7 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
     document.getElementById('customerList').innerHTML=rows.map(c=>{
       let bs=customerBookings(c),is=customerInvoices(c),hs=customerSkinAnalyses(c),next=bs.filter(b=>b.status!=='storniert'&&b.date>=TODAY()).sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)))[0];
       const completion=profileCompletion(c),dupes=possibleDuplicates(c).length;
-      return `<div class="item crmCustomerRow" onclick="openCustomer('${esc(c.id)}')"><div class="cleanSectionHead"><div><b>${esc(c.name||'Neue Kundin')}</b><br><span class="small">${esc(c.phone||'Kein Telefon')}${c.email?' · '+esc(c.email):''}</span></div><span class="badge ${dupes?'warn':''}">${dupes?'Duplikat prüfen':completion+'% Profil'}</span></div><div class="crmCustomerMeta"><span class="badge">${bs.length} Termine</span><span class="badge">${is.length} Rechnungen</span><span class="badge">${hs.length} Analysen</span>${next?`<span class="badge ok">Nächster ${esc(next.date)}</span>`:''}</div><div class="crmCompletion"><span style="width:${completion}%"></span></div></div>`;
+      return `<div class="item crmCustomerRow" role="button" tabindex="0" aria-label="Kundenakte ${esc(c.name||'Neue Kundin')} öffnen" onclick="openCustomer('${esc(c.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCustomer('${esc(c.id)}')}"><div class="cleanSectionHead"><div><b>${esc(c.name||'Neue Kundin')}</b><br><span class="small">${esc(c.phone||'Kein Telefon')}${c.email?' · '+esc(c.email):''}</span></div><span class="badge ${dupes?'warn':''}">${dupes?'Duplikat prüfen':completion+'% Profil'}</span></div><div class="crmCustomerMeta"><span class="badge">${bs.length} Termine</span><span class="badge">${is.length} Rechnungen</span><span class="badge">${hs.length} Analysen</span>${next?`<span class="badge ok">Nächster ${esc(crmDate(next.date))}</span>`:''}</div><div class="crmCompletion"><span style="width:${completion}%"></span></div></div>`;
     }).join('')||"<p class='small'>Keine Kundinnen gefunden.</p>";
   };
 
@@ -2466,11 +2485,6 @@ body{min-height:100vh}
       else if(similarity>=.72){score+=Math.round(similarity*45);reasons.push("ähnlicher Name");}
       return {customer:c,score:score,reasons:reasons};
     }).filter(function(item){return item.score>=32;}).sort(function(a,b){return b.score-a.score;});
-  }
-  function crmDate(value){
-    if(!value)return "—";
-    const raw=String(value),match=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return match?match[3]+"."+match[2]+"."+match[1]:raw;
   }
   function crmToast(message,type){
     document.querySelector(".crmToast")?.remove();
@@ -3135,7 +3149,10 @@ body{min-height:100vh}
         originalPrintInvoice(id);
         overlay.ok(2);
       }catch(error){
-        overlay.bad(1,"PDF konnte nicht gespeichert werden · "+(error.message||error));
+        const message=String(error&&error.message||error||"");
+        overlay.bad(1,message.includes("Action inconnue: deliverInvoice")||message.includes("Action inconnue")
+          ? "Apps Script ist nicht aktuell veröffentlicht. Code.gs neu bereitstellen und die neue Web-App-URL im Staff speichern."
+          : "PDF konnte nicht gespeichert werden · "+message);
       }
       overlay.closeable();
       renderInvoice(id,"invoiceDetail");
@@ -3332,7 +3349,7 @@ body{min-height:100vh}
   function safe(value){return typeof esc==="function"?esc(value):String(value||"");}
   function deDate(value){
     const m=String(value||"").match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return m?`${m[3]}.${m[2]}.${m[1]}`:(value||"–");
+    return m?`${m[3]}.${m[2]}.${m[1].slice(-2)}`:(value||"–");
   }
   function bookingById(id){return (db.bookings||[]).find(b=>String(b.id)===String(id));}
   function customerById(id){return (db.customers||[]).find(c=>String(c.id)===String(id));}
@@ -3883,7 +3900,7 @@ body{min-height:100vh}
         <div class="card">
           <h2>Noch keine Rechnung</h2>
           <p class="small">Sie können eine Rechnung direkt ohne Termin erstellen.</p>
-          <button class="gold" onclick="newFreeInvoice()">Neue Rechnung ohne Termin</button>
+          <button class="gold" onclick="resetInvoiceForm(true);tab('invoice')">Neue Rechnung ohne Termin</button>
         </div>`;
       return;
     }
@@ -3963,5 +3980,40 @@ body{min-height:100vh}
   }
 </style>
 
+
+<style id="lune-staff-v23-mobile-ux">
+  .crmCustomerRow{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:rgba(185,155,98,.18)}
+  .crmCustomerRow:focus-visible{outline:3px solid rgba(185,155,98,.55);outline-offset:2px}
+  .crmCustomerRow:active{transform:scale(.99);background:#fff9ee}
+  @media(max-width:700px){
+    body{font-size:16px!important;padding-bottom:92px!important}
+    main{padding:10px!important;width:100%!important;overflow-x:hidden!important}
+    .staffShell,.staffLayout,.customerWorkspace,.customerDossier,.grid,.row,.row3,.row4{grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important}
+    .card{padding:13px!important;border-radius:18px!important;margin-bottom:12px!important;overflow:hidden!important}
+    #customerList{max-height:none!important;overflow:visible!important;padding-right:0!important}
+    .crmCustomerRow{display:block!important;width:100%!important;min-height:112px!important;padding:16px!important;margin:10px 0!important}
+    .crmCustomerRow .cleanSectionHead{display:flex!important;align-items:flex-start!important;gap:10px!important}
+    .crmCustomerRow .cleanSectionHead>div{min-width:0!important;flex:1!important}
+    .crmCustomerRow b{font-size:17px!important;line-height:1.3!important}
+    .crmCustomerRow .small{display:block!important;font-size:14px!important;overflow-wrap:anywhere!important;margin-top:4px!important}
+    .crmCustomerMeta{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin-top:11px!important}
+    .crmCustomerMeta .badge{font-size:12px!important;padding:6px 9px!important}
+    .customerDossierHead{display:grid!important;grid-template-columns:56px minmax(0,1fr)!important;gap:10px!important}
+    .dossierActions{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}
+    .dossierActions button,.bookingActions button,.noPrint button{min-height:52px!important;width:100%!important;margin:0!important;white-space:normal!important}
+    .dossierKpis,.v22CustomerSummary{grid-template-columns:1fr 1fr!important;gap:8px!important}
+    .dossierKpi,.v22SummaryCard{min-width:0!important;padding:11px!important}
+    .dossierKpi b,.v22SummaryCard b{font-size:15px!important;overflow-wrap:anywhere!important;white-space:normal!important}
+    .crmDossierNav{position:sticky!important;top:0!important;z-index:12!important;background:rgba(251,247,240,.96)!important;padding:8px 0!important}
+    input,select,textarea{font-size:16px!important;min-height:50px!important}
+    .invoice{padding:12px!important;overflow-x:auto!important}
+    .invoice table{min-width:620px!important}
+    #cloudMiniStatus,.staffMiniCloud{max-width:150px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  }
+  @media(max-width:420px){
+    .dossierActions,.dossierKpis,.v22CustomerSummary{grid-template-columns:1fr!important}
+    .crmCustomerRow .cleanSectionHead{flex-direction:column!important}
+  }
+</style>
 </body>
 </html>
