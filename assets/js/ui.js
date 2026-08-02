@@ -70,7 +70,6 @@
 
 })();
 
-
 // ======================================================
 // WHATSAPP
 // ======================================================
@@ -84,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => box.classList.add("active"), 3000);
   close.addEventListener("click", () => box.classList.remove("active"));
 });
-
 
 // ======================================================
 // VIDEO SYSTEM (FINAL CLEAN STABLE)
@@ -146,27 +144,62 @@ wrappers.forEach(wrapper => {
   });
 
 });
-document.getElementById("booking-form")?.addEventListener("submit", function(e) {
+document.getElementById("booking-form")?.addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  const form = e.target;
+  const form = e.currentTarget;
   const success = document.getElementById("booking-success");
+  const errorBox = document.getElementById("booking-error");
   const submitBtn = form.querySelector('button[type="submit"]');
-  const oldText = submitBtn ? submitBtn.textContent : '';
+  const oldText = submitBtn ? submitBtn.textContent : "Termin anfragen";
+
+  success?.classList.add("hidden");
+  if (success) success.hidden = true;
+  errorBox?.classList.add("hidden");
+  if (errorBox) errorBox.hidden = true;
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    form.querySelector(":invalid")?.focus();
+    return;
+  }
 
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.textContent = "Wird gesendet…";
   }
 
-  fetch(form.action, {
-    method: "POST",
-    body: new FormData(form),
-    headers: { "Accept": "application/json" }
-  }).catch(() => {
-    // Formsubmit can fail silently on some browsers; the cloud copy still runs through booking-cloud.js.
-  }).finally(() => {
+  let sent = false;
+  let lastError = null;
+
+  try {
+    if (window.LuneBookingCloud?.ready?.()) {
+      await window.LuneBookingCloud.submit(form);
+      sent = true;
+    }
+  } catch (error) {
+    lastError = error;
+  }
+
+  if (!sent) {
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { "Accept": "application/json" }
+      });
+      if (!response.ok) throw new Error("Formularversand fehlgeschlagen (" + response.status + ")");
+      sent = true;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (sent) {
+    errorBox?.classList.add("hidden");
+    if (errorBox) errorBox.hidden = true;
     success?.classList.remove("hidden");
+    if (success) success.hidden = false;
 
     document.getElementById("selected-service")?.classList.add("hidden");
     document.getElementById("selected-price")?.classList.add("hidden");
@@ -176,73 +209,25 @@ document.getElementById("booking-form")?.addEventListener("submit", function(e) 
       .forEach(li => li.classList.remove("active-service"));
 
     form.reset();
+    success?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = oldText || "Termin anfragen";
-    }
-
-    setTimeout(() => {
+    window.setTimeout(() => {
       success?.classList.add("hidden");
-    }, 5200);
-  });
-});
-document.querySelectorAll(".book-link").forEach(link => {
+      if (success) success.hidden = true;
+        }, 7000);
+  } else {
+    success?.classList.add("hidden");
+    if (success) success.hidden = true;
+    errorBox?.classList.remove("hidden");
+    if (errorBox) errorBox.hidden = false;
+    console.error("Lune Beauty booking failed:", lastError);
+    errorBox?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    const service = link.dataset.service;
-    const select = document.querySelector("#booking-form select");
-    const booking = document.getElementById("booking");
-
-    // ✅ Set dropdown
-    if (select) {
-      const option = [...select.options].find(o => o.text.trim() === service.trim());
-      if (option) select.value = option.value;
-    }
-
-    // ✅ Show selected service badge
-    const badge = document.getElementById("selected-service");
-    if (badge) {
-      badge.classList.remove("hidden");
-      badge.querySelector("span").textContent = service;
-    }
-
-    // ✅ Smooth scroll
-    if (booking) {
-      const yOffset = -110;
-      const y = booking.getBoundingClientRect().top + window.scrollY + yOffset;
-
-      window.scrollTo({
-        top: y,
-        behavior: "smooth"
-      });
-    }
-
-    // ✅ Glow effect
-    const card = document.querySelector(".booking-card");
-    if (card) {
-      card.classList.add("highlight");
-      setTimeout(() => card.classList.remove("highlight"), 1400);
-    }
-
-    // ✅ Focus input
-    const firstInput = document.querySelector("#booking-form input");
-    if (firstInput) {
-      setTimeout(() => firstInput.focus(), 500);
-    }
-
-    // ✅ Highlight clicked service
-    document.querySelectorAll(".acc-list li").forEach(li => {
-      li.classList.remove("active-service");
-    });
-
-    const parentLi = link.closest("li");
-    if (parentLi) parentLi.classList.add("active-service");
-
-  });
-
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = oldText;
+  }
 });
 const SERVICE_PRICES = {
   "Basisbehandlung Gesicht": "69 €",
@@ -272,62 +257,83 @@ const SERVICE_PRICES = {
   "Kombi Augenbehandlung": "45 €"
 };
 
-document.querySelectorAll(".book-link").forEach(link => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
+function selectBookingService(service, options = {}) {
+  const value = String(service || "").trim();
+  if (!value) return false;
 
-    const service = link.dataset.service;
-    const select = document.querySelector("#booking-form select");
+  const form = document.getElementById("booking-form");
+  const select = form?.querySelector('select[name="service"]');
+  if (!select) return false;
 
-    // ✅ Set dropdown
-    if (select) {
-      const option = [...select.options].find(o => o.text.trim() === service.trim());
-      if (option) select.value = option.value;
-    }
+  const option = [...select.options].find(item =>
+    item.text.trim().toLowerCase() === value.toLowerCase() ||
+    String(item.value || "").trim().toLowerCase() === value.toLowerCase()
+  );
+  if (!option) return false;
 
-    // ✅ Badge
-    const badge = document.getElementById("selected-service");
-    if (badge) {
-      badge.classList.remove("hidden");
-      badge.querySelector("span").textContent = service;
-    }
+  select.value = option.value;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
 
-    // ✅ Price
-    const priceBox = document.getElementById("selected-price");
-    if (priceBox) {
-      priceBox.classList.remove("hidden");
-      priceBox.textContent = "Preis: " + (SERVICE_PRICES[service] || "");
-    }
+  const badge = document.getElementById("selected-service");
+  if (badge) {
+    badge.classList.remove("hidden");
+    const label = badge.querySelector("span");
+    if (label) label.textContent = option.text.trim();
+  }
 
-    // ✅ Floating summary
-    const floating = document.getElementById("floating-summary");
-    if (floating) {
-      floating.classList.remove("hidden");
-      floating.textContent = service + " · " + (SERVICE_PRICES[service] || "");
-    }
+  const price = SERVICE_PRICES[option.text.trim()] || "";
+  const priceBox = document.getElementById("selected-price");
+  if (priceBox) {
+    priceBox.classList.toggle("hidden", !price);
+    priceBox.textContent = price ? "Preis: " + price : "";
+  }
 
-    // ✅ Scroll
+  const floating = document.getElementById("floating-summary");
+  if (floating) {
+    floating.classList.remove("hidden");
+    floating.textContent = option.text.trim() + (price ? " · " + price : "");
+  }
+
+  if (options.scroll !== false) {
     const booking = document.getElementById("booking");
     if (booking) {
-      const y = booking.getBoundingClientRect().top + window.scrollY - 110;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      const top = booking.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({
+        top,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+      });
     }
+  }
 
-    // ✅ Glow
-    const card = document.querySelector(".booking-card");
-    if (card) {
-      card.classList.add("highlight");
-      setTimeout(() => card.classList.remove("highlight"), 1200);
-    }
+  document.querySelectorAll(".acc-list li").forEach(item => item.classList.remove("active-service"));
+  options.sourceElement?.closest("li")?.classList.add("active-service");
 
-    // ✅ Highlight service row
-    document.querySelectorAll(".acc-list li").forEach(li => li.classList.remove("active-service"));
-    link.closest("li")?.classList.add("active-service");
+  const card = document.querySelector(".booking-card");
+  if (card) {
+    card.classList.add("highlight");
+    window.setTimeout(() => card.classList.remove("highlight"), 1000);
+  }
 
-    // ✅ Focus input
-    setTimeout(() => {
-      document.querySelector("#booking-form input")?.focus();
-    }, 500);
+  if (options.focus !== false) {
+    window.setTimeout(() => {
+      const target = window.innerWidth <= 760
+        ? form.querySelector('input[name="date"]')
+        : form.querySelector('input[name="name"]');
+      target?.focus({ preventScroll: true });
+    }, 420);
+  }
+
+  return true;
+}
+
+document.querySelectorAll(".book-link").forEach(link => {
+  link.addEventListener("click", event => {
+    event.preventDefault();
+    selectBookingService(link.dataset.service, {
+      sourceElement: link,
+      scroll: true,
+      focus: true
+    });
   });
 });
 
@@ -449,3 +455,28 @@ document.querySelectorAll(
     }, 520);
   });
 });
+
+// Lune Beauty V23 — Pflicht-E-Mail im Terminformular
+(function(){
+  const form=document.getElementById("booking-form");
+  if(!form)return;
+  const email=form.querySelector('input[name="email"]');
+  if(email){
+    email.required=true;
+    email.setAttribute("aria-required","true");
+    email.setAttribute("autocomplete","email");
+    email.addEventListener("invalid",function(){
+      email.setCustomValidity(email.value.trim()?"Bitte geben Sie eine gültige E-Mail-Adresse ein.":"Bitte geben Sie Ihre E-Mail-Adresse ein.");
+    });
+    email.addEventListener("input",function(){email.setCustomValidity("");});
+  }
+  form.addEventListener("submit",function(event){
+    if(!form.checkValidity()){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      form.reportValidity();
+      form.querySelector(":invalid")?.focus({preventScroll:false});
+    }
+  },true);
+})();
+
