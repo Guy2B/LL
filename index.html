@@ -1181,10 +1181,10 @@
   <nav class="top-nav">
     <div class="nav-inner">
       <a href="#hero" aria-label="Lune Beauty">
-        <img src="assets/img/logo.png" class="brand-logo" alt="Lune Beauty" />
+        <img src="assets/img/logo.png" class="brand-logo" alt="Lune Beauty" / loading="lazy" decoding="async">
       </a>
 
-      <ul class="nav-links">
+      <ul class="nav-links" id="main-navigation">
         <li><a href="#hero">Home</a></li>
         <li><a href="#services">Behandlungen</a></li>
         <li><a href="#pricing">Preise</a></li>
@@ -1219,7 +1219,7 @@
       src="assets/img/logo.png" 
       class="hero-logo" 
       alt="Lune Beauty Kosmetikstudio in Worms" 
-    />
+    / decoding="async">
 
     <h1 class="hero-title">
       Premium Kosmetikstudio in Worms
@@ -1241,7 +1241,7 @@
 
       <!-- IMAGE -->
       <div class="studio-image">
-        <img src="assets/img/studio-1.webp" alt="Lune Beauty Studio">
+        <img src="assets/img/studio-1.webp" alt="Lune Beauty Studio" loading="lazy" decoding="async">
       </div>
 
       <!-- TEXT CARD -->
@@ -1419,7 +1419,7 @@
       <div class="services-grid">
 
         <article class="service-card service-choice-card" data-target="acc-face">
-          <img src="assets/img/gesichtsbehandlung.png" alt="Gesichtsbehandlung in Worms bei Lune Beauty" />
+          <img src="assets/img/gesichtsbehandlung.png" alt="Gesichtsbehandlung in Worms bei Lune Beauty" / loading="lazy" decoding="async">
           <h3>Gesichtsbehandlung</h3>
           <div class="service-card-actions">
             <a href="#acc-face" onclick="event.stopPropagation()">Preise ansehen</a>
@@ -1428,7 +1428,7 @@
         </article>
 
         <article class="service-card service-choice-card" data-target="acc-mani">
-          <img src="assets/img/manikuere.png" alt="Maniküre und Fußpflege in Worms bei Lune Beauty" />
+          <img src="assets/img/manikuere.png" alt="Maniküre und Fußpflege in Worms bei Lune Beauty" / loading="lazy" decoding="async">
           <h3>Maniküre &amp; Fußpflege</h3>
           <div class="service-card-actions">
             <a href="#acc-mani" onclick="event.stopPropagation()">Preise ansehen</a>
@@ -1437,7 +1437,7 @@
         </article>
 
         <article class="service-card service-choice-card" data-target="acc-eye">
-          <img src="assets/img/augenpflege.png" alt="Augenpflege in Worms bei Lune Beauty" />
+          <img src="assets/img/augenpflege.png" alt="Augenpflege in Worms bei Lune Beauty" / loading="lazy" decoding="async">
           <h3>Augenpflege</h3>
           <div class="service-card-actions">
             <a href="#acc-eye" onclick="event.stopPropagation()">Preise ansehen</a>
@@ -2141,26 +2141,22 @@
       <!-- ✅ CORRECT FORM -->
       <form id="booking-form" action="https://formsubmit.co/lunebeauty.kontakt@gmail.com" method="POST">
 
-  <!-- ✅ Hidden config -->
+  <!-- Configuration et champs techniques conservés -->
   <input type="hidden" name="_subject" value="Neue Terminanfrage - Lune Beauty">
   <input type="hidden" name="_captcha" value="false">
   <input type="hidden" name="_template" value="table">
   <input type="hidden" name="notes" value="">
 
-        <!-- ✅ UX elements -->
-        <div id="selected-service" class="selected-service hidden">
-          <span></span>
-        </div>
+  <div id="selected-service" class="selected-service hidden">
+    <span></span>
+  </div>
+  <div id="selected-price" class="selected-price hidden"></div>
 
-        <div id="selected-price" class="selected-price hidden"></div>
-
-        <!-- ✅ Inputs -->
-        <input type="text" name="name" placeholder="Name" required>
-        <input type="tel" name="phone" placeholder="Telefonnummer" required>
-        <input type="email" name="email" placeholder="E-Mail (optional)">
-
-        <!-- ✅ FULL SERVICE LIST -->
-        <select name="service" required>
+  <!-- Identifiants de groupe conservés, invisibles visuellement -->
+  <div class="booking-group-label" id="booking-group-treatment" hidden><span>1</span> Behandlung</div>
+  <div class="booking-field">
+    <label for="booking-service">Behandlung</label>
+    <select id="booking-service" name="service" required>
           <option value="">Behandlung wählen</option>
 
           <optgroup label="Gesicht">
@@ -2207,19 +2203,46 @@
           </optgroup>
 
         </select>
+  </div>
 
-        <!-- Date/time -->
-        <input type="date" name="date" required>
-        <input type="time" name="time" required>
+  <div class="booking-group-label" id="booking-group-date" hidden><span>2</span> Termin</div>
+  <div class="booking-field">
+    <label for="booking-date">Wunschtag</label>
+    <input id="booking-date" type="date" name="date" required>
+  </div>
 
- <!-- ✅ ✅ ADD IT HERE -->
-  <div id="booking-success" class="booking-success hidden">✅ Vielen Dank. Ihre Anfrage wird bearbeitet. Wir melden uns in Kürze zur Bestätigung.</div>
+  <div class="booking-field">
+    <label for="booking-time">Wunschzeit</label>
+    <input id="booking-time" type="time" name="time" required>
+  </div>
 
-        <!-- Submit -->
-        <button type="submit">Termin anfragen</button>
-        <p class="form-note small" style="margin-top:10px;color:#777">Ihre Anfrage wird persönlich bearbeitet. Wir melden uns zur Bestätigung.</p>
+  <div class="booking-group-label" id="booking-group-contact" hidden><span>3</span> Kontakt</div>
+  <div class="booking-field">
+    <label for="booking-name">Vor- und Nachname</label>
+    <input id="booking-name" type="text" name="name" placeholder="Vor- und Nachname" autocomplete="name" required>
+  </div>
 
-      </form>
+  <div class="booking-field">
+    <label for="booking-phone">Telefonnummer</label>
+    <input id="booking-phone" type="tel" name="phone" placeholder="+49 …" autocomplete="tel" inputmode="tel" required>
+  </div>
+
+  <div class="booking-field">
+    <label for="booking-email">E-Mail-Adresse</label>
+    <input id="booking-email" type="email" name="email" placeholder="name@beispiel.de" autocomplete="email" inputmode="email" required aria-required="true">
+  </div>
+
+  <div id="booking-success" class="booking-success hidden" hidden role="status" aria-live="polite">
+    Vielen Dank. Ihre Terminanfrage ist bei uns eingegangen.<br>
+    Der Termin ist erst nach unserer persönlichen Bestätigung verbindlich.
+  </div>
+
+  <div id="booking-error" class="booking-error hidden" hidden role="alert" aria-live="assertive">
+    Die Terminanfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.
+  </div>
+
+  <button type="submit">Termin anfragen</button>
+</form>
 
     </div>
 
