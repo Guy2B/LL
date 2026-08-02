@@ -1524,5 +1524,78 @@ function redirectToWebsiteBookingFallback(payload, error){
 
 async function sendRequest(){if(!lastResult)return;const name=$("archiveName").value.trim(),phone=$("archivePhone").value.trim(),email=$("archiveEmail").value.trim();if(!phone&&!email){$("archiveStatus").innerHTML='<span class="error">Bitte Telefon oder E-Mail angeben.</span>';return;}if(!$("archiveConsent").checked){$("archiveStatus").innerHTML='<span class="error">Bitte Zustimmung aktivieren.</span>';return;}const btn=$("archiveBtn"),old=btn.textContent;btn.disabled=true;btn.textContent='Wird gesendet…';const r=lastResult;const payload={action:'publicSkinAnalysis',source:'Skin Check',page:location.href,name:name||'Skin Check Kundin',phone,email,profileId:r.profile.id,profileName:r.profile.name,confidence:r.profile.conf,treatmentId:r.treatment.id,treatmentName:r.treatment.title,recommendedService:r.treatment.service,score:r.metrics.overall,scores:JSON.stringify(r.metrics),reasons:JSON.stringify(r.reasons),consent:'yes',consentText:'Kosmetisches Hautprofil darf zur Beratung gespeichert werden. Foto wird nicht übertragen.'};try{if(!apiReady()) throw new Error('Cloud URL fehlt');const res=await jsonp(window.LUNE_STAFF_CLOUD_API,payload);$("archiveStatus").innerHTML=`<div class="successBox">Gesendet. Anfrage ${esc(res.bookingId||'')} ist im Staff/Cloud gespeichert.</div>`;setTimeout(()=>{window.location.href='https://www.lunebeauty.de/';},2600);}catch(e){console.warn('Skin Check Cloud error:', e);redirectToWebsiteBookingFallback(payload,e);}finally{setTimeout(()=>{btn.disabled=false;btn.textContent=old;},1800);}}
 </script>
+
+
+<style id="lune-skin-v18-camera-mobile-large">
+/* V18 — Larger mobile camera preview.
+   Keeps the complete flow scrollable while making the face clearly visible. */
+@media (max-width:520px){
+  .screen#photoScreen.active,
+  .photoCard{
+    min-height:0!important;
+  }
+  .photoCard{
+    display:flex!important;
+    flex-direction:column!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+    padding:14px!important;
+    gap:10px!important;
+  }
+  .photoCard::-webkit-scrollbar{display:none!important}
+  .photoCard .heroText{flex:0 0 auto!important;overflow:visible!important}
+  .cameraBox{
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:0!important;
+    overflow:visible!important;
+    padding:2px 0!important;
+  }
+  .cameraCircle{
+    width:min(76vw,310px)!important;
+    height:min(76vw,310px)!important;
+    min-width:250px!important;
+    min-height:250px!important;
+    max-width:310px!important;
+    max-height:310px!important;
+    margin:0 auto!important;
+  }
+  .quality{flex:0 0 auto!important}
+  .photoCard .consent{flex:0 0 auto!important;max-height:none!important;overflow:visible!important}
+  .photoCard .actions{flex:0 0 auto!important}
+  .photoCard .status{flex:0 0 auto!important}
+}
+@media (max-width:380px){
+  .cameraCircle{
+    width:min(80vw,286px)!important;
+    height:min(80vw,286px)!important;
+    min-width:238px!important;
+    min-height:238px!important;
+  }
+}
+@media (max-width:520px) and (max-height:700px){
+  .cameraCircle{
+    width:min(68vw,270px)!important;
+    height:min(68vw,270px)!important;
+    min-width:226px!important;
+    min-height:226px!important;
+  }
+}
+@media (max-width:360px) and (max-height:620px){
+  .cameraCircle{
+    width:228px!important;
+    height:228px!important;
+    min-width:228px!important;
+    min-height:228px!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .mapDot.active{animation:none!important}
+  *{scroll-behavior:auto!important}
+}
+</style>
+
 </body>
 </html>
