@@ -1130,17 +1130,16 @@
 
 <style id="algbr-credit-ci">
 .algbr-credit-wrap{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:calc(4px + env(safe-area-inset-bottom,0px));
-  z-index:20;
+  position:static;
+  width:100%;
   display:flex;
   justify-content:center;
-  pointer-events:none;
+  align-items:center;
+  margin:8px 0 0;
+  padding:2px 12px 8px;
+  pointer-events:auto;
 }
 .algbr-credit{
-  pointer-events:auto;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -1151,7 +1150,6 @@
   border-radius:999px;
   background:rgba(255,253,249,.84);
   box-shadow:0 3px 10px rgba(62,44,24,.05);
-  backdrop-filter:blur(10px);
   text-decoration:none!important;
   opacity:.80;
   line-height:1;
