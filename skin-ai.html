@@ -1148,6 +1148,58 @@ button,.btn,.step,.badge,.field label,.treatmentPill,.featurePill{font-weight:60
 }
 
 </style>
+
+<style id="algbr-credit-ci">
+.algbr-credit-wrap{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:calc(4px + env(safe-area-inset-bottom,0px));
+  z-index:20;
+  display:flex;
+  justify-content:center;
+  pointer-events:none;
+}
+.algbr-credit{
+  pointer-events:auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  min-height:22px;
+  padding:3px 8px;
+  border:1px solid rgba(185,155,98,.24);
+  border-radius:999px;
+  background:rgba(255,253,249,.84);
+  box-shadow:0 3px 10px rgba(62,44,24,.05);
+  backdrop-filter:blur(10px);
+  text-decoration:none!important;
+  opacity:.80;
+  line-height:1;
+}
+.algbr-credit-by{
+  color:#9a8d79;
+  font-size:6.5px;
+  font-weight:500;
+}
+.algbr-wordmark{
+  display:inline-flex;
+  align-items:baseline;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+}
+.algbr-a{color:#173f72}
+.algbr-g,.algbr-b{color:#5168e8}
+.algbr-r{color:#1aa6a6}
+.algbr-credit:hover,
+.algbr-credit:focus-visible{
+  opacity:1;
+  background:rgba(255,253,249,.96);
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1597,5 +1649,18 @@ async function sendRequest(){if(!lastResult)return;const name=$("archiveName").v
 }
 </style>
 
+
+<div class="algbr-credit-wrap" aria-label="Technische Umsetzung">
+  <a href="https://algbr-3b4ee.web.app/"
+     target="_blank"
+     rel="noopener noreferrer"
+     class="algbr-credit"
+     aria-label="Al.G.B.r. Digital Studio öffnen">
+    <span class="algbr-credit-by">by</span>
+    <span class="algbr-wordmark" aria-hidden="true">
+      <span class="algbr-a">Al.</span><span class="algbr-g">G.</span><span class="algbr-b">B.</span><span class="algbr-r">r.</span>
+    </span>
+  </a>
+</div>
 </body>
 </html>
