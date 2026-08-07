@@ -663,7 +663,7 @@ function defaultDb(){
     services:structuredClone(seedServices),
     products:structuredClone(seedProducts),
     recipes:structuredClone(seedRecipes),
-    bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[]
+    bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[],aftercareFlows:[]
   };
 }
 function loadDb(){
@@ -683,7 +683,7 @@ function resetOperationalData(confirmFirst=true,auto=false){
   const keepServices=(db&&Array.isArray(db.services)&&db.services.length)?structuredClone(db.services):structuredClone(seedServices);
   const keepRecipes=structuredClone((db&&db.recipes)||seedRecipes);
   keepSettings.dailyCounters={};
-  db=normalizeDb({settings:keepSettings,services:keepServices,products:structuredClone(seedProducts),recipes:keepRecipes,bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[]});
+  db=normalizeDb({settings:keepSettings,services:keepServices,products:structuredClone(seedProducts),recipes:keepRecipes,bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[],aftercareFlows:[]});
   safeStorage.setItem(KEY,JSON.stringify(db));
   safeStorage.setItem(CLEAN_START_FLAG,"done");
   if(auto){try{safeStorage.setItem(KEY+"_auto_clean_start_at",new Date().toISOString());}catch(e){} return;}
@@ -739,6 +739,7 @@ function normalizeDb(d){
   d.payments=Array.isArray(d.payments)?d.payments:[];
   d.stockMovements=Array.isArray(d.stockMovements)?d.stockMovements:[];
   d.skinAnalyses=Array.isArray(d.skinAnalyses)?d.skinAnalyses:[];
+  d.aftercareFlows=Array.isArray(d.aftercareFlows)?d.aftercareFlows:[];
   d.recipes=Object.assign(structuredClone(seedRecipes),d.recipes||{});
   const bySku=new Map(d.products.map(p=>[String(p.sku||p.id||"").toUpperCase(),p]));
   seedProducts.forEach(sp=>{
@@ -943,8 +944,9 @@ async function deleteTestBooking(id){
     const hasOtherBookings=(db.bookings||[]).some(sameCustomer);
     const hasInvoices=(db.invoices||[]).some(sameCustomer);
     const hasSkinChecks=(db.skinAnalyses||[]).some(sameCustomer);
+    const hasAftercare=(db.aftercareFlows||[]).some(sameCustomer);
 
-    if(!hasOtherBookings&&!hasInvoices&&!hasSkinChecks){
+    if(!hasOtherBookings&&!hasInvoices&&!hasSkinChecks&&!hasAftercare){
       db.customers=(db.customers||[]).filter(c=>String(c.id)!==customerId);
       customerDeleted=true;
     }
@@ -1009,7 +1011,7 @@ function openBooking(id){
   let stornoBox=b.status==="storniert"?`<div class="stornoFeeBox"><b>Storno: Storniert</b><br>${b.cancellationFee?"Kostenpflichtig, weil weniger als 24h vor Termin.<br>Gemäß AGB 4.1–4.4 / § 615 BGB kann der vereinbarte Termin vollständig berechnet werden.":"Nicht kostenpflichtig nach 24h-Regel."}</div>`:"";
   let invoiceBtn=active?`<button class="gold" onclick="tab('invoices');setTimeout(()=>renderInvoice('${esc(active.id)}','invoiceDetail'),0)">Rechnung öffnen</button>`:`<button class="gold" onclick="invoiceFromBooking('${esc(b.id)}')" ${(b.status==="storniert"&&!isFeeBillable)?"disabled":""}>${isFeeBillable?"Kostenpflichtig abrechnen":(linked.some(i=>i.status==="storniert")?"Neue Rechnung nach Storno":"Zur Rechnung")}</button>`;
   let linkedHtml=linked.length?`<details class="fold" open><summary>Rechnungen zu diesem Termin</summary>${linked.map(i=>`<div class="item ${esc(i.status)}"><b>${esc(i.number)}</b> ${statusBadge(i.status)} · ${EUR(i.total)}<br><button class="secondary" onclick="tab('invoices');setTimeout(()=>renderInvoice('${esc(i.id)}','invoiceDetail'),0)">Öffnen</button></div>`).join("")}</details>`:"";
-  $("bookingDetail").innerHTML=`<h2>${esc(b.time)} · ${esc(b.name)}</h2><p>${bookingBadge(b.status)} ${b.cancellationFee?'<span class="badge bad">kostenpflichtig</span>':''}</p><p><b>Service:</b> ${esc(b.service)}<br><b>Datum:</b> ${esc(b.date)} ${esc(b.time)}</p>${feeWarn}${stornoBox}<details class="fold" open><summary>Kontakt & Notiz</summary><p>${esc(b.phone||"")}<br>${esc(b.email||"")}</p>${b.notes?`<p><b>Notiz:</b><br>${esc(b.notes).replaceAll("\n","<br>")}</p>`:""}</details>${linkedHtml}<div class="bookingActions"><button class="secondary" onclick="fillBookingForm('${esc(b.id)}')">Bearbeiten</button><button class="secondary" onclick="customerFromBooking('${esc(b.id)}')">Zum Kunden</button>${invoiceBtn}<button class="secondary" onclick="setBookingStatus('${esc(b.id)}','angekommen')" ${b.status==="storniert"?"disabled":""}>Kunde angekommen</button><button class="secondary" onclick="setBookingStatus('${esc(b.id)}','beendet')" ${b.status==="storniert"?"disabled":""}>Beendet</button><button class="bad" onclick="cancelBooking('${esc(b.id)}')" ${b.status==="storniert"?"disabled":""}>Stornieren</button></div>`;
+  $("bookingDetail").innerHTML=`<h2>${esc(b.time)} · ${esc(b.name)}</h2><p>${bookingBadge(b.status)} ${b.cancellationFee?'<span class="badge bad">kostenpflichtig</span>':''}</p><p><b>Service:</b> ${esc(b.service)}<br><b>Datum:</b> ${esc(b.date)} ${esc(b.time)}</p>${feeWarn}${stornoBox}<details class="fold" open><summary>Kontakt & Notiz</summary><p>${esc(b.phone||"")}<br>${esc(b.email||"")}</p>${b.notes?`<p><b>Notiz:</b><br>${esc(b.notes).replaceAll("\n","<br>")}</p>`:""}</details>${linkedHtml}<div class="bookingActions"><button class="secondary" onclick="fillBookingForm('${esc(b.id)}')">Bearbeiten</button><button class="secondary" onclick="customerFromBooking('${esc(b.id)}')">Zum Kunden</button>${invoiceBtn}<button class="secondary" onclick="setBookingStatus('${esc(b.id)}','angekommen')" ${b.status==="storniert"?"disabled":""}>Kunde angekommen</button><button class="secondary" onclick="setBookingStatus('${esc(b.id)}','beendet')" ${b.status==="storniert"?"disabled":""}>Beendet</button>${b.status==="beendet"?`<button class="gold" onclick="startAftercareFromBooking('${esc(b.id)}')">Nachbetreuung anlegen</button>`:""}<button class="bad" onclick="cancelBooking('${esc(b.id)}')" ${b.status==="storniert"?"disabled":""}>Stornieren</button></div>`;
 }
 function setAgendaMode(mode){agendaMode=mode;document.querySelectorAll(".agendaModeBtn").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));renderBookings();}
 function addDays(dateStr,n){let d=new Date(dateStr+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d);}
@@ -1565,7 +1567,7 @@ function flat(rows){return rows.map(r=>{let o={};Object.keys(r).forEach(k=>o[k]=
 function csv(rows){if(!rows.length)return "";let f=flat(rows),h=[...new Set(f.flatMap(o=>Object.keys(o)))];return [h.join(";"),...f.map(r=>h.map(x=>`"${String(r[x]??"").replaceAll('"','""')}"`).join(";"))].join("\n");}
 function dl(n,c,t="text/csv;charset=utf-8"){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:t}));a.download=n;a.click();}
 function exportCSV(kind){let rows=db[kind]||[];if(!rows.length){alert("Keine Daten");return;}dl(`lune_${kind}_${TODAY()}.csv`,"\ufeff"+csv(rows));}
-function exportAllCSVs(){["bookings","customers","invoices","payments","products","stockMovements"].forEach(k=>{if((db[k]||[]).length)dl(`lune_${k}_${TODAY()}.csv`,"\ufeff"+csv(db[k]));});if($("backupStatus"))$("backupStatus").textContent="CSV-Export gestartet. Für Wiederherstellung bitte zusätzlich JSON-Backup speichern.";}
+function exportAllCSVs(){["bookings","customers","invoices","payments","products","stockMovements","aftercareFlows"].forEach(k=>{if((db[k]||[]).length)dl(`lune_${k}_${TODAY()}.csv`,"\ufeff"+csv(db[k]));});if($("backupStatus"))$("backupStatus").textContent="CSV-Export gestartet. Für Wiederherstellung bitte zusätzlich JSON-Backup speichern.";}
 function exportDay(){let d=TODAY(),pack={exportType:"lune_day_export",exportedAt:new Date().toISOString(),date:d,bookings:db.bookings.filter(x=>x.date===d),invoices:db.invoices.filter(x=>x.invoiceDate===d||x.paidDate===d||x.stornoDate===d),payments:db.payments.filter(x=>x.paymentDate===d),products:db.products,stockMovements:db.stockMovements.filter(x=>x.date===d),recipes:db.recipes,paymentReconciliation:paymentMethodSummary(d)};dl(`lune_tagesabschluss_${d}.json`,JSON.stringify(pack,null,2),"application/json");["bookings","invoices","payments","products","stockMovements"].forEach(k=>pack[k]?.length&&dl(`lune_${k}_${d}.csv`,"\ufeff"+csv(pack[k])));markBackupToday("day");}
 function backupJSON(){let pack={exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.4",exportedAt:new Date().toISOString(),data:db};dl(`lune_backup_complet_${TODAY()}.json`,JSON.stringify(pack,null,2),"application/json");markBackupToday("json");let c=dayCheck();c.endBackupJson=true;safeStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();if($("backupStatus"))$("backupStatus").textContent="Backup exportiert. Datei sicher speichern, z.B. iCloud/Drive/USB.";}
 function extractBackupData(raw){if(raw&&raw.exportType==="lune_staff_full_backup"&&raw.data)return raw.data;if(raw&&raw.settings&&raw.invoices&&raw.products)return raw;throw new Error("Diese Datei ist kein vollständiges Staff-Backup. Bitte eine Datei lune_backup_complet_YYYY-MM-DD.json importieren.");}
@@ -1853,7 +1855,258 @@ function renderTreatmentArchive(){
   $('treatmentArchiveList').innerHTML=filtered.length?filtered.map(a=>{let c=skinAnalysisCustomer(a),reasons=Array.isArray(a.reasons)?a.reasons.join(' · '):String(a.reasons||'');return `<div class="item"><b>${esc((a.createdAt||'').slice(0,10))} · ${esc(skinAnalysisName(a))}</b><br><span class="badge">${esc(a.profileName||'Hautprofil')}</span> <span class="badge">Score ${esc(a.score||'')}/100</span><br><b>${esc(a.treatmentName||a.recommendedService||'')}</b><div class="analysisMini">${esc(reasons)}</div><div class="analysisMini">${esc(a.phone||'')} ${a.email?' · '+esc(a.email):''}</div><div class="analysisActions"><button class="secondary" onclick="openCustomerFromSkinAnalysis('${esc(a.id)}')">Kundenakte</button>${a.bookingId?`<button class="gold" onclick="openBookingFromSkinAnalysis('${esc(a.id)}')">Anfrage öffnen</button>`:`<button class="gold" onclick="newBookingFromSkinAnalysis('${esc(a.id)}')">Termin anlegen</button>`}</div></div>`;}).join(''):`<p class='small'>Noch keine Beauty-Profile gespeichert.</p>`;
   $('treatmentCatalogList').innerHTML=LUNE_TREATMENT_CATALOG.map(x=>`<div class="catalogCard"><b>${esc(x.profileName)}</b><div class="small">${esc(x.criteria)}</div><span class="badge">${esc(x.treatmentName)}</span><div class="analysisMini">Service: ${esc(x.service)}</div></div>`).join('');
 }
-function renderAll(){renderSelects();renderDashboard();renderBookings();renderCustomers();renderInvoices();renderPayments();renderProducts();renderRecipes();renderInvoiceHelper();renderTagescheck();renderClose();renderTreatmentArchive();}document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!$("loginBox").classList.contains("hidden"))doLogin();});
+function renderAll(){renderSelects();renderDashboard();renderBookings();renderCustomers();renderInvoices();renderPayments();renderProducts();renderRecipes();renderInvoiceHelper();renderTagescheck();renderClose();renderTreatmentArchive();renderAftercareDashboard();}
+/* V28 — Nachbetreuung & Rebooking: visible CRM workflow, non-destructive. */
+function acDateAdd(dateStr,days){
+  const d=new Date((dateStr||TODAY())+"T12:00:00");
+  d.setDate(d.getDate()+Number(days||0));
+  return ymd(d);
+}
+function acDaysSince(dateStr){
+  if(!dateStr)return 0;
+  const a=new Date(dateStr+"T12:00:00"), b=new Date(TODAY()+"T12:00:00");
+  return Math.max(0,Math.floor((b-a)/86400000));
+}
+function acFutureBooking(customerId,excludeBookingId){
+  return (db.bookings||[]).some(b=>
+    String(b.customerId||"")===String(customerId||"") &&
+    String(b.id||"")!==String(excludeBookingId||"") &&
+    b.status!=="storniert" &&
+    b.date>=TODAY()
+  );
+}
+function acDefaultWeeks(service){
+  const s=String(service||"").toLowerCase();
+  if(/massage|soul/.test(s))return 4;
+  if(/lifting|timeless|aging/.test(s))return 4;
+  if(/hydra|glow|facial|gesicht/.test(s))return 5;
+  return 6;
+}
+function acDefaultAddon(service){
+  const s=String(service||"").toLowerCase();
+  if(/hydra|glow|facial|gesicht|lifting|timeless|aging/.test(s))return "LED Therapie";
+  return "";
+}
+function acStageLabel(stage){
+  return ({
+    thanks:"Danke & Nachsorge",
+    checkin:"Nachsorge",
+    rebook:"Beauty-Empfehlung",
+    reminder:"Sanfte Erinnerung",
+    converted:"Wieder gebucht",
+    done:"Abgeschlossen",
+    stopped:"Beendet"
+  })[stage]||"Nachbetreuung";
+}
+function acStatusClass(flow){
+  if(flow.status==="converted"||flow.status==="done")return "ok";
+  if(flow.status==="stopped")return "";
+  if(flow.nextActionAt&&flow.nextActionAt<=TODAY())return "warn";
+  return "";
+}
+function acStageFromAge(flow){
+  const age=acDaysSince(flow.treatmentDate);
+  if(age<=2)return "thanks";
+  if(age<=7)return "checkin";
+  const rebookDay=Number(flow.rebookWeeks||6)*7;
+  return age>=rebookDay?"rebook":"rebook";
+}
+function startAftercareFromBooking(bookingId){
+  const b=(db.bookings||[]).find(x=>x.id===bookingId);
+  if(!b)return;
+  if(b.status!=="beendet"&&!confirm("Der Termin ist nicht als beendet markiert. Nachbetreuung trotzdem anlegen?"))return;
+  const active=(db.aftercareFlows||[]).find(f=>f.bookingId===bookingId&&f.status==="active");
+  if(active)return alert("Für diesen Termin ist bereits eine Nachbetreuung angelegt.");
+
+  const c=(db.customers||[]).find(x=>x.id===b.customerId)||{};
+  const done=prompt("Durchgeführte Behandlung:",b.service||"");
+  if(done===null)return;
+  const next=prompt("Empfohlene nächste Behandlung:",done||b.service||"");
+  if(next===null)return;
+  const weeksRaw=prompt("Empfohlener Abstand in Wochen:",String(acDefaultWeeks(done)));
+  if(weeksRaw===null)return;
+  const weeks=Math.max(1,Math.min(52,Number(weeksRaw)||acDefaultWeeks(done)));
+  const addon=prompt("Passende Ergänzung / Cross-Sell (optional):",acDefaultAddon(done));
+  if(addon===null)return;
+  const note=prompt("Persönlicher Hinweis (optional):","");
+  if(note===null)return;
+
+  const treatmentDate=b.date||TODAY();
+  const age=acDaysSince(treatmentDate);
+  let stage="thanks", nextActionAt=acDateAdd(treatmentDate,1);
+  if(age>=3&&age<=7){stage="checkin";nextActionAt=TODAY();}
+  else if(age>7){
+    stage="rebook";
+    const target=acDateAdd(treatmentDate,weeks*7);
+    nextActionAt=target<=TODAY()?TODAY():target;
+  }
+
+  db.aftercareFlows=db.aftercareFlows||[];
+  db.aftercareFlows.push({
+    id:nextId(db.aftercareFlows,"AC"),
+    bookingId:b.id,
+    customerId:b.customerId,
+    customerName:b.name||c.name||"",
+    email:b.email||c.email||"",
+    treatmentDate,
+    performedTreatment:String(done||"").trim(),
+    recommendedTreatment:String(next||"").trim(),
+    recommendedAddon:String(addon||"").trim(),
+    personalNote:String(note||"").trim(),
+    rebookWeeks:weeks,
+    status:"active",
+    stage,
+    nextActionAt,
+    createdAt:new Date().toISOString(),
+    history:[]
+  });
+  persist();
+  alert("Nachbetreuung wurde angelegt.");
+  tab("customers");
+  setTimeout(()=>{openCustomer(b.customerId);crmShowPanel(b.customerId,"aftercare");},0);
+}
+function acMessage(flow){
+  const c=(db.customers||[]).find(x=>x.id===flow.customerId)||{};
+  const name=String(c.name||flow.customerName||"").trim();
+  const greeting=`Guten Tag ${name},`;
+  const done=flow.performedTreatment||"Behandlung";
+  const next=flow.recommendedTreatment||done;
+
+  if(flow.stage==="thanks"){
+    return {
+      subject:"Schön, dass Sie bei uns waren ✨",
+      body:`${greeting}\n\nvielen Dank für Ihren Besuch bei Lune Beauty. Wir hoffen, dass Sie Ihre ${done} genießen konnten und sich rundum wohlgefühlt haben.\n\nWir wünschen Ihnen noch lange Freude an Ihrem Beauty-Moment. Wenn in den nächsten Tagen eine Frage zu Ihrer Behandlung entsteht, sind wir selbstverständlich gerne für Sie da.\n\nHerzliche Grüße\nIhr Lune Beauty Team`
+    };
+  }
+  if(flow.stage==="checkin"){
+    return {
+      subject:"Wie geht es Ihnen nach Ihrer Behandlung?",
+      body:`${greeting}\n\nvor einigen Tagen durften wir Sie zu Ihrer ${done} bei Lune Beauty begrüßen.\n\nWir hoffen, dass Sie sich wohlgefühlt haben und mit dem Ergebnis und Ihrem Hautgefühl nach der Behandlung zufrieden sind.\n\nWenn noch eine Frage zur Pflege oder zur Behandlung entstanden ist, sind wir selbstverständlich gerne für Sie da.\n\nHerzliche Grüße\nIhr Lune Beauty Team`
+    };
+  }
+  if(flow.stage==="rebook"){
+    return {
+      subject:"Zeit für Ihren nächsten Beauty-Moment ✨",
+      body:`${greeting}\n\nvor einigen Wochen durften wir Sie zu Ihrer ${done} bei Lune Beauty begrüßen.\n\nUm das Ergebnis weiter zu unterstützen, wäre jetzt ein schöner Zeitpunkt für Ihre nächste Behandlung.\n\nFür Ihren nächsten Besuch empfehlen wir Ihnen ${next}.${flow.personalNote?`\n\n${flow.personalNote}`:""}${flow.recommendedAddon?`\n\nErgänzend könnte ${flow.recommendedAddon} Ihre Behandlung wunderbar abrunden.`:""}\n\nWenn Sie möchten, finden wir gerne einen passenden Termin für Sie.\n\nHerzliche Grüße\nIhr Lune Beauty Team`
+    };
+  }
+  return {
+    subject:"Ihre persönliche Beauty-Empfehlung",
+    body:`${greeting}\n\nIhre persönliche Beauty-Empfehlung ${next} ist weiterhin bei uns für Sie vorgemerkt.\n\nWenn Sie sich wieder etwas Zeit für sich und Ihre Haut nehmen möchten, sind wir gerne für Sie da.\n\nHerzliche Grüße\nIhr Lune Beauty Team`
+  };
+}
+function previewAftercareMail(id){
+  const f=(db.aftercareFlows||[]).find(x=>x.id===id);
+  if(!f)return;
+  const m=acMessage(f);
+  alert(m.subject+"\n\n"+m.body);
+}
+function prepareAftercareMail(id){
+  const f=(db.aftercareFlows||[]).find(x=>x.id===id);
+  if(!f)return;
+  const c=(db.customers||[]).find(x=>x.id===f.customerId)||{};
+  const email=String(c.email||f.email||"").trim();
+  if(!email)return alert("Keine E-Mail-Adresse vorhanden.");
+  const m=acMessage(f);
+  location.href=`mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}`;
+}
+function markAftercareSent(id){
+  const f=(db.aftercareFlows||[]).find(x=>x.id===id);
+  if(!f)return;
+  if(acFutureBooking(f.customerId,f.bookingId)){
+    f.status="converted"; f.stage="converted"; f.nextActionAt="";
+    f.completedAt=new Date().toISOString(); persist(); return;
+  }
+  f.history=f.history||[];
+  f.history.push({
+    stage:f.stage,
+    sentAt:new Date().toISOString(),
+    to:f.email||"",
+    method:"manual-confirmed"
+  });
+  if(f.stage==="thanks"||f.stage==="checkin"){
+    f.stage="rebook";
+    f.nextActionAt=acDateAdd(f.treatmentDate,Number(f.rebookWeeks||6)*7);
+    if(f.nextActionAt<TODAY())f.nextActionAt=TODAY();
+  }else if(f.stage==="rebook"){
+    f.stage="reminder";
+    f.nextActionAt=acDateAdd(TODAY(),9);
+  }else{
+    f.status="done"; f.stage="done"; f.nextActionAt="";
+    f.completedAt=new Date().toISOString();
+  }
+  persist();
+}
+function stopAftercare(id){
+  const f=(db.aftercareFlows||[]).find(x=>x.id===id);
+  if(!f)return;
+  if(!confirm("Nachbetreuung wirklich beenden?"))return;
+  f.status="stopped"; f.stage="stopped"; f.nextActionAt="";
+  f.completedAt=new Date().toISOString();
+  persist();
+}
+function acAutoConvert(){
+  let changed=false;
+  (db.aftercareFlows||[]).forEach(f=>{
+    if(f.status==="active"&&acFutureBooking(f.customerId,f.bookingId)){
+      f.status="converted"; f.stage="converted"; f.nextActionAt="";
+      f.completedAt=new Date().toISOString(); changed=true;
+    }
+  });
+  if(changed)try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+}
+function renderCustomerAftercarePanel(customerId){
+  acAutoConvert();
+  const rows=(db.aftercareFlows||[])
+    .filter(f=>String(f.customerId||"")===String(customerId||""))
+    .sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  const completed=(db.bookings||[])
+    .filter(b=>String(b.customerId||"")===String(customerId||"")&&b.status==="beendet"&&acBookingIsPast(b))
+    .sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+  const withoutFlow=completed.filter(b=>!(db.aftercareFlows||[]).some(f=>f.bookingId===b.id));
+
+  let html=`<div class="cleanSectionHead"><div><div class="brandEyebrow">Retention · Rebooking</div><h3>Nachbetreuung</h3><p class="small">Danke, Nachsorge und nächste persönliche Behandlungsempfehlung an einem Ort.</p></div></div>`;
+
+  if(withoutFlow.length){
+    html+=`<div class="dossierAlert"><b>${withoutFlow.length} abgeschlossene Behandlung${withoutFlow.length>1?"en":""} ohne Nachbetreuung</b><br><span class="small">Sie können auch ältere Termine nachträglich aufnehmen.</span>${withoutFlow.slice(0,5).map(b=>`<div class="bookingActions"><button class="secondary" onclick="startAftercareFromBooking('${esc(b.id)}')">${esc(crmDate(b.date))} · ${esc(b.service||"Behandlung")} → anlegen</button></div>`).join("")}</div>`;
+  }
+  if(!rows.length){
+    html+=`<div class="emptyDossier" style="padding:28px 10px"><h3>Noch keine Nachbetreuung</h3><p class="small">Nach einer abgeschlossenen Behandlung kann hier ein persönlicher Follow-up- und Rebooking-Prozess angelegt werden.</p></div>`;
+    return html;
+  }
+  html+=rows.map(f=>{
+    const hist=(f.history||[]);
+    const sent=hist.slice().reverse()[0];
+    return `<div class="crmSafetyCard" style="margin:12px 0">
+      <div class="cleanSectionHead"><div><b>${esc(f.performedTreatment||"Behandlung")}</b><br><span class="small">${esc(crmDate(f.treatmentDate))}</span></div><span class="badge ${acStatusClass(f)}">${esc(acStageLabel(f.stage))}</span></div>
+      <div class="crmCustomerMeta" style="margin-top:10px">
+        <span class="badge">Nächste Empfehlung: ${esc(f.recommendedTreatment||"–")}</span>
+        ${f.recommendedAddon?`<span class="badge">Ergänzung: ${esc(f.recommendedAddon)}</span>`:""}
+        <span class="badge">${esc(f.rebookWeeks||6)} Wochen</span>
+      </div>
+      ${f.personalNote?`<p class="small"><b>Persönlicher Hinweis:</b> ${esc(f.personalNote)}</p>`:""}
+      <p class="small"><b>Nächste Aktion:</b> ${f.nextActionAt?esc(crmDate(f.nextActionAt)):"–"}${sent?`<br><b>Letzter Versand bestätigt:</b> ${esc(String(sent.sentAt||"").slice(0,16).replace("T"," "))}`:""}</p>
+      ${f.status==="active"?`<div class="bookingActions"><button class="secondary" onclick="previewAftercareMail('${esc(f.id)}')">Nachricht ansehen</button><button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button><button class="gold" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button><button class="secondary" onclick="stopAftercare('${esc(f.id)}')">Beenden</button></div>`:`<p class="small">${f.status==="converted"?"✓ Neuer Termin erkannt – keine weitere Relance.":"Workflow abgeschlossen."}</p>`}
+    </div>`;
+  }).join("");
+  return html;
+}
+function renderAftercareDashboard(){
+  acAutoConvert();
+  const host=document.getElementById("todayList");
+  if(!host)return;
+  const due=(db.aftercareFlows||[])
+    .filter(f=>f.status==="active"&&f.nextActionAt&&f.nextActionAt<=TODAY())
+    .sort((a,b)=>String(a.nextActionAt).localeCompare(String(b.nextActionAt)));
+  if(!due.length)return;
+  const html=`<div class="card" id="aftercareTodayCard" style="margin:0 0 16px;border-color:#d8c08b">
+    <div class="cleanSectionHead"><div><div class="brandEyebrow">Beauty Follow-up</div><h2>${due.length} Nachbetreuung${due.length>1?"en":""} fällig</h2><p class="small">Nur Aktionen, die heute wirklich fällig sind.</p></div><span class="badge warn">Heute</span></div>
+    ${due.map(f=>`<div class="item"><b>${esc(f.customerName||"Kundin / Kunde")}</b> · ${esc(acStageLabel(f.stage))}<br><span class="small">${esc(f.performedTreatment||"")} · Empfehlung: ${esc(f.recommendedTreatment||"–")} · ${esc(crmDate(f.nextActionAt))}</span><div class="bookingActions"><button class="secondary" onclick="previewAftercareMail('${esc(f.id)}')">Nachricht ansehen</button><button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button><button class="gold" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button><button class="secondary" onclick="tab('customers');setTimeout(()=>{openCustomer('${esc(f.customerId)}');crmShowPanel('${esc(f.customerId)}','aftercare')},0)">Kundenakte</button></div></div>`).join("")}
+  </div>`;
+  host.insertAdjacentHTML("afterbegin",html);
+}
+
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!$("loginBox").classList.contains("hidden"))doLogin();});
 </script>
 
 <script src="assets/js/staff-cloud-sync.js"></script>
@@ -1961,11 +2214,12 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
     const local = getDb();
     if(!local) return {changed:0, addedBookings:[]};
     const beforeIds = new Set((local.bookings || []).map(b => String(b.id || '')));
-    ['customers','services','bookings','skinAnalyses'].forEach(k => { if(!Array.isArray(local[k])) local[k]=[]; });
+    ['customers','services','bookings','skinAnalyses','aftercareFlows'].forEach(k => { if(!Array.isArray(local[k])) local[k]=[]; });
     let changed = 0;
     changed += mergeArrayById(local.customers, remote.customers || []);
     changed += mergeArrayById(local.services, remote.services || []);
     changed += mergeArrayById(local.skinAnalyses, remote.skinAnalyses || []);
+    changed += mergeArrayById(local.aftercareFlows, remote.aftercareFlows || []);
     changed += mergeArrayById(local.bookings, remote.bookings || []);
     const addedBookings = (local.bookings || []).filter(b => !beforeIds.has(String(b.id || '')) && isOpenRequest(b));
     if(changed){
@@ -2276,11 +2530,12 @@ function renderAll(){renderSelects();renderDashboard();renderBookings();renderCu
       <div class="customerDossierHead"><div class="dossierAvatar">${esc(initials)}</div><div class="dossierIdentity"><div class="brandEyebrow">Zentrale Kundenakte</div><h2>${esc(c.name||'Neue Kundin')}</h2><div class="small">${esc(c.phone||'Kein Telefon')}${c.email?' · '+esc(c.email):' · Keine E-Mail'}</div><div class="crmIdentityLine"><span class="badge ${completion<60?'warn':'ok'}">Profil ${completion}%</span><span class="crmIdentityKey">${esc(ident.key||c.id)}</span></div></div><div class="dossierActions"><button class="gold" onclick="newBookingForCustomer('${esc(id)}')">Neuer Termin</button><button class="secondary" onclick="invoiceForCustomer('${esc(id)}')">Neue Rechnung</button></div></div>
       ${duplicateHtml}${warnings.join('')}
       <div class="dossierKpis"><div class="dossierKpi"><span>Termine</span><b>${bs.length}</b></div><div class="dossierKpi"><span>Rechnungen</span><b>${is.length}</b></div><div class="dossierKpi"><span>Umsatz bezahlt</span><b>${EUR(revenue)}</b></div><div class="dossierKpi"><span>Nächster Termin</span><b style="font-size:15px">${nextBooking?esc(nextBooking.date+' '+nextBooking.time):'–'}</b></div></div>
-      <div class="crmDossierNav"><button data-panel="overview" onclick="crmShowPanel('${esc(id)}','overview')">Übersicht</button><button data-panel="anamnesis" onclick="crmShowPanel('${esc(id)}','anamnesis')">Anamnese</button><button data-panel="timeline" onclick="crmShowPanel('${esc(id)}','timeline')">Verlauf</button><button data-panel="billing" onclick="crmShowPanel('${esc(id)}','billing')">Rechnungen</button></div>
+      <div class="crmDossierNav"><button data-panel="overview" onclick="crmShowPanel('${esc(id)}','overview')">Übersicht</button><button data-panel="anamnesis" onclick="crmShowPanel('${esc(id)}','anamnesis')">Anamnese</button><button data-panel="timeline" onclick="crmShowPanel('${esc(id)}','timeline')">Verlauf</button><button data-panel="billing" onclick="crmShowPanel('${esc(id)}','billing')">Rechnungen</button><button data-panel="aftercare" onclick="crmShowPanel('${esc(id)}','aftercare')">Nachbetreuung</button></div>
       <div class="crmPanel" data-panel="overview"><div class="crmSafetyGrid"><div class="crmSafetyCard"><b>Kontakt & Identität</b><label>Name</label><input id="cName" value="${esc(c.name)}"><div class="row"><div><label>Telefon</label><input id="cPhone" value="${esc(c.phone||'')}"></div><div><label>E-Mail</label><input id="cEmail" value="${esc(c.email||'')}"></div></div><label>Adresse</label><textarea id="cAddress">${esc(c.address||'')}</textarea></div><div class="crmSafetyCard"><b>Interne Notizen</b><textarea id="cNotes" placeholder="Präferenzen, Gesprächsnotizen, wichtige Hinweise ...">${esc(c.notes||'')}</textarea><p class="small">Diese Notizen erscheinen nicht auf der Rechnung.</p></div></div><div class="bookingActions"><button class="gold" onclick="saveCustomer('${esc(id)}')">Kundenakte speichern</button></div></div>
       <div class="crmPanel" data-panel="anamnesis"><div class="crmSafetyGrid"><div><label>Hauttyp / Hautzustand</label><textarea id="cSkin" placeholder="Hauttyp / Hautzustand">${esc(a.skin)}</textarea></div><div><label>Allergien / Unverträglichkeiten</label><textarea id="cAllergies" placeholder="Allergien / Unverträglichkeiten">${esc(a.allergies)}</textarea></div><div><label>Kontraindikationen</label><textarea id="cContra" placeholder="Schwangerschaft / Erkrankungen / Kontraindikationen">${esc(a.contra)}</textarea></div><div><label>Medikamente / Wirkstoffe</label><textarea id="cMedication" placeholder="Medikamente / Wirkstoffe">${esc(a.medication)}</textarea></div></div><label>Reaktion nach letzter Behandlung</label><textarea id="cLastReaction" placeholder="Reaktionen nach der letzten Behandlung">${esc(a.lastReaction)}</textarea><div class="bookingActions"><button class="gold" onclick="saveCustomer('${esc(id)}')">Anamnese speichern</button></div></div>
       <div class="crmPanel" data-panel="timeline"><h3>Gesamter Kundenverlauf</h3>${crmVerlauf(c,bs,is,hs)}</div>
-      <div class="crmPanel" data-panel="billing"><h3>Rechnungen · ${is.length}</h3>${is.length?is.slice().reverse().map(i=>`<div class="item ${esc(i.status)}"><b>${esc(i.number)}</b> ${statusBadge(i.status)} · ${EUR(i.total)}<br><span class="small">${(i.items||[]).map(x=>esc(x.description)).join(' · ')}</span><br><button class="secondary" onclick="tab('invoices');setTimeout(()=>renderInvoice('${esc(i.id)}','invoiceDetail'),0)">Rechnung öffnen</button></div>`).join(''):'<p class="small">Noch keine Rechnungen.</p>'}</div>`;
+      <div class="crmPanel" data-panel="billing"><h3>Rechnungen · ${is.length}</h3>${is.length?is.slice().reverse().map(i=>`<div class="item ${esc(i.status)}"><b>${esc(i.number)}</b> ${statusBadge(i.status)} · ${EUR(i.total)}<br><span class="small">${(i.items||[]).map(x=>esc(x.description)).join(' · ')}</span><br><button class="secondary" onclick="tab('invoices');setTimeout(()=>renderInvoice('${esc(i.id)}','invoiceDetail'),0)">Rechnung öffnen</button></div>`).join(''):'<p class="small">Noch keine Rechnungen.</p>'}</div>
+      <div class="crmPanel" data-panel="aftercare">${renderCustomerAftercarePanel(id)}</div>`;
     crmShowPanel(id,preferredPanel);
   };
 
@@ -2629,12 +2884,14 @@ body{min-height:100vh}
     (db.customers||[]).forEach(function(customer){
       if(typeof customerBookings!=="function")return;
       const bookings=customerBookings(customer)||[];
-      const past=bookings.filter(function(item){return item.status==="beendet";});
-      const future=bookings.filter(function(item){
-        return item.status!=="storniert"&&String(item.date||"")>=today;
+      const past=bookings.filter(function(item){
+        return item.status==="beendet"&&String(item.date||"")<=today;
       });
-      if(past.length&&!future.length){
-        tasks.push({type:"info",icon:"↻",title:"Keine Folgebehandlung geplant",text:(customer.name||"")+" · zuletzt "+crmDate(past[0].date),action:"tab('customers');openCustomer('"+esc(customer.id)+"')"});
+      const activeAftercare=(db.aftercareFlows||[]).some(function(flow){
+        return String(flow.customerId||"")===String(customer.id||"")&&flow.status==="active";
+      });
+      if(past.length&&!activeAftercare){
+        tasks.push({type:"info",icon:"↻",title:"Nachbetreuung prüfen",text:(customer.name||"")+" · zuletzt "+crmDate(past[0].date),action:"tab('customers');openCustomer('"+esc(customer.id)+"');setTimeout(function(){crmShowPanel('"+esc(customer.id)+"','aftercare')},40)"});
       }
     });
 
@@ -2888,6 +3145,13 @@ body{min-height:100vh}
     });
     (db.skinAnalyses||[]).forEach(function(item){
       if(String(item.customerId)===String(source.id))item.customerId=target.id;
+    });
+    (db.aftercareFlows||[]).forEach(function(item){
+      if(String(item.customerId)===String(source.id)){
+        item.customerId=target.id;
+        item.customerName=target.name||item.customerName;
+        item.email=target.email||item.email;
+      }
     });
     target.notes=[target.notes,source.notes?("Zusammengeführt aus "+(source.name||source.id)+": "+source.notes):""].filter(Boolean).join("\n");
     source.archived=true;
@@ -4015,5 +4279,1490 @@ body{min-height:100vh}
     .crmCustomerRow .cleanSectionHead{flex-direction:column!important}
   }
 </style>
+
+<script id="lune-v29-aftercare-logic-fix">
+(function(){
+  'use strict';
+
+  window.acBookingDateTime=function(b){
+    if(!b||!b.date)return null;
+    const d=new Date(String(b.date)+"T"+String(b.time||"23:59")+":00");
+    return isNaN(d.getTime())?null:d;
+  };
+  window.acBookingIsPast=function(b){
+    const d=acBookingDateTime(b);
+    return !!(d&&d.getTime()<=Date.now());
+  };
+  window.acNorm=function(v){
+    return String(v||"").toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/ß/g,"ss").replace(/[^a-z0-9]+/g," ").trim();
+  };
+  window.acBookingTreatmentText=function(b){
+    const names=Array.isArray(b&&b.services)?b.services.map(x=>x&&x.name||""):[];
+    names.push(b&&b.service||"");
+    return acNorm(names.filter(Boolean).join(" "));
+  };
+  window.acInferServiceId=function(name){
+    const n=acNorm(name);
+    const exact=(db.services||[]).find(s=>acNorm(s.name)===n);
+    if(exact)return exact.id;
+    const loose=(db.services||[]).find(s=>{
+      const sn=acNorm(s.name);
+      return n&&sn&&(sn.includes(n)||n.includes(sn));
+    });
+    return loose?loose.id:"";
+  };
+  window.acBookingMatchesFlow=function(b,f){
+    if(!b||!f||b.status==="storniert")return false;
+    if(String(b.customerId||"")!==String(f.customerId||""))return false;
+    if(String(b.id||"")===String(f.bookingId||""))return false;
+    if(String(b.date||"")<=String(f.treatmentDate||""))return false;
+
+    const ids=(Array.isArray(b.services)?b.services:[])
+      .map(x=>String(x&&x.id||"")).filter(Boolean);
+    if(f.recommendedServiceId&&ids.includes(String(f.recommendedServiceId)))return true;
+    if(f.recommendedServiceId&&String(b.serviceId||"")===String(f.recommendedServiceId))return true;
+
+    const wanted=acNorm(f.recommendedTreatment);
+    const offered=acBookingTreatmentText(b);
+    if(!wanted||!offered)return false;
+    if(offered.includes(wanted)||wanted.includes(offered))return true;
+
+    const wt=new Set(wanted.split(/\s+/).filter(x=>x.length>2));
+    const ot=new Set(offered.split(/\s+/).filter(x=>x.length>2));
+    if(!wt.size||!ot.size)return false;
+    let common=0; wt.forEach(x=>{if(ot.has(x))common++;});
+    return common/Math.min(wt.size,ot.size)>=0.7;
+  };
+  window.acFutureCandidates=function(f){
+    return (db.bookings||[])
+      .filter(b=>String(b.customerId||"")===String(f.customerId||"") &&
+                 String(b.id||"")!==String(f.bookingId||"") &&
+                 b.status!=="storniert" &&
+                 String(b.date||"")>String(f.treatmentDate||"") &&
+                 (String(b.date||"")>TODAY() ||
+                  (String(b.date||"")===TODAY()&&String(b.time||"")>=new Date().toTimeString().slice(0,5))))
+      .sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+  };
+  window.acLinkSuccessor=function(flowId,bookingId,manual){
+    const f=(db.aftercareFlows||[]).find(x=>String(x.id)===String(flowId));
+    const b=(db.bookings||[]).find(x=>String(x.id)===String(bookingId));
+    if(!f||!b)return;
+    f.successorBookingId=b.id;
+    f.successorLinkedAt=new Date().toISOString();
+    f.successorLinkMethod=manual?"manual":"automatic";
+    f.status="converted";
+    f.stage="converted";
+    f.nextActionAt="";
+    f.completedAt=new Date().toISOString();
+    persist();
+  };
+  window.acUnlinkSuccessor=function(flowId){
+    const f=(db.aftercareFlows||[]).find(x=>String(x.id)===String(flowId));
+    if(!f)return;
+    f.successorBookingId="";
+    f.successorLinkedAt="";
+    f.successorLinkMethod="";
+    f.status="active";
+    const age=acDaysSince(f.treatmentDate);
+    if(age<=2){f.stage="thanks";f.nextActionAt=TODAY();}
+    else if(age<=7){f.stage="checkin";f.nextActionAt=TODAY();}
+    else{
+      f.stage="rebook";
+      const target=acDateAdd(f.treatmentDate,Number(f.rebookWeeks||6)*7);
+      f.nextActionAt=target<=TODAY()?TODAY():target;
+    }
+    persist();
+  };
+  window.acReconcileFlow=function(f){
+    if(!f)return false;
+    // Linked appointment cancelled/deleted => reopen instead of silently considering it converted.
+    if(f.successorBookingId){
+      const linked=(db.bookings||[]).find(b=>String(b.id)===String(f.successorBookingId));
+      if(!linked||linked.status==="storniert"){
+        f.successorBookingId="";
+        f.successorLinkedAt="";
+        f.successorLinkMethod="";
+        f.status="active";
+        f.stage="rebook";
+        const target=acDateAdd(f.treatmentDate,Number(f.rebookWeeks||6)*7);
+        f.nextActionAt=target<=TODAY()?TODAY():target;
+        return true;
+      }
+      return false;
+    }
+    if(f.status!=="active")return false;
+
+    const candidates=acFutureCandidates(f);
+    const strong=candidates.filter(b=>acBookingMatchesFlow(b,f));
+    if(strong.length===1){
+      const b=strong[0];
+      f.successorBookingId=b.id;
+      f.successorLinkedAt=new Date().toISOString();
+      f.successorLinkMethod="automatic";
+      f.status="converted"; f.stage="converted"; f.nextActionAt="";
+      f.completedAt=new Date().toISOString();
+      return true;
+    }
+    return false;
+  };
+  window.acAutoConvert=function(){
+    let changed=false;
+    (db.aftercareFlows||[]).forEach(f=>{if(acReconcileFlow(f))changed=true;});
+    if(changed){
+      try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+    }
+  };
+
+  // Prevent impossible future appointments from being marked as completed.
+  if(typeof window.setBookingStatus==="function"){
+    const prevSetBookingStatus=window.setBookingStatus;
+    window.setBookingStatus=function(id,status){
+      const b=(db.bookings||[]).find(x=>String(x.id)===String(id));
+      if(b&&status==="beendet"&&!acBookingIsPast(b)){
+        alert("Dieser Termin liegt in der Zukunft und kann noch nicht als „beendet“ markiert werden.");
+        return;
+      }
+      return prevSetBookingStatus.apply(this,arguments);
+    };
+  }
+
+  // Also reject saving a future booking directly with status "beendet".
+  if(typeof window.saveBooking==="function"){
+    const prevSaveBooking=window.saveBooking;
+    window.saveBooking=function(){
+      const status=document.getElementById("bStatus")?.value;
+      const date=document.getElementById("bDate")?.value;
+      const time=document.getElementById("bTime")?.value||"23:59";
+      if(status==="beendet"){
+        const d=new Date(String(date)+"T"+String(time)+":00");
+        if(!isNaN(d.getTime())&&d.getTime()>Date.now()){
+          alert("Ein zukünftiger Termin kann nicht als „beendet“ gespeichert werden.");
+          return;
+        }
+      }
+      return prevSaveBooking.apply(this,arguments);
+    };
+  }
+
+  // Safer start logic: never create aftercare from a future booking.
+  if(typeof window.startAftercareFromBooking==="function"){
+    const prevStart=window.startAftercareFromBooking;
+    window.startAftercareFromBooking=function(id){
+      const b=(db.bookings||[]).find(x=>String(x.id)===String(id));
+      if(!b)return;
+      if(!acBookingIsPast(b)){
+        alert("Nachbetreuung kann erst nach dem tatsächlichen Behandlungstermin angelegt werden.");
+        return;
+      }
+      const before=(db.aftercareFlows||[]).length;
+      const result=prevStart.apply(this,arguments);
+      const after=(db.aftercareFlows||[]).length;
+      if(after>before){
+        const f=db.aftercareFlows[after-1];
+        if(f&&!f.recommendedServiceId)f.recommendedServiceId=acInferServiceId(f.recommendedTreatment);
+        if(f)acReconcileFlow(f);
+        try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+      }
+      return result;
+    };
+  }
+
+  // Do NOT close a workflow just because "some" future booking exists.
+  window.markAftercareSent=function(id){
+    const f=(db.aftercareFlows||[]).find(x=>String(x.id)===String(id));
+    if(!f)return;
+    acReconcileFlow(f);
+    if(f.status==="converted"){persist();return;}
+
+    f.history=f.history||[];
+    f.history.push({
+      stage:f.stage,
+      sentAt:new Date().toISOString(),
+      to:f.email||"",
+      method:"manual-confirmed"
+    });
+    if(f.stage==="thanks"||f.stage==="checkin"){
+      f.stage="rebook";
+      f.nextActionAt=acDateAdd(f.treatmentDate,Number(f.rebookWeeks||6)*7);
+      if(f.nextActionAt<TODAY())f.nextActionAt=TODAY();
+    }else if(f.stage==="rebook"){
+      f.stage="reminder";
+      f.nextActionAt=acDateAdd(TODAY(),9);
+    }else{
+      f.status="done"; f.stage="done"; f.nextActionAt="";
+      f.completedAt=new Date().toISOString();
+    }
+    persist();
+  };
+
+  // Full customer panel with explicit successor appointment logic and anomaly detection.
+  window.renderCustomerAftercarePanel=function(customerId){
+    acAutoConvert();
+    const rows=(db.aftercareFlows||[])
+      .filter(f=>String(f.customerId||"")===String(customerId||""))
+      .sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+
+    const customerBookings=(db.bookings||[])
+      .filter(b=>String(b.customerId||"")===String(customerId||""));
+
+    const invalidFutureEnded=customerBookings
+      .filter(b=>b.status==="beendet"&&!acBookingIsPast(b))
+      .sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+
+    const completed=customerBookings
+      .filter(b=>b.status==="beendet"&&acBookingIsPast(b))
+      .sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+
+    const withoutFlow=completed.filter(b=>!(db.aftercareFlows||[]).some(f=>String(f.bookingId)===String(b.id)));
+
+    let html=`<div class="cleanSectionHead"><div><div class="brandEyebrow">Retention · Rebooking</div><h3>Nachbetreuung</h3><p class="small">Nur tatsächlich abgeschlossene Behandlungen. Ein Folgetermin wird nur verknüpft, wenn er zur Empfehlung passt oder manuell bestätigt wurde.</p></div></div>`;
+
+    if(invalidFutureEnded.length){
+      html+=`<div class="dossierAlert bad"><b>Daten prüfen</b><br><span class="small">${invalidFutureEnded.length} zukünftige${invalidFutureEnded.length>1?" Termine sind":"r Termin ist"} fälschlich als „beendet“ markiert.</span>${invalidFutureEnded.map(b=>`<div class="bookingActions"><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">${esc(crmDate(b.date))} · ${esc(b.time||"")} · ${esc(b.service||"Termin")} prüfen</button></div>`).join("")}</div>`;
+    }
+
+    if(withoutFlow.length){
+      html+=`<div class="dossierAlert"><b>${withoutFlow.length} abgeschlossene Behandlung${withoutFlow.length>1?"en":""} ohne Nachbetreuung</b><br><span class="small">Auch ältere Behandlungen können nachträglich aufgenommen werden.</span>${withoutFlow.slice(0,8).map(b=>`<div class="bookingActions"><button class="secondary" onclick="startAftercareFromBooking('${esc(b.id)}')">${esc(crmDate(b.date))} · ${esc(b.service||"Behandlung")} → anlegen</button></div>`).join("")}</div>`;
+    }
+
+    if(!rows.length){
+      html+=`<div class="emptyDossier" style="padding:28px 10px"><h3>Noch keine Nachbetreuung</h3><p class="small">Nach einer abgeschlossenen Behandlung kann hier der persönliche Nachsorge- und Rebooking-Prozess angelegt werden.</p></div>`;
+      return html;
+    }
+
+    html+=rows.map(f=>{
+      acReconcileFlow(f);
+      const linked=f.successorBookingId?(db.bookings||[]).find(b=>String(b.id)===String(f.successorBookingId)):null;
+      const candidates=acFutureCandidates(f);
+      const strong=candidates.filter(b=>acBookingMatchesFlow(b,f));
+      const unrelated=candidates.filter(b=>!acBookingMatchesFlow(b,f));
+      const sent=(f.history||[]).slice().reverse()[0];
+
+      return `<div class="crmSafetyCard" style="margin:12px 0">
+        <div class="cleanSectionHead"><div><b>${esc(f.performedTreatment||"Behandlung")}</b><br><span class="small">${esc(crmDate(f.treatmentDate))}</span></div><span class="badge ${acStatusClass(f)}">${esc(acStageLabel(f.stage))}</span></div>
+        <div class="crmCustomerMeta" style="margin-top:10px">
+          <span class="badge">Empfehlung: ${esc(f.recommendedTreatment||"–")}</span>
+          ${f.recommendedAddon?`<span class="badge">Ergänzung: ${esc(f.recommendedAddon)}</span>`:""}
+          <span class="badge">${esc(f.rebookWeeks||6)} Wochen</span>
+        </div>
+        ${f.personalNote?`<p class="small"><b>Persönlicher Hinweis:</b> ${esc(f.personalNote)}</p>`:""}
+
+        ${linked?`<div class="dossierAlert" style="border-color:#cfe2d4;background:#f6fbf7"><b>✓ Nachfolgetermin verknüpft</b><br><span class="small">${esc(crmDate(linked.date))} · ${esc(linked.time||"")} · ${esc(linked.service||"Termin")} · ${f.successorLinkMethod==="automatic"?"automatisch erkannt":"manuell bestätigt"}</span><div class="bookingActions"><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(linked.id)}'),0)">Termin öffnen</button><button class="secondary" onclick="acUnlinkSuccessor('${esc(f.id)}')">Verknüpfung lösen</button></div></div>`:""}
+
+        ${!linked&&strong.length?`<div class="dossierAlert"><b>Passender zukünftiger Termin erkannt</b><br><span class="small">Bitte verknüpfen, falls dies die Folgebehandlung ist.</span>${strong.map(b=>`<div class="bookingActions"><button class="gold" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">${esc(crmDate(b.date))} · ${esc(b.time||"")} · ${esc(b.service||"Termin")} verknüpfen</button></div>`).join("")}</div>`:""}
+
+        ${!linked&&unrelated.length?`<details class="fold"><summary>${unrelated.length} weiterer zukünftiger Termin${unrelated.length>1?"e":""}</summary><p class="small">Nicht automatisch als Nachfolge gewertet, weil die Behandlung nicht eindeutig zur Empfehlung passt.</p>${unrelated.map(b=>`<div class="bookingActions"><button class="secondary" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">${esc(crmDate(b.date))} · ${esc(b.time||"")} · ${esc(b.service||"Termin")} manuell als Nachfolge</button></div>`).join("")}</details>`:""}
+
+        <p class="small"><b>Nächste Aktion:</b> ${f.nextActionAt?esc(crmDate(f.nextActionAt)):"–"}${sent?`<br><b>Zuletzt als gesendet markiert:</b> ${esc(String(sent.sentAt||"").slice(0,16).replace("T"," "))}`:""}</p>
+
+        ${f.status==="active"?`<div class="bookingActions"><button class="secondary" onclick="previewAftercareMail('${esc(f.id)}')">Nachricht ansehen</button><button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button><button class="gold" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button><button class="secondary" onclick="stopAftercare('${esc(f.id)}')">Beenden</button></div>`:`<p class="small">${f.status==="converted"?"✓ Rebooking erkannt – keine weitere Rebooking-Nachricht geplant.":"Workflow abgeschlossen."}</p>`}
+      </div>`;
+    }).join("");
+
+    return html;
+  };
+
+  // Refresh current customer panel after cloud updates.
+  window.addEventListener('lune:cloud-db-updated',function(){
+    try{
+      acAutoConvert();
+      const visible=document.querySelector('.crmDossierNav button[data-panel="aftercare"].active');
+      if(visible){
+        const detail=document.getElementById('customerDetail');
+        const id=(db.customers||[]).find(c=>detail&&detail.textContent.includes(c.name||""))?.id;
+        if(id)openCustomer(id);
+      }
+    }catch(_){}
+  });
+
+})();
+</script>
+
+
+<style id="lune-v30-aftercare-css">
+#acV30Dialog{border:0;border-radius:26px;padding:0;max-width:720px;width:min(94vw,720px);box-shadow:0 30px 80px rgba(40,28,18,.25);background:#fffdf9;color:#211815}
+#acV30Dialog::backdrop{background:rgba(33,24,21,.42);backdrop-filter:blur(4px)}
+.acV30Box{padding:22px}.acV30Head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:14px}
+.acV30Head h2{margin:0}.acV30Grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.acV30Full{grid-column:1/-1}
+.acV30Future{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fffaf2;margin-top:10px}.acV30Future label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:14px;cursor:pointer;font-weight:600}.acV30Future label:hover{background:#fff}
+.acV30Future input[type=radio]{width:auto;min-height:auto;margin-top:3px}.acV30Actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}
+.acFutureCard{border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0;background:#fffdf8}.acFutureCard.match{border-color:#c9b176;background:#fffaf0}
+@media(max-width:700px){.acV30Grid{grid-template-columns:1fr}.acV30Full{grid-column:auto}}
+</style>
+<script id="lune-v30-aftercare-followup-choice">
+(function(){
+  'use strict';
+
+  function acV30AllFutureBookings(customerId, afterDate, excludeId){
+    return (db.bookings||[])
+      .filter(function(b){
+        if(String(b.customerId||"")!==String(customerId||""))return false;
+        if(String(b.id||"")===String(excludeId||""))return false;
+        if(b.status==="storniert")return false;
+        if(!b.date || String(b.date)<=String(afterDate||""))return false;
+        const nowTime=new Date().toTimeString().slice(0,5);
+        return String(b.date)>TODAY() || (String(b.date)===TODAY() && String(b.time||"23:59")>=nowTime);
+      })
+      .sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+  }
+
+  function acV30ServiceOptions(selectedId){
+    const services=(db.services||[]).filter(s=>s && s.active!==false);
+    return services.map(s=>`<option value="${esc(s.id)}" ${String(s.id)===String(selectedId||"")?"selected":""}>${esc(s.name||s.id)}</option>`).join("");
+  }
+
+  function acV30FindServiceIdByName(name){
+    const n=acNorm(name);
+    const exact=(db.services||[]).find(s=>acNorm(s.name)===n);
+    if(exact)return exact.id;
+    const loose=(db.services||[]).find(s=>{
+      const sn=acNorm(s.name);
+      return n&&sn&&(sn.includes(n)||n.includes(sn));
+    });
+    return loose?loose.id:"";
+  }
+
+  function acV30EnsureDialog(){
+    let d=document.getElementById("acV30Dialog");
+    if(d)return d;
+    d=document.createElement("dialog");
+    d.id="acV30Dialog";
+    document.body.appendChild(d);
+    return d;
+  }
+
+  window.startAftercareFromBooking=function(bookingId){
+    const b=(db.bookings||[]).find(x=>String(x.id)===String(bookingId));
+    if(!b)return;
+    if(!acBookingIsPast(b)){
+      alert("Nachbetreuung kann erst nach dem tatsächlichen Behandlungstermin angelegt werden.");
+      return;
+    }
+    if(b.status!=="beendet"){
+      alert("Bitte den Termin zuerst als „beendet“ markieren.");
+      return;
+    }
+    const existing=(db.aftercareFlows||[]).find(f=>String(f.bookingId)===String(bookingId)&&f.status==="active");
+    if(existing){
+      tab("customers");
+      setTimeout(()=>{openCustomer(b.customerId);crmShowPanel(b.customerId,"aftercare")},0);
+      return;
+    }
+
+    const performedNames=Array.isArray(b.services)&&b.services.length
+      ? b.services.map(x=>x.name).filter(Boolean).join(" + ")
+      : (b.service||"Behandlung");
+    const currentServiceId=String(b.serviceId||((Array.isArray(b.services)&&b.services[0])?b.services[0].id:"")||"");
+    const futures=acV30AllFutureBookings(b.customerId,b.date,b.id);
+    const d=acV30EnsureDialog();
+
+    d.innerHTML=`<div class="acV30Box">
+      <div class="acV30Head">
+        <div><div class="brandEyebrow">Nachbetreuung · Rebooking</div><h2>Nachbetreuung anlegen</h2><p class="small">${esc(crmDate(b.date))} · ${esc(performedNames)}</p></div>
+        <button type="button" class="secondary" onclick="document.getElementById('acV30Dialog').close()">✕</button>
+      </div>
+      <div class="acV30Grid">
+        <div class="acV30Full"><label>Durchgeführte Behandlung</label><input id="acV30Performed" value="${esc(performedNames)}"></div>
+        <div><label>Nächste empfohlene Behandlung</label>
+          <select id="acV30NextService">
+            <option value="">Bitte wählen …</option>
+            ${acV30ServiceOptions(currentServiceId)}
+            <option value="__custom__">Andere / individuell …</option>
+          </select>
+        </div>
+        <div><label>Empfohlener Abstand</label>
+          <select id="acV30Weeks">
+            ${[2,3,4,5,6,8,10,12].map(w=>`<option value="${w}" ${w===acDefaultWeeks(performedNames)?"selected":""}>${w} Wochen</option>`).join("")}
+          </select>
+        </div>
+        <div><label>Ergänzende Behandlung (optional)</label>
+          <select id="acV30Addon">
+            <option value="">Keine</option>
+            ${acV30ServiceOptions("")}
+            <option value="__custom__">Andere / individuell …</option>
+          </select>
+        </div>
+        <div><label>Persönlicher Hinweis</label><input id="acV30Note" placeholder="z. B. Fokus auf Feuchtigkeit / Glow"></div>
+
+        <div class="acV30Full acV30Future">
+          <b>Bereits gebuchte zukünftige Termine</b>
+          <p class="small">Ein Folgetermin darf eine andere Behandlung sein. Wählen Sie den Termin, der zu dieser Nachbetreuung gehört. Wenn noch keiner gebucht ist, lassen Sie „Kein Folgetermin“ aktiv.</p>
+          <label><input type="radio" name="acV30Successor" value="" checked><span>Kein Folgetermin verknüpfen</span></label>
+          ${futures.length?futures.map(b2=>`<label><input type="radio" name="acV30Successor" value="${esc(b2.id)}"><span><b>${esc(crmDate(b2.date))} · ${esc(b2.time||"")}</b><br><span class="small">${esc(b2.service||((b2.services||[]).map(x=>x.name).join(" + "))||"Termin")}</span></span></label>`).join(""):`<p class="small">Aktuell kein zukünftiger Termin vorhanden.</p>`}
+        </div>
+      </div>
+      <div class="acV30Actions">
+        <button class="secondary" type="button" onclick="document.getElementById('acV30Dialog').close()">Abbrechen</button>
+        <button class="gold" type="button" onclick="acV30CreateFlow('${esc(b.id)}')">Nachbetreuung speichern</button>
+      </div>
+    </div>`;
+    d.showModal();
+  };
+
+  window.acV30CreateFlow=function(bookingId){
+    const b=(db.bookings||[]).find(x=>String(x.id)===String(bookingId));
+    if(!b)return;
+    const c=(db.customers||[]).find(x=>String(x.id)===String(b.customerId))||{};
+    const performed=String(document.getElementById("acV30Performed")?.value||b.service||"").trim();
+
+    const nextSelect=document.getElementById("acV30NextService");
+    let nextServiceId=String(nextSelect?.value||"");
+    let nextName="";
+    if(nextServiceId==="__custom__"){
+      nextName=prompt("Individuelle nächste Behandlung:","");
+      if(nextName===null)return;
+      nextServiceId=acV30FindServiceIdByName(nextName);
+    }else{
+      const svc=(db.services||[]).find(s=>String(s.id)===nextServiceId);
+      nextName=svc?svc.name:"";
+    }
+    if(!nextName){
+      alert("Bitte eine nächste empfohlene Behandlung wählen.");
+      return;
+    }
+
+    const addonSelect=document.getElementById("acV30Addon");
+    let addonId=String(addonSelect?.value||""), addonName="";
+    if(addonId==="__custom__"){
+      addonName=prompt("Individuelle ergänzende Behandlung:","");
+      if(addonName===null)return;
+      addonId=acV30FindServiceIdByName(addonName);
+    }else if(addonId){
+      const svc=(db.services||[]).find(s=>String(s.id)===addonId);
+      addonName=svc?svc.name:"";
+    }
+
+    const weeks=Math.max(1,Math.min(52,Number(document.getElementById("acV30Weeks")?.value||6)));
+    const note=String(document.getElementById("acV30Note")?.value||"").trim();
+    const successorId=String(document.querySelector('input[name="acV30Successor"]:checked')?.value||"");
+    const treatmentDate=b.date||TODAY();
+    const age=acDaysSince(treatmentDate);
+    let stage="thanks",nextActionAt=acDateAdd(treatmentDate,1);
+    if(age>=3&&age<=7){stage="checkin";nextActionAt=TODAY();}
+    else if(age>7){
+      stage="rebook";
+      const target=acDateAdd(treatmentDate,weeks*7);
+      nextActionAt=target<=TODAY()?TODAY():target;
+    }
+
+    const f={
+      id:nextId(db.aftercareFlows||[],"AC"),
+      bookingId:b.id,
+      customerId:b.customerId,
+      customerName:b.name||c.name||"",
+      email:b.email||c.email||"",
+      treatmentDate,
+      performedTreatment:performed,
+      recommendedTreatment:nextName,
+      recommendedServiceId:nextServiceId,
+      recommendedAddon:addonName,
+      recommendedAddonServiceId:addonId,
+      personalNote:note,
+      rebookWeeks:weeks,
+      status:"active",
+      stage,
+      nextActionAt,
+      createdAt:new Date().toISOString(),
+      history:[]
+    };
+    db.aftercareFlows=db.aftercareFlows||[];
+    db.aftercareFlows.push(f);
+
+    if(successorId){
+      f.successorBookingId=successorId;
+      f.successorLinkedAt=new Date().toISOString();
+      f.successorLinkMethod="manual-at-creation";
+      f.status="converted";
+      f.stage="converted";
+      f.nextActionAt="";
+      f.completedAt=new Date().toISOString();
+    }
+
+    persist();
+    document.getElementById("acV30Dialog")?.close();
+    tab("customers");
+    setTimeout(()=>{openCustomer(b.customerId);crmShowPanel(b.customerId,"aftercare")},0);
+  };
+
+  // A follow-up appointment is a relationship, not necessarily the same service.
+  window.acReconcileFlow=function(f){
+    if(!f)return false;
+    if(f.successorBookingId){
+      const linked=(db.bookings||[]).find(b=>String(b.id)===String(f.successorBookingId));
+      if(!linked||linked.status==="storniert"){
+        f.successorBookingId="";
+        f.successorLinkedAt="";
+        f.successorLinkMethod="";
+        f.status="active";
+        const age=acDaysSince(f.treatmentDate);
+        if(age<=2){f.stage="thanks";f.nextActionAt=TODAY();}
+        else if(age<=7){f.stage="checkin";f.nextActionAt=TODAY();}
+        else{
+          f.stage="rebook";
+          const target=acDateAdd(f.treatmentDate,Number(f.rebookWeeks||6)*7);
+          f.nextActionAt=target<=TODAY()?TODAY():target;
+        }
+        return true;
+      }
+      return false;
+    }
+    if(f.status!=="active")return false;
+
+    const futures=acV30AllFutureBookings(f.customerId,f.treatmentDate,f.bookingId);
+    const activeFlows=(db.aftercareFlows||[]).filter(x=>
+      x.status==="active" &&
+      String(x.customerId||"")===String(f.customerId||"") &&
+      !x.successorBookingId
+    );
+
+    if(futures.length===1 && activeFlows.length===1){
+      const b=futures[0];
+      f.successorBookingId=b.id;
+      f.successorLinkedAt=new Date().toISOString();
+      f.successorLinkMethod="automatic-single-future";
+      f.status="converted";
+      f.stage="converted";
+      f.nextActionAt="";
+      f.completedAt=new Date().toISOString();
+      return true;
+    }
+    return false;
+  };
+
+  const prevPanel=window.renderCustomerAftercarePanel;
+  window.renderCustomerAftercarePanel=function(customerId){
+    acAutoConvert();
+    const base=prevPanel(customerId);
+    const rows=(db.aftercareFlows||[])
+      .filter(f=>String(f.customerId||"")===String(customerId||""))
+      .sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+
+    if(!rows.length)return base;
+
+    const extra=rows.map(f=>{
+      if(f.successorBookingId)return "";
+      const futures=acV30AllFutureBookings(f.customerId,f.treatmentDate,f.bookingId);
+      if(!futures.length)return "";
+      return `<div class="crmSafetyCard" style="margin:12px 0">
+        <div class="cleanSectionHead"><div><b>Folgetermin zuordnen</b><br><span class="small">${esc(f.performedTreatment||"Behandlung")} · ${esc(crmDate(f.treatmentDate))}</span></div><span class="badge">${futures.length} Termin${futures.length>1?"e":""}</span></div>
+        <p class="small">Ein Folgetermin darf ausdrücklich eine <b>andere Behandlung</b> sein. Bitte wählen Sie, welcher zukünftige Termin zu diesem Follow-up gehört.</p>
+        ${futures.map(b=>`<div class="acFutureCard ${acBookingMatchesFlow(b,f)?"match":""}"><b>${esc(crmDate(b.date))} · ${esc(b.time||"")}</b><br><span class="small">${esc(b.service||((b.services||[]).map(x=>x.name).join(" + "))||"Termin")}</span><div class="bookingActions"><button class="gold" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">Als Nachfolgetermin verknüpfen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Termin öffnen</button></div></div>`).join("")}
+      </div>`;
+    }).join("");
+
+    return base + extra;
+  };
+
+  if(typeof window.saveBooking==="function"){
+    const prev=window.saveBooking;
+    window.saveBooking=function(){
+      const r=prev.apply(this,arguments);
+      try{ acAutoConvert(); renderAftercareDashboard(); }catch(_){}
+      return r;
+    };
+  }
+
+})();
+</script>
+
+
+<style id="lune-v31-aftercare-premium-css">
+.ac31Hero{border:1px solid rgba(185,155,98,.28);background:linear-gradient(135deg,#fffdf9,#fbf3e7);border-radius:22px;padding:16px;margin:0 0 14px}
+.ac31HeroTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.ac31Title{margin:2px 0 4px;font-family:Georgia,"Times New Roman",serif;font-size:24px;font-weight:500;color:#231915}
+.ac31Lead{margin:0;color:#756960;font-size:13px;line-height:1.5;max-width:620px}
+.ac31StatusGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.ac31Status{border:1px solid var(--line);border-radius:18px;background:#fff;padding:13px}
+.ac31Status span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#927443;font-weight:800;margin-bottom:4px}
+.ac31Status b{display:block;font-size:15px;line-height:1.35}
+.ac31Status .small{margin-top:3px;display:block;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:500}
+.ac31Status.booked{border-color:#cfe2d4;background:#f6fbf7}
+.ac31Plan{border:1px solid var(--line);border-radius:20px;background:#fff;padding:15px;margin:12px 0;box-shadow:0 8px 24px rgba(64,46,29,.04)}
+.ac31PlanHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ac31Plan h4{margin:0;font-size:17px}.ac31Meta{color:var(--muted);font-size:12px;margin-top:3px}
+.ac31Steps{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:13px 0}
+.ac31Step{border:1px solid var(--line);border-radius:14px;padding:9px;background:#fffdf8;font-size:12px}
+.ac31Step strong{display:block;font-size:12px;margin-bottom:2px}
+.ac31Step.done{border-color:#cfe2d4;background:#f6fbf7}.ac31Step.now{border-color:#e5c77d;background:#fff9eb}
+.ac31Info{border:1px solid #eadbc6;background:#fffaf2;border-radius:18px;padding:13px;margin:12px 0}
+.ac31Info.ok{border-color:#cfe2d4;background:#f6fbf7}.ac31Info.warn{border-color:#f0d99d;background:#fffaf0}
+.ac31Actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.ac31Actions button{margin:0}
+.ac31Empty{border:1px dashed #d9c49b;background:rgba(255,253,248,.7);border-radius:20px;padding:18px;text-align:left;margin-top:12px}
+.ac31Empty h4{margin:0 0 6px}.ac31Empty p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+@media(max-width:680px){.ac31StatusGrid,.ac31Steps{grid-template-columns:1fr}.ac31Actions button{width:100%}}
+</style>
+<script id="lune-v31-aftercare-premium-ui">
+(function(){
+  'use strict';
+
+  function ac31FutureBookings(customerId){
+    const nowTime=new Date().toTimeString().slice(0,5);
+    return (db.bookings||[])
+      .filter(b =>
+        String(b.customerId||"")===String(customerId||"") &&
+        b.status!=="storniert" &&
+        (String(b.date||"")>TODAY() || (String(b.date||"")===TODAY() && String(b.time||"23:59")>=nowTime))
+      )
+      .sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+  }
+
+  function ac31CompletedBookings(customerId){
+    return (db.bookings||[])
+      .filter(b =>
+        String(b.customerId||"")===String(customerId||"") &&
+        b.status==="beendet" &&
+        acBookingIsPast(b)
+      )
+      .sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+  }
+
+  function ac31BookingName(b){
+    if(!b)return "–";
+    if(Array.isArray(b.services)&&b.services.length){
+      return b.services.map(x=>x&&x.name).filter(Boolean).join(" + ") || b.service || "Termin";
+    }
+    return b.service||"Termin";
+  }
+
+  function ac31SentStages(flow){
+    return new Set((flow.history||[]).map(h=>h.stage));
+  }
+
+  function ac31StepClass(flow,key){
+    const sent=ac31SentStages(flow);
+    if(key==="visit")return "done";
+    if(key==="care"){
+      if(sent.has("thanks")||sent.has("checkin")||["rebook","reminder","converted","done"].includes(flow.stage))return "done";
+      return ["thanks","checkin"].includes(flow.stage)?"now":"";
+    }
+    if(key==="next"){
+      if(flow.status==="converted"||flow.status==="done")return "done";
+      if(["rebook","reminder"].includes(flow.stage))return "now";
+      return "";
+    }
+    return "";
+  }
+
+  window.renderCustomerAftercarePanel=function(customerId){
+    acAutoConvert();
+
+    const rows=(db.aftercareFlows||[])
+      .filter(f=>String(f.customerId||"")===String(customerId||""))
+      .sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+
+    const completed=ac31CompletedBookings(customerId);
+    const futures=ac31FutureBookings(customerId);
+    const latestCompleted=completed[0]||null;
+    const nextFuture=futures[0]||null;
+    const withoutFlow=completed.filter(b=>!(db.aftercareFlows||[]).some(f=>String(f.bookingId||"")===String(b.id||"")));
+
+    let html=`<div class="ac31Hero">
+      <div class="ac31HeroTop">
+        <div>
+          <div class="brandEyebrow">Kundenpflege</div>
+          <h3 class="ac31Title">Nachbetreuung</h3>
+          <p class="ac31Lead">Nach dem Besuch: persönlich nachfragen, die nächste passende Behandlung empfehlen und vorhandene Folgetermine sauber zuordnen.</p>
+        </div>
+      </div>
+      <div class="ac31StatusGrid">
+        <div class="ac31Status">
+          <span>Letzte Behandlung</span>
+          <b>${latestCompleted?esc(crmDate(latestCompleted.date))+" · "+esc(ac31BookingName(latestCompleted)):"Noch keine abgeschlossene Behandlung"}</b>
+        </div>
+        <div class="ac31Status ${nextFuture?"booked":""}">
+          <span>Nächster Termin</span>
+          <b>${nextFuture?esc(crmDate(nextFuture.date))+" · "+esc(nextFuture.time||""):"Noch nicht gebucht"}</b>
+          ${nextFuture?`<span class="small">${esc(ac31BookingName(nextFuture))} · bereits gebucht</span>`:`<span class="small">Eine Empfehlung kann trotzdem geplant werden.</span>`}
+        </div>
+      </div>
+    </div>`;
+
+    if(withoutFlow.length){
+      html+=`<div class="ac31Info warn">
+        <b>Nachbetreuung noch nicht eingerichtet</b>
+        <div class="small" style="margin-top:4px">Für ${withoutFlow.length===1?"die Behandlung":"diese Behandlungen"} wurde noch kein Nachsorgeplan angelegt.${nextFuture?" Der bereits gebuchte Termin kann beim Start direkt als Folgetermin ausgewählt werden.":""}</div>
+        ${withoutFlow.slice(0,6).map(b=>`<div class="ac31Actions"><button class="gold" onclick="startAftercareFromBooking('${esc(b.id)}')">Nachbetreuung planen · ${esc(crmDate(b.date))}</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Behandlung ansehen</button></div>`).join("")}
+      </div>`;
+    }
+
+    if(!rows.length){
+      html+=`<div class="ac31Empty">
+        <h4>Kein Nachsorgeplan aktiv</h4>
+        <p>${nextFuture
+          ?`Ein neuer Termin ist bereits für <b>${esc(crmDate(nextFuture.date))} · ${esc(nextFuture.time||"")}</b> gebucht. Starten Sie die Nachbetreuung für die letzte Behandlung und wählen Sie diesen Termin dort als Folgetermin aus, wenn er dazugehört.`
+          :`Wählen Sie unten eine abgeschlossene Behandlung und klicken Sie auf „Nachbetreuung planen“. Danach wählen Sie Empfehlung, Zeitraum und einen vorhandenen Folgetermin.`}</p>
+      </div>`;
+      return html;
+    }
+
+    rows.forEach(f=>{
+      acReconcileFlow(f);
+      const source=(db.bookings||[]).find(b=>String(b.id||"")===String(f.bookingId||""));
+      const linked=f.successorBookingId?(db.bookings||[]).find(b=>String(b.id||"")===String(f.successorBookingId||"")):null;
+      const candidates=ac31FutureBookings(f.customerId).filter(b=>String(b.id||"")!==String(f.bookingId||"")&&String(b.date||"")>String(f.treatmentDate||""));
+      const sent=(f.history||[]).slice().reverse()[0];
+
+      html+=`<div class="ac31Plan">
+        <div class="ac31PlanHead">
+          <div>
+            <h4>${esc(f.performedTreatment||ac31BookingName(source)||"Behandlung")}</h4>
+            <div class="ac31Meta">${esc(crmDate(f.treatmentDate))}</div>
+          </div>
+          <span class="badge ${acStatusClass(f)}">${esc(acStageLabel(f.stage))}</span>
+        </div>
+
+        <div class="ac31Steps">
+          <div class="ac31Step ${ac31StepClass(f,"visit")}"><strong>1 · Besuch</strong>${esc(crmDate(f.treatmentDate))}</div>
+          <div class="ac31Step ${ac31StepClass(f,"care")}"><strong>2 · Nachsorge</strong>${["thanks","checkin"].includes(f.stage)?"jetzt fällig":"Danke / Check-in"}</div>
+          <div class="ac31Step ${ac31StepClass(f,"next")}"><strong>3 · Nächster Schritt</strong>${linked?"Termin gebucht":esc(f.recommendedTreatment||"Empfehlung")}</div>
+        </div>
+
+        <div class="small"><b>Empfehlung:</b> ${esc(f.recommendedTreatment||"–")}${f.recommendedAddon?` · <b>Ergänzung:</b> ${esc(f.recommendedAddon)}`:""} · <b>Zeitraum:</b> ${esc(f.rebookWeeks||6)} Wochen</div>
+        ${f.personalNote?`<div class="small" style="margin-top:5px"><b>Hinweis:</b> ${esc(f.personalNote)}</div>`:""}
+
+        ${linked?`<div class="ac31Info ok"><b>✓ Folgetermin bereits gebucht</b><div class="small" style="margin-top:4px">${esc(crmDate(linked.date))} · ${esc(linked.time||"")} · ${esc(ac31BookingName(linked))}</div><div class="ac31Actions"><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(linked.id)}'),0)">Termin öffnen</button><button class="secondary" onclick="acUnlinkSuccessor('${esc(f.id)}')">Zuordnung ändern</button></div></div>`:""}
+
+        ${!linked&&candidates.length?`<div class="ac31Info"><b>Es gibt bereits ${candidates.length===1?"einen zukünftigen Termin":"zukünftige Termine"}</b><div class="small" style="margin-top:4px">Prüfen Sie kurz, ob einer davon der Folgetermin zu dieser Behandlung ist. Die Behandlung darf dabei eine andere sein.</div>${candidates.map(b=>`<div class="acFutureCard"><b>${esc(crmDate(b.date))} · ${esc(b.time||"")}</b><br><span class="small">${esc(ac31BookingName(b))}</span><div class="ac31Actions"><button class="gold" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">Als Folgetermin zuordnen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Termin öffnen</button></div></div>`).join("")}</div>`:""}
+
+        ${f.status==="active"?`<div class="ac31Info">
+          <b>Nächste Aktion: ${esc(acStageLabel(f.stage))}</b>
+          <div class="small" style="margin-top:4px">${f.nextActionAt?"Geplant für "+esc(crmDate(f.nextActionAt)):"Keine Aktion geplant"}${sent?` · zuletzt als gesendet markiert: ${esc(String(sent.sentAt||"").slice(0,16).replace("T"," "))}`:""}</div>
+          <div class="ac31Actions">
+            <button class="secondary" onclick="previewAftercareMail('${esc(f.id)}')">E-Mail lesen</button>
+            <button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button>
+            <button class="gold" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button>
+            <button class="secondary" onclick="stopAftercare('${esc(f.id)}')">Nachbetreuung beenden</button>
+          </div>
+        </div>`:`<div class="ac31Info ${f.status==="converted"?"ok":""}"><b>${f.status==="converted"?"✓ Rebooking erledigt":"Nachbetreuung abgeschlossen"}</b><div class="small">${f.status==="converted"?"Ein Folgetermin ist zugeordnet. Es wird keine weitere Rebooking-Mail geplant.":"Für diesen Plan ist keine weitere Aktion offen."}</div></div>`}
+      </div>`;
+    });
+
+    return html;
+  };
+
+})();
+</script>
+
+
+<style id="lune-v32-aftercare-e2e-css">
+.ac32State{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}
+.ac32Dot{width:8px;height:8px;border-radius:50%;background:#b99554;display:inline-block}
+.ac32Decision{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fffdf8;margin-top:10px}
+.ac32Decision b{display:block;margin-bottom:4px}
+.ac32Mini{font-size:12px;color:var(--muted);line-height:1.45}
+</style>
+<script id="lune-v32-aftercare-e2e">
+(function(){
+  'use strict';
+
+  function ac32Future(customerId, afterDate, excludeId){
+    const nowTime=new Date().toTimeString().slice(0,5);
+    return (db.bookings||[]).filter(b=>{
+      if(String(b.customerId||"")!==String(customerId||""))return false;
+      if(String(b.id||"")===String(excludeId||""))return false;
+      if(b.status==="storniert")return false;
+      if(!b.date || String(b.date||"")<=String(afterDate||""))return false;
+      return String(b.date)>TODAY() || (String(b.date)===TODAY() && String(b.time||"23:59")>=nowTime);
+    }).sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+  }
+
+  function ac32Name(b){
+    if(!b)return "Termin";
+    if(Array.isArray(b.services)&&b.services.length){
+      return b.services.map(x=>x&&x.name).filter(Boolean).join(" + ") || b.service || "Termin";
+    }
+    return b.service||"Termin";
+  }
+
+  // New flow state: no appointment is a perfectly valid active aftercare state.
+  function ac32NormalizeFlow(f){
+    if(!f)return;
+    if(!f.bookingState)f.bookingState=f.successorBookingId?"booked":"not_booked";
+    if(f.status==="converted"&&f.successorBookingId)f.bookingState="booked";
+  }
+
+  function ac32ReopenAfterCancelledSuccessor(f){
+    if(!f||!f.successorBookingId)return false;
+    const linked=(db.bookings||[]).find(b=>String(b.id||"")===String(f.successorBookingId||""));
+    if(linked && linked.status!=="storniert")return false;
+    f.successorBookingId="";
+    f.successorLinkedAt="";
+    f.successorLinkMethod="";
+    f.bookingState="not_booked";
+    f.status="active";
+    const age=acDaysSince(f.treatmentDate);
+    if(age<=2){f.stage="thanks";f.nextActionAt=TODAY();}
+    else if(age<=7){f.stage="checkin";f.nextActionAt=TODAY();}
+    else{
+      f.stage="rebook";
+      const target=acDateAdd(f.treatmentDate,Number(f.rebookWeeks||6)*7);
+      f.nextActionAt=target<=TODAY()?TODAY():target;
+    }
+    return true;
+  }
+
+  // Do not silently convert when several plausible bookings/flows exist.
+  window.acAutoConvert=function(){
+    let changed=false;
+    (db.aftercareFlows||[]).forEach(f=>{
+      ac32NormalizeFlow(f);
+      if(ac32ReopenAfterCancelledSuccessor(f))changed=true;
+      if(f.status!=="active" || f.successorBookingId)return;
+
+      const futures=ac32Future(f.customerId,f.treatmentDate,f.bookingId);
+      const openFlows=(db.aftercareFlows||[]).filter(x =>
+        String(x.customerId||"")===String(f.customerId||"") &&
+        x.status==="active" && !x.successorBookingId
+      );
+      // Only the truly unambiguous case is auto-linked.
+      if(futures.length===1 && openFlows.length===1){
+        const b=futures[0];
+        f.successorBookingId=b.id;
+        f.successorLinkedAt=new Date().toISOString();
+        f.successorLinkMethod="automatic-unambiguous";
+        f.bookingState="booked";
+        f.status="converted";
+        f.stage="converted";
+        f.nextActionAt="";
+        f.completedAt=new Date().toISOString();
+        changed=true;
+      }
+    });
+    if(changed){
+      try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+    }
+  };
+
+  const oldLink=window.acLinkSuccessor;
+  window.acLinkSuccessor=function(flowId,bookingId,manual){
+    const r=oldLink.apply(this,arguments);
+    const f=(db.aftercareFlows||[]).find(x=>String(x.id)===String(flowId));
+    if(f)f.bookingState="booked";
+    persist();
+    return r;
+  };
+
+  const oldUnlink=window.acUnlinkSuccessor;
+  window.acUnlinkSuccessor=function(flowId){
+    const r=oldUnlink.apply(this,arguments);
+    const f=(db.aftercareFlows||[]).find(x=>String(x.id)===String(flowId));
+    if(f)f.bookingState="not_booked";
+    persist();
+    return r;
+  };
+
+  // Explicit "no follow-up appointment yet" choice when creating a plan.
+  const oldCreate=window.acV30CreateFlow;
+  window.acV30CreateFlow=function(bookingId){
+    const before=(db.aftercareFlows||[]).length;
+    const successor=String(document.querySelector('input[name="acV30Successor"]:checked')?.value||"");
+    const r=oldCreate.apply(this,arguments);
+    if((db.aftercareFlows||[]).length>before){
+      const f=db.aftercareFlows[db.aftercareFlows.length-1];
+      f.bookingState=successor?"booked":"not_booked";
+      persist();
+    }
+    return r;
+  };
+
+  // After a real booking is saved later, refresh the relationship logic.
+  if(typeof window.saveBooking==="function"){
+    const prevSave32=window.saveBooking;
+    window.saveBooking=function(){
+      const r=prevSave32.apply(this,arguments);
+      try{
+        acAutoConvert();
+        if(typeof renderAftercareDashboard==="function")renderAftercareDashboard();
+      }catch(_){}
+      return r;
+    };
+  }
+
+  // Premium employee-facing panel, centered on "what do I do next?"
+  window.renderCustomerAftercarePanel=function(customerId){
+    acAutoConvert();
+
+    const allBookings=(db.bookings||[]).filter(b=>String(b.customerId||"")===String(customerId||""));
+    const completed=allBookings.filter(b=>b.status==="beendet"&&acBookingIsPast(b))
+      .sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+    const futures=ac32Future(customerId,"0000-00-00","");
+    const rows=(db.aftercareFlows||[]).filter(f=>String(f.customerId||"")===String(customerId||""))
+      .sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+    const withoutFlow=completed.filter(b=>!rows.some(f=>String(f.bookingId||"")===String(b.id||"")));
+    const latest=completed[0], next=futures[0];
+
+    let html=`<div class="ac31Hero">
+      <div class="brandEyebrow">Kundenpflege · Rebooking</div>
+      <h3 class="ac31Title">Nachbetreuung</h3>
+      <p class="ac31Lead">Hier sieht das Team sofort: Was wurde gemacht? Was empfehlen wir als Nächstes? Ist bereits ein Termin gebucht? Und welche persönliche Nachricht ist jetzt sinnvoll?</p>
+      <div class="ac31StatusGrid">
+        <div class="ac31Status"><span>Letzte Behandlung</span><b>${latest?esc(crmDate(latest.date))+" · "+esc(ac32Name(latest)):"Keine abgeschlossene Behandlung"}</b></div>
+        <div class="ac31Status ${next?"booked":""}"><span>Nächster gebuchter Termin</span><b>${next?esc(crmDate(next.date))+" · "+esc(next.time||""):"Noch kein Termin"}</b>${next?`<span class="small">${esc(ac32Name(next))}</span>`:`<span class="small">Das ist kein Fehler: Die Nachbetreuung kann ohne Folgetermin geplant werden.</span>`}</div>
+      </div>
+    </div>`;
+
+    if(withoutFlow.length){
+      html+=`<div class="ac31Info warn"><b>Aktion für das Team</b><div class="small" style="margin-top:4px">Für ${withoutFlow.length===1?"diese abgeschlossene Behandlung":"diese abgeschlossenen Behandlungen"} ist noch kein Nachsorgeplan angelegt.</div>${withoutFlow.slice(0,6).map(b=>`<div class="ac31Actions"><button class="gold" onclick="startAftercareFromBooking('${esc(b.id)}')">Nachbetreuung planen · ${esc(crmDate(b.date))}</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Behandlung öffnen</button></div>`).join("")}</div>`;
+    }
+
+    if(!rows.length){
+      html+=`<div class="ac31Empty"><h4>Noch kein Nachsorgeplan</h4><p>${next?`Ein Termin am <b>${esc(crmDate(next.date))} · ${esc(next.time||"")}</b> ist bereits gebucht. Beim Anlegen der Nachbetreuung entscheidet die Mitarbeiterin, ob dieser Termin dazugehört.`:`Klicken Sie oben auf <b>„Nachbetreuung planen“</b>. Ein zukünftiger Termin ist dafür nicht erforderlich.`}</p></div>`;
+      return html;
+    }
+
+    rows.forEach(f=>{
+      ac32NormalizeFlow(f);
+      const linked=f.successorBookingId?allBookings.find(b=>String(b.id||"")===String(f.successorBookingId||"")):null;
+      const candidates=!linked?ac32Future(f.customerId,f.treatmentDate,f.bookingId):[];
+      const sent=(f.history||[]).slice().reverse()[0];
+
+      let nextText="";
+      if(f.status==="converted"&&linked)nextText="Folgetermin gebucht – keine Rebooking-Nachricht mehr nötig.";
+      else if(f.stage==="thanks")nextText="Danke-/Nachsorge-Mail prüfen und senden.";
+      else if(f.stage==="checkin")nextText="Persönlichen Check-in prüfen und senden.";
+      else if(f.stage==="rebook")nextText="Empfehlung für die nächste Behandlung prüfen und senden.";
+      else if(f.stage==="reminder")nextText="Eine letzte, sanfte Erinnerung prüfen. Danach endet der Workflow.";
+      else nextText="Keine weitere Aktion offen.";
+
+      html+=`<div class="ac31Plan">
+        <div class="ac31PlanHead"><div><h4>${esc(f.performedTreatment||"Behandlung")}</h4><div class="ac31Meta">${esc(crmDate(f.treatmentDate))}</div></div><span class="badge ${acStatusClass(f)}">${esc(acStageLabel(f.stage))}</span></div>
+
+        <div class="ac31Steps">
+          <div class="ac31Step done"><strong>1 · Behandlung</strong>${esc(crmDate(f.treatmentDate))}</div>
+          <div class="ac31Step ${["thanks","checkin"].includes(f.stage)?"now":(["rebook","reminder","converted","done"].includes(f.stage)?"done":"")}"><strong>2 · Nachsorge</strong>${["thanks","checkin"].includes(f.stage)?"jetzt bearbeiten":"persönlicher Kontakt"}</div>
+          <div class="ac31Step ${f.status==="converted"?"done":(["rebook","reminder"].includes(f.stage)?"now":"")}"><strong>3 · Folgetermin</strong>${linked?"gebucht":"noch offen"}</div>
+        </div>
+
+        <div class="ac32Decision"><b>Empfehlung für den nächsten Besuch</b><div class="ac32Mini">${esc(f.recommendedTreatment||"–")} · empfohlen nach ca. ${esc(f.rebookWeeks||6)} Wochen${f.recommendedAddon?` · Ergänzung: ${esc(f.recommendedAddon)}`:""}</div></div>
+
+        ${linked?`<div class="ac31Info ok"><b>✓ Folgetermin zugeordnet</b><div class="small">${esc(crmDate(linked.date))} · ${esc(linked.time||"")} · ${esc(ac32Name(linked))}</div><div class="ac31Actions"><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(linked.id)}'),0)">Termin öffnen</button><button class="secondary" onclick="acUnlinkSuccessor('${esc(f.id)}')">Zuordnung ändern</button></div></div>`:
+        `<div class="ac31Info"><b>Noch kein Folgetermin zugeordnet</b><div class="small">Die Nachbetreuung bleibt aktiv. Sobald die Kundin einen neuen Termin bucht, kann er hier zugeordnet werden.</div>${candidates.length?`<div class="small" style="margin-top:8px"><b>Bereits vorhandene zukünftige Termine:</b></div>${candidates.map(b=>`<div class="acFutureCard"><b>${esc(crmDate(b.date))} · ${esc(b.time||"")}</b><br><span class="small">${esc(ac32Name(b))}</span><div class="ac31Actions"><button class="gold" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">Als Folgetermin zuordnen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Termin öffnen</button></div></div>`).join("")}`:`<div class="ac32State"><span class="ac32Dot"></span><span class="ac32Mini">Noch nichts gebucht – Follow-up läuft weiter.</span></div>`}</div>`}
+
+        <div class="ac31Info ${f.status==="converted"?"ok":""}"><b>Nächster Schritt für das Team</b><div class="small" style="margin-top:4px">${esc(nextText)}${f.nextActionAt?` · geplant: ${esc(crmDate(f.nextActionAt))}`:""}${sent?` · letzter bestätigter Versand: ${esc(String(sent.sentAt||"").slice(0,16).replace("T"," "))}`:""}</div>
+        ${f.status==="active"?`<div class="ac31Actions"><button class="secondary" onclick="previewAftercareMail('${esc(f.id)}')">E-Mail lesen</button><button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button><button class="gold" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button><button class="secondary" onclick="stopAftercare('${esc(f.id)}')">Nachbetreuung beenden</button></div>`:""}</div>
+      </div>`;
+    });
+    return html;
+  };
+})();
+</script>
+
+
+<style id="lune-v33-pipeline-css">
+.ac33Pipeline{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.ac33Stage{border:1px solid var(--line);border-radius:16px;padding:11px;background:#fff;min-height:74px}
+.ac33Stage .n{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#927443}
+.ac33Stage b{display:block;margin:4px 0 2px;font-size:13px}.ac33Stage small{color:var(--muted)}
+.ac33Stage.done{background:#f5faf6;border-color:#cfe2d4}.ac33Stage.now{background:#fff8e8;border-color:#d8b86d;box-shadow:0 6px 18px rgba(166,126,53,.10)}
+.ac33Stage.wait{opacity:.72}.ac33Cta{border:1px solid #dfc68f;background:linear-gradient(135deg,#fffaf0,#fffdf9);border-radius:20px;padding:16px;margin-top:12px}
+.ac33CtaEyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:#927443}.ac33Cta h4{font-size:18px;margin:5px 0}.ac33Cta p{font-size:13px;color:var(--muted);line-height:1.5;margin:5px 0}
+.ac33Primary{margin-top:11px}.ac33Primary .gold{font-weight:800}
+.ac33Status{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;background:#fff}
+@media(max-width:680px){.ac33Pipeline{grid-template-columns:1fr}.ac33Stage{min-height:auto}}
+</style>
+<script id="lune-v33-action-pipeline">
+(function(){
+'use strict';
+
+function ac33Future(customerId, afterDate, excludeId){
+  const nowTime=new Date().toTimeString().slice(0,5);
+  return (db.bookings||[]).filter(b=>{
+    if(String(b.customerId||"")!==String(customerId||""))return false;
+    if(String(b.id||"")===String(excludeId||""))return false;
+    if(b.status==="storniert")return false;
+    if(!b.date||String(b.date)<=String(afterDate||""))return false;
+    return String(b.date)>TODAY()||(String(b.date)===TODAY()&&String(b.time||"23:59")>=nowTime);
+  }).sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+}
+function ac33Name(b){
+  if(!b)return "Termin";
+  return (Array.isArray(b.services)&&b.services.length?b.services.map(x=>x&&x.name).filter(Boolean).join(" + "):"")||b.service||"Termin";
+}
+function ac33StageState(f,key){
+  if(f.status==="converted")return key==="s3"?"done":(key==="s1"||key==="s2"?"done":"wait");
+  const stage=f.stage||"thanks";
+  if(key==="s1"){
+    if(stage==="thanks")return "now";
+    return "done";
+  }
+  if(key==="s2"){
+    if(stage==="checkin")return "now";
+    if(["rebook","reminder","done"].includes(stage))return "done";
+    return "wait";
+  }
+  if(key==="s3"){
+    if(["rebook","reminder"].includes(stage))return "now";
+    if(stage==="done")return "done";
+    return "wait";
+  }
+  return "wait";
+}
+function ac33StageText(f,key){
+  const state=ac33StageState(f,key);
+  if(state==="done")return "✓ erledigt";
+  if(state==="now")return "JETZT";
+  return "später";
+}
+function ac33Action(f,linked){
+  if(linked)return {title:"Kein Rebooking mehr nötig",desc:"Ein Folgetermin ist bereits zugeordnet. Der Rebooking-Teil dieser Nachbetreuung ist beendet.",cta:""};
+  if(f.stage==="thanks")return {title:"Nachricht 1 · Danke & Nachsorge",desc:"Die erste persönliche Nachricht nach der Behandlung ist jetzt vorgesehen.",cta:"Nachricht 1 ansehen"};
+  if(f.stage==="checkin")return {title:"Nachricht 2 · Persönlicher Check-in",desc:"Jetzt kurz und persönlich nachfragen, wie es der Kundin nach der Behandlung geht.",cta:"Nachricht 2 ansehen"};
+  if(f.stage==="rebook")return {title:"Nachricht 3 · Nächste Behandlung",desc:"Noch kein Folgetermin zugeordnet. Jetzt die persönliche Behandlungsempfehlung prüfen.",cta:"Nachricht 3 ansehen"};
+  if(f.stage==="reminder")return {title:"Letzte sanfte Erinnerung",desc:"Falls weiterhin kein Termin gebucht wurde, kann jetzt die letzte zurückhaltende Erinnerung geprüft werden.",cta:"Erinnerung ansehen"};
+  return {title:"Keine Aktion offen",desc:"Für diese Nachbetreuung ist momentan nichts zu tun.",cta:""};
+}
+
+window.renderCustomerAftercarePanel=function(customerId){
+  try{acAutoConvert();}catch(_){}
+  const all=(db.bookings||[]).filter(b=>String(b.customerId||"")===String(customerId||""));
+  const completed=all.filter(b=>b.status==="beendet"&&acBookingIsPast(b)).sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+  const rows=(db.aftercareFlows||[]).filter(f=>String(f.customerId||"")===String(customerId||"")).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  const futures=ac33Future(customerId,"0000-00-00","");
+  const latest=completed[0], next=futures[0];
+  const without=completed.filter(b=>!rows.some(f=>String(f.bookingId||"")===String(b.id||"")));
+
+  let html=`<div class="ac31Hero">
+    <div class="brandEyebrow">Kundenpflege · Rebooking</div>
+    <h3 class="ac31Title">Nachbetreuung</h3>
+    <p class="ac31Lead">Das Team sieht hier nur, was jetzt wichtig ist: aktueller Status, nächster Schritt und die passende Nachricht.</p>
+    <div class="ac31StatusGrid">
+      <div class="ac31Status"><span>Letzte Behandlung</span><b>${latest?esc(crmDate(latest.date))+" · "+esc(ac33Name(latest)):"Keine abgeschlossene Behandlung"}</b></div>
+      <div class="ac31Status ${next?"booked":""}"><span>Nächster Termin</span><b>${next?esc(crmDate(next.date))+" · "+esc(next.time||""):"Noch nicht gebucht"}</b>${next?`<span class="small">${esc(ac33Name(next))}</span>`:""}</div>
+    </div>
+  </div>`;
+
+  if(without.length){
+    const b=without[0];
+    html+=`<div class="ac33Cta">
+      <div class="ac33CtaEyebrow">Status · Noch nicht gestartet</div>
+      <h4>Jetzt Nachbetreuung planen</h4>
+      <p>Für die Behandlung vom <b>${esc(crmDate(b.date))}</b> wurde noch kein Nachsorgeplan eingerichtet. Empfehlung und Zeitraum festlegen; ein Folgetermin ist dafür nicht erforderlich.</p>
+      <div class="ac33Primary"><button class="gold" onclick="startAftercareFromBooking('${esc(b.id)}')">Nachbetreuung jetzt planen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Behandlung ansehen</button></div>
+    </div>`;
+    if(without.length>1){
+      html+=`<div class="small" style="margin:10px 4px">+ ${without.length-1} weitere abgeschlossene Behandlung${without.length-1>1?"en":""} ohne Nachbetreuung.</div>`;
+    }
+  }
+
+  if(!rows.length)return html;
+
+  rows.forEach(f=>{
+    const linked=f.successorBookingId?all.find(b=>String(b.id||"")===String(f.successorBookingId||"")):null;
+    const candidates=!linked?ac33Future(f.customerId,f.treatmentDate,f.bookingId):[];
+    const action=ac33Action(f,linked);
+    html+=`<div class="ac31Plan">
+      <div class="ac31PlanHead">
+        <div><h4>${esc(f.performedTreatment||"Behandlung")}</h4><div class="ac31Meta">${esc(crmDate(f.treatmentDate))}</div></div>
+        <span class="ac33Status">${linked?"✓ Termin gebucht":esc(acStageLabel(f.stage))}</span>
+      </div>
+
+      <div class="ac33Pipeline">
+        <div class="ac33Stage ${ac33StageState(f,"s1")}"><div class="n">Schritt 1</div><b>Danke & Nachsorge</b><small>${ac33StageText(f,"s1")}</small></div>
+        <div class="ac33Stage ${ac33StageState(f,"s2")}"><div class="n">Schritt 2</div><b>Persönlicher Check-in</b><small>${ac33StageText(f,"s2")}</small></div>
+        <div class="ac33Stage ${ac33StageState(f,"s3")}"><div class="n">Schritt 3</div><b>Nächste Behandlung</b><small>${linked?"✓ Termin gebucht":ac33StageText(f,"s3")}</small></div>
+      </div>
+
+      <div class="ac32Decision"><b>Geplante Empfehlung</b><div class="ac32Mini">${esc(f.recommendedTreatment||"–")} · ca. ${esc(f.rebookWeeks||6)} Wochen${f.recommendedAddon?` · Ergänzung: ${esc(f.recommendedAddon)}`:""}</div></div>
+
+      ${linked?`<div class="ac31Info ok"><b>✓ Nächster Termin gebucht</b><div class="small">${esc(crmDate(linked.date))} · ${esc(linked.time||"")} · ${esc(ac33Name(linked))}</div><div class="small" style="margin-top:5px">Keine weitere Rebooking-Nachricht notwendig.</div><div class="ac31Actions"><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(linked.id)}'),0)">Termin öffnen</button><button class="secondary" onclick="acUnlinkSuccessor('${esc(f.id)}')">Zuordnung ändern</button></div></div>`:""}
+
+      ${!linked&&candidates.length?`<div class="ac31Info"><b>Neuer Termin vorhanden</b><div class="small">Gehört einer dieser Termine zu dieser Nachbetreuung?</div>${candidates.map(b=>`<div class="acFutureCard"><b>${esc(crmDate(b.date))} · ${esc(b.time||"")} · ${esc(ac33Name(b))}</b><div class="ac31Actions"><button class="gold" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">Ja, zuordnen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Termin ansehen</button></div></div>`).join("")}</div>`:""}
+
+      <div class="ac33Cta">
+        <div class="ac33CtaEyebrow">Jetzt zu tun</div>
+        <h4>${esc(action.title)}</h4>
+        <p>${esc(action.desc)}${f.nextActionAt&&!linked?` Geplant: <b>${esc(crmDate(f.nextActionAt))}</b>.`:""}</p>
+        ${action.cta&&f.status==="active"?`<div class="ac33Primary"><button class="gold" onclick="previewAftercareMail('${esc(f.id)}')">${esc(action.cta)}</button><button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button><button class="secondary" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button></div>`:""}
+      </div>
+    </div>`;
+  });
+  return html;
+};
+})();
+</script>
+
+
+<style id="lune-v34-focus-css">
+.ac34Head{padding:16px 16px 13px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,#fffdf9,#fbf4e9);margin-bottom:12px}
+.ac34HeadTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.ac34Head h3{font:500 25px Georgia,serif;margin:2px 0 4px}.ac34Sub{font-size:12px;color:var(--muted)}
+.ac34Progress{display:flex;gap:5px;align-items:center;margin-top:12px}.ac34Bar{height:5px;flex:1;border-radius:10px;background:#eadfce}.ac34Bar.done{background:#9bb8a1}.ac34Bar.now{background:#c6a45f}
+.ac34Task{border:1px solid #ddc27f;background:#fffaf0;border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 10px 28px rgba(93,67,31,.06)}
+.ac34Eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8e6e38;font-weight:900}.ac34Task h4{font-size:19px;margin:5px 0}.ac34Task p{font-size:12px;color:var(--muted);line-height:1.45;margin:4px 0}
+.ac34Reco{border-top:1px solid #eadcc3;margin-top:11px;padding-top:10px;font-size:13px}.ac34Reco b{display:block;margin-bottom:2px}
+.ac34Btns{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.ac34Btns button{margin:0}.ac34Btns .gold{font-weight:800}
+.ac34Next{border:1px solid var(--line);background:#fff;border-radius:18px;padding:13px;margin-top:10px}.ac34Next.ok{background:#f5faf6;border-color:#cfe2d4}.ac34Next b{display:block;font-size:14px}.ac34Next .small{margin-top:3px}
+.ac34History{margin-top:10px}.ac34History summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:700}.ac34HistoryBody{padding:10px 2px 0;font-size:12px;color:var(--muted)}
+.ac34Start{border:1px solid #ddc27f;background:#fffaf0;border-radius:22px;padding:18px;margin-top:12px}.ac34Start h4{font-size:19px;margin:5px 0}
+@media(max-width:680px){.ac34Btns{display:grid;grid-template-columns:1fr}.ac34Btns button{width:100%}}
+</style>
+<script id="lune-v34-focus-ui">
+(function(){
+'use strict';
+function f34(customerId,afterDate,excludeId){
+ const nt=new Date().toTimeString().slice(0,5);
+ return (db.bookings||[]).filter(b=>String(b.customerId||"")===String(customerId||"")&&String(b.id||"")!==String(excludeId||"")&&b.status!=="storniert"&&String(b.date||"")>String(afterDate||"")&&(String(b.date)>TODAY()||(String(b.date)===TODAY()&&String(b.time||"23:59")>=nt))).sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+}
+function n34(b){return !b?"Termin":((Array.isArray(b.services)&&b.services.length?b.services.map(x=>x&&x.name).filter(Boolean).join(" + "):"")||b.service||"Termin")}
+function step34(f){
+ if(f.status==="converted")return 3;
+ if(f.stage==="thanks")return 1;
+ if(f.stage==="checkin")return 2;
+ return 3;
+}
+function action34(f,linked){
+ if(linked)return {title:"Folgetermin gebucht",text:"Keine weitere Rebooking-Nachricht nötig.",button:""};
+ if(f.stage==="thanks")return {title:"Danke & Nachsorge senden",text:"Nachricht 1 nach der Behandlung.",button:"Nachricht 1 ansehen"};
+ if(f.stage==="checkin")return {title:"Persönlich nachfragen",text:"Nachricht 2 · kurzer Check-in nach der Behandlung.",button:"Nachricht 2 ansehen"};
+ if(f.stage==="rebook")return {title:"Nächste Behandlung empfehlen",text:"Nachricht 3 · persönliche Empfehlung für den nächsten Besuch.",button:"Nachricht 3 ansehen"};
+ if(f.stage==="reminder")return {title:"Letzte Erinnerung prüfen",text:"Eine letzte zurückhaltende Nachricht, danach endet der Ablauf.",button:"Erinnerung ansehen"};
+ return {title:"Keine Aktion offen",text:"Momentan ist nichts zu tun.",button:""};
+}
+window.renderCustomerAftercarePanel=function(customerId){
+ try{acAutoConvert()}catch(_){}
+ const bookings=(db.bookings||[]).filter(b=>String(b.customerId||"")===String(customerId||""));
+ const completed=bookings.filter(b=>b.status==="beendet"&&acBookingIsPast(b)).sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+ const flows=(db.aftercareFlows||[]).filter(f=>String(f.customerId||"")===String(customerId||"")).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+ const without=completed.filter(b=>!flows.some(f=>String(f.bookingId||"")===String(b.id||"")));
+ let html=`<div class="ac34Head"><div class="ac34HeadTop"><div><div class="brandEyebrow">Kundenpflege</div><h3>Nachbetreuung</h3><div class="ac34Sub">Ein Blick genügt: Status sehen → nächste Aktion ausführen.</div></div></div></div>`;
+ if(without.length){
+   const b=without[0];
+   html+=`<div class="ac34Start"><div class="ac34Eyebrow">Noch nicht gestartet</div><h4>Nachbetreuung planen</h4><p class="small">${esc(n34(b))} · ${esc(crmDate(b.date))}</p><p class="small">Empfehlung und passenden Zeitraum festlegen. Ein neuer Termin ist dafür nicht erforderlich.</p><div class="ac34Btns"><button class="gold" onclick="startAftercareFromBooking('${esc(b.id)}')">Jetzt planen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Behandlung ansehen</button></div></div>`;
+ }
+ if(!flows.length)return html;
+ flows.forEach(f=>{
+   const linked=f.successorBookingId?bookings.find(b=>String(b.id||"")===String(f.successorBookingId||"")):null;
+   const candidates=!linked?f34(f.customerId,f.treatmentDate,f.bookingId):[];
+   const s=step34(f), a=action34(f,linked);
+   html+=`<div class="ac31Plan">
+     <div class="ac34HeadTop"><div><b style="font-size:17px">${esc(f.performedTreatment||"Behandlung")}</b><div class="ac34Sub">${esc(crmDate(f.treatmentDate))}</div></div><span class="ac33Status">${linked?"✓ Termin gebucht":"Schritt "+s+" von 3"}</span></div>
+     <div class="ac34Progress"><span class="ac34Bar ${s>1||linked?"done":"now"}"></span><span class="ac34Bar ${s>2||linked?"done":s===2?"now":""}"></span><span class="ac34Bar ${linked?"done":s===3?"now":""}"></span></div>
+     <div class="ac34Task">
+       <div class="ac34Eyebrow">Jetzt zu tun · Schritt ${s}</div><h4>${esc(a.title)}</h4><p>${esc(a.text)}${f.nextActionAt&&!linked?` Geplant: <b>${esc(crmDate(f.nextActionAt))}</b>.`:""}</p>
+       <div class="ac34Reco"><b>Empfehlung</b>${esc(f.recommendedTreatment||"–")} · ca. ${esc(f.rebookWeeks||6)} Wochen${f.recommendedAddon?` · + ${esc(f.recommendedAddon)}`:""}</div>
+       ${a.button&&f.status==="active"?`<div class="ac34Btns"><button class="gold" onclick="previewAftercareMail('${esc(f.id)}')">${esc(a.button)}</button><button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button><button class="secondary" onclick="markAftercareSent('${esc(f.id)}')">Versand bestätigen</button></div>`:""}
+     </div>
+     ${linked?`<div class="ac34Next ok"><b>✓ Nächster Termin</b><div class="small">${esc(crmDate(linked.date))} · ${esc(linked.time||"")} · ${esc(n34(linked))}</div><div class="small">Rebooking abgeschlossen.</div><div class="ac34Btns"><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(linked.id)}'),0)">Termin öffnen</button><button class="secondary" onclick="acUnlinkSuccessor('${esc(f.id)}')">Zuordnung ändern</button></div></div>`:
+       candidates.length?`<div class="ac34Next"><b>Nächster Termin vorhanden</b><div class="small">Gehört dieser Termin zur Nachbetreuung?</div>${candidates.slice(0,3).map(b=>`<div style="padding-top:9px"><b>${esc(crmDate(b.date))} · ${esc(b.time||"")} · ${esc(n34(b))}</b><div class="ac34Btns"><button class="gold" onclick="acLinkSuccessor('${esc(f.id)}','${esc(b.id)}',true)">Ja, zuordnen</button><button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">Termin ansehen</button></div></div>`).join("")}</div>`:
+       `<div class="ac34Next"><b>Nächster Termin</b><div class="small">Noch nicht gebucht. Die Nachbetreuung läuft weiter.</div></div>`}
+     <details class="ac34History"><summary>Details & Verlauf</summary><div class="ac34HistoryBody">Empfohlen: ${esc(f.recommendedTreatment||"–")} · Zeitraum: ca. ${esc(f.rebookWeeks||6)} Wochen${f.personalNote?` · Hinweis: ${esc(f.personalNote)}`:""}${(f.history||[]).length?` · ${esc((f.history||[]).length)} Versand-/Verlaufseinträge`:""}</div></details>
+   </div>`;
+ });
+ return html;
+};
+})();
+</script>
+
+
+<style id="lune-v35-cta-css">
+.ac35Action{
+  border:1px solid #d9bc77;
+  background:linear-gradient(135deg,#fff8e8 0%,#fffdf9 100%);
+  border-radius:22px;
+  padding:18px;
+  margin:12px 0 14px;
+  box-shadow:0 12px 30px rgba(130,95,35,.08);
+}
+.ac35ActionTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.ac35Step{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid #dfc98f;background:#fff;border-radius:999px;
+  padding:6px 10px;font-size:11px;font-weight:900;color:#765a2f
+}
+.ac35Action h4{font-size:20px;margin:6px 0 4px}
+.ac35Action p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
+.ac35MainBtn{margin-top:14px}
+.ac35MainBtn button.gold{
+  min-height:54px;
+  padding:13px 22px;
+  font-size:15px;
+  font-weight:900;
+  box-shadow:0 10px 24px rgba(185,155,98,.22)
+}
+.ac35Hint{
+  margin-top:9px;
+  font-size:11px;
+  color:#8c7d70
+}
+.ac35Secondary{margin-top:8px}
+.ac35Secondary button{font-size:12px}
+</style>
+
+<script id="lune-v35-clear-cta">
+(function(){
+'use strict';
+
+const previousRender = window.renderCustomerAftercarePanel;
+
+function ac35BookingLabel(b){
+  if(!b)return "Behandlung";
+  if(Array.isArray(b.services)&&b.services.length){
+    return b.services.map(x=>x&&x.name).filter(Boolean).join(" + ") || b.service || "Behandlung";
+  }
+  return b.service||"Behandlung";
+}
+
+window.renderCustomerAftercarePanel=function(customerId){
+  const html = previousRender(customerId);
+
+  const bookings=(db.bookings||[]).filter(b=>String(b.customerId||"")===String(customerId||""));
+  const completed=bookings
+    .filter(b=>b.status==="beendet"&&acBookingIsPast(b))
+    .sort((a,b)=>String(b.date+b.time).localeCompare(String(a.date+a.time)));
+
+  const flows=(db.aftercareFlows||[])
+    .filter(f=>String(f.customerId||"")===String(customerId||""))
+    .sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+
+  const without=completed.filter(b=>!flows.some(f=>String(f.bookingId||"")===String(b.id||"")));
+
+  // Strong CTA if no plan yet
+  if(without.length){
+    const b=without[0];
+    const actionCard=`
+      <div class="ac35Action">
+        <div class="ac35ActionTop">
+          <div>
+            <div class="ac34Eyebrow">JETZT ZU TUN</div>
+            <h4>Nachbetreuung für diese Kundin planen</h4>
+            <p>${esc(ac35BookingLabel(b))} · ${esc(crmDate(b.date))}</p>
+          </div>
+          <span class="ac35Step">Schritt 0 von 3</span>
+        </div>
+
+        <p style="margin-top:10px">
+          Legen Sie jetzt fest, welche Behandlung als Nächstes empfohlen wird und wann die Kundin wieder kontaktiert werden soll.
+        </p>
+
+        <div class="ac35MainBtn">
+          <button class="gold" onclick="startAftercareFromBooking('${esc(b.id)}')">
+            Nachbetreuung jetzt planen
+          </button>
+        </div>
+
+        <div class="ac35Hint">
+          Dauert ca. 20 Sekunden · ein neuer Termin ist nicht erforderlich.
+        </div>
+
+        <div class="ac35Secondary">
+          <button class="secondary" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(b.id)}'),0)">
+            Behandlung ansehen
+          </button>
+        </div>
+      </div>`;
+
+    // Inject directly after the Nachbetreuung header block.
+    return html.replace(
+      /(<div class="ac34Head">[\s\S]*?<\/div>\s*<\/div>)/,
+      '$1' + actionCard
+    );
+  }
+
+  // Strong CTA when there is already a flow
+  if(flows.length){
+    const f=flows[0];
+    const linked=f.successorBookingId?bookings.find(b=>String(b.id||"")===String(f.successorBookingId||"")):null;
+
+    let title="Keine Aktion offen";
+    let description="Momentan ist nichts zu tun.";
+    let primary="";
+    let step="";
+
+    if(linked){
+      title="Folgetermin bereits gebucht";
+      description="Keine weitere Rebooking-Nachricht notwendig.";
+      step="Abgeschlossen";
+      primary=`<button class="gold" onclick="tab('agenda');setTimeout(()=>openBooking('${esc(linked.id)}'),0)">Termin öffnen</button>`;
+    }else if(f.stage==="thanks"){
+      title="Nachricht 1 senden";
+      description="Danke & Nachsorge nach der Behandlung.";
+      step="Schritt 1 von 3";
+      primary=`<button class="gold" onclick="previewAftercareMail('${esc(f.id)}')">Nachricht 1 ansehen</button>`;
+    }else if(f.stage==="checkin"){
+      title="Nachricht 2 senden";
+      description="Persönlicher Check-in nach der Behandlung.";
+      step="Schritt 2 von 3";
+      primary=`<button class="gold" onclick="previewAftercareMail('${esc(f.id)}')">Nachricht 2 ansehen</button>`;
+    }else if(f.stage==="rebook"){
+      title="Nachricht 3 senden";
+      description="Die nächste passende Behandlung empfehlen.";
+      step="Schritt 3 von 3";
+      primary=`<button class="gold" onclick="previewAftercareMail('${esc(f.id)}')">Nachricht 3 ansehen</button>`;
+    }else if(f.stage==="reminder"){
+      title="Letzte Erinnerung prüfen";
+      description="Eine letzte sanfte Nachricht, danach endet der Ablauf.";
+      step="Letzte Aktion";
+      primary=`<button class="gold" onclick="previewAftercareMail('${esc(f.id)}')">Erinnerung ansehen</button>`;
+    }
+
+    const actionCard=`
+      <div class="ac35Action">
+        <div class="ac35ActionTop">
+          <div>
+            <div class="ac34Eyebrow">JETZT ZU TUN</div>
+            <h4>${esc(title)}</h4>
+            <p>${esc(description)}</p>
+          </div>
+          ${step?`<span class="ac35Step">${esc(step)}</span>`:""}
+        </div>
+
+        <div class="ac35MainBtn">
+          ${primary}
+        </div>
+
+        ${f.status==="active"&&!linked?`
+          <div class="ac35Secondary">
+            <button class="secondary" onclick="prepareAftercareMail('${esc(f.id)}')">E-Mail vorbereiten</button>
+            <button class="secondary" onclick="markAftercareSent('${esc(f.id)}')">Als gesendet markieren</button>
+          </div>
+        `:""}
+      </div>`;
+
+    return html.replace(
+      /(<div class="ac34Head">[\s\S]*?<\/div>\s*<\/div>)/,
+      '$1' + actionCard
+    );
+  }
+
+  return html;
+};
+
+})();
+</script>
+
+
+<style id="lune-v36-direct-mail-css">
+.ac36SendState{display:none;margin-top:10px;border-radius:14px;padding:10px 12px;font-size:12px}
+.ac36SendState.show{display:block}.ac36SendState.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.ac36SendState.bad{background:#fff6f4;border:1px solid #edc3ba;color:#a94335}
+.ac36SendState.wait{background:#fffaf0;border:1px solid #f0d99d;color:#8a5a10}
+button.ac36Sending{opacity:.65;pointer-events:none}
+</style>
+<script id="lune-v36-direct-aftercare-email">
+(function(){
+'use strict';
+const AC36_CONFIG_KEY='lune_staff_cloud_config_v1';
+
+function ac36Config(){
+  try{return Object.assign({apiUrl:'',token:''},JSON.parse(safeStorage.getItem(AC36_CONFIG_KEY)||'{}'));}catch(_){return {apiUrl:'',token:''};}
+}
+function ac36ClientId(){
+  try{
+    const k='lune_staff_cloud_client_id_v1';
+    let id=safeStorage.getItem(k);
+    if(!id){id='staff-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);safeStorage.setItem(k,id);}
+    return id;
+  }catch(_){return 'staff-v36';}
+}
+async function ac36Post(payload){
+  const cfg=ac36Config();
+  if(!cfg.apiUrl||!cfg.token)throw new Error('Staff Cloud ist nicht verbunden.');
+  const body=new URLSearchParams(Object.assign({},payload,{token:cfg.token,clientId:ac36ClientId()}));
+  const response=await fetch(cfg.apiUrl,{method:'POST',body,redirect:'follow'});
+  const text=await response.text();
+  let data;
+  try{data=JSON.parse(text);}catch(_){throw new Error('Ungültige Antwort von Apps Script.');}
+  if(!data||data.ok===false)throw new Error((data&&data.error)||'E-Mail konnte nicht gesendet werden.');
+  return data;
+}
+function ac36State(flowId,msg,type){
+  let box=document.querySelector('[data-ac36-state="'+String(flowId).replace(/"/g,'')+'"]');
+  if(!box){
+    box=document.createElement('div');
+    box.setAttribute('data-ac36-state',String(flowId));
+    box.className='ac36SendState';
+    const btn=document.querySelector('[data-ac36-send="'+String(flowId).replace(/"/g,'')+'"]');
+    if(btn&&btn.parentElement)btn.parentElement.insertAdjacentElement('afterend',box);
+  }
+  if(box){box.className='ac36SendState show '+type;box.textContent=msg;}
+}
+
+window.sendAftercareEmail=async function(flowId){
+  const f=(db.aftercareFlows||[]).find(x=>String(x.id)===String(flowId));
+  if(!f)return alert('Nachbetreuung nicht gefunden.');
+  const c=(db.customers||[]).find(x=>String(x.id)===String(f.customerId))||{};
+  const email=String(c.email||f.email||'').trim();
+  if(!email)return alert('Keine E-Mail-Adresse in der Kundenakte hinterlegt.');
+
+  const message=acMessage(f);
+  if(!message||!message.subject||!message.body)return alert('E-Mail-Inhalt konnte nicht erstellt werden.');
+
+  if(!confirm('E-Mail jetzt an '+email+' versenden?\n\n'+message.subject))return;
+
+  const btn=document.querySelector('[data-ac36-send="'+String(flowId).replace(/"/g,'')+'"]');
+  if(btn){btn.classList.add('ac36Sending');btn.disabled=true;btn.textContent='Wird gesendet…';}
+  ac36State(flowId,'E-Mail wird über Lune Beauty versendet…','wait');
+
+  try{
+    const result=await ac36Post({
+      action:'sendAftercareEmail',
+      flowId:String(f.id),
+      expectedStage:String(f.stage||''),
+      customerId:String(f.customerId||'')
+    });
+
+    if(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.pull==='function'){
+      try{await window.LuneStaffCloudSync.pull();}catch(_){}
+    }else{
+      f.history=f.history||[];
+      f.history.push({
+        stage:result.sentStage||f.stage,
+        sentAt:result.sentAt||new Date().toISOString(),
+        to:result.emailSentTo||email,
+        method:'server-confirmed'
+      });
+      if(result.flowStatus)f.status=result.flowStatus;
+      if(result.nextStage)f.stage=result.nextStage;
+      if(Object.prototype.hasOwnProperty.call(result,'nextActionAt'))f.nextActionAt=result.nextActionAt||'';
+      safeStorage.setItem(KEY,JSON.stringify(db));
+    }
+
+    ac36State(flowId,'✓ E-Mail gesendet · '+(result.emailSentTo||email),'ok');
+    if(btn){btn.textContent='✓ Gesendet';}
+    setTimeout(()=>{
+      try{
+        openCustomer(f.customerId);
+        crmShowPanel(f.customerId,'aftercare');
+        renderAll();
+      }catch(_){}
+    },300);
+  }catch(err){
+    ac36State(flowId,'Versand fehlgeschlagen: '+(err.message||err),'bad');
+    if(btn){btn.disabled=false;btn.classList.remove('ac36Sending');btn.textContent='E-Mail versenden';}
+  }
+};
+
+const prevRender36=window.renderCustomerAftercarePanel;
+window.renderCustomerAftercarePanel=function(customerId){
+  let html=prevRender36(customerId);
+  html=html
+    .replace(/<button class="secondary" onclick="prepareAftercareMail\('([^']+)'\)">E-Mail vorbereiten<\/button>/g,
+      function(_,id){return '<button class="gold" data-ac36-send="'+id+'" onclick="sendAftercareEmail(\''+id+'\')">E-Mail versenden</button>';})
+    .replace(/<button class="secondary" onclick="markAftercareSent\('([^']+)'\)">Als gesendet markieren<\/button>/g,'')
+    .replace(/<button class="secondary" onclick="markAftercareSent\('([^']+)'\)">Versand bestätigen<\/button>/g,'');
+  return html;
+};
+
+if(typeof window.renderAftercareDashboard==='function'){
+  const oldDash36=window.renderAftercareDashboard;
+  window.renderAftercareDashboard=function(){
+    oldDash36();
+    document.querySelectorAll('#aftercareTodayCard button').forEach(btn=>{
+      const oc=btn.getAttribute('onclick')||'';
+      let m=oc.match(/prepareAftercareMail\('([^']+)'\)/);
+      if(m){
+        btn.className='gold';
+        btn.setAttribute('data-ac36-send',m[1]);
+        btn.setAttribute('onclick',"sendAftercareEmail('"+m[1]+"')");
+        btn.textContent='E-Mail versenden';
+      }
+      if(/markAftercareSent\(/.test(oc))btn.remove();
+    });
+  };
+}
+})();
+</script>
+
 </body>
 </html>
