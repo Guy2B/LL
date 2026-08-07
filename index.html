@@ -2111,7 +2111,7 @@
             <h3>Signature Experience</h3>
           </div>
           <a class="instagram-v9-open"
-             href="https://www.instagram.com/reel/DZ4pV5rIyKl/"
+             href="https://www.instagram.com/reel/Dbf9qKPIQ3C/"
              target="_blank" rel="noopener noreferrer"
              aria-label="Reel 02 auf Instagram öffnen">↗</a>
         </div>
@@ -2119,14 +2119,14 @@
         <div class="instagram-v9-embed">
           <blockquote
             class="instagram-media"
-            data-instgrm-permalink="https://www.instagram.com/reel/DZ4pV5rIyKl/"
+            data-instgrm-permalink="https://www.instagram.com/reel/Dbf9qKPIQ3C/"
             data-instgrm-version="14">
           </blockquote>
         </div>
 
         <div class="instagram-v9-foot">
           <span class="instagram-v9-handle">@lunebeauty2</span>
-          <a href="https://www.instagram.com/reel/DZ4pV5rIyKl/"
+          <a href="https://www.instagram.com/reel/Dbf9qKPIQ3C/"
              target="_blank" rel="noopener noreferrer">Auf Instagram ansehen →</a>
         </div>
       </article>
@@ -2196,6 +2196,8 @@
   <input type="hidden" name="_captcha" value="false">
   <input type="hidden" name="_template" value="table">
   <input type="hidden" name="notes" value="">
+  <input type="hidden" id="booking-duration" name="durationMinutes" value="">
+  <input type="hidden" id="booking-price" name="price" value="">
 
   <div id="selected-service" class="selected-service hidden">
     <span></span>
@@ -2253,6 +2255,7 @@
           </optgroup>
 
         </select>
+    <div id="booking-service-meta" class="service-meta" style="margin-top:8px" hidden></div>
   </div>
 
   <div class="booking-group-label" id="booking-group-date" hidden><span>2</span> Termin</div>
@@ -2523,6 +2526,7 @@
           Array.from(select.options).forEach(function(opt){
             if(normalize(opt.value || opt.textContent) === target){ select.value = opt.value || opt.textContent; }
           });
+          if(window.LuneSyncBookingServiceMeta) window.LuneSyncBookingServiceMeta();
         }
 
         var notes = form.elements && form.elements['notes'];
@@ -2609,6 +2613,7 @@
             select.value = opt.value || opt.textContent;
           }
         });
+        if(window.LuneSyncBookingServiceMeta) window.LuneSyncBookingServiceMeta();
       }
 
       var selected = document.getElementById('selected-service');
@@ -2643,6 +2648,68 @@
       preselectServiceFromUrl();
     }
   })();
+</script>
+
+
+
+<script id="lune-booking-duration-sync-v37">
+(function(){
+  'use strict';
+  function norm(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,' '); }
+  function priceNum(v){ var m=String(v||'').match(/([\d.]+(?:,\d+)?)\s*€/); return m?Number(m[1].replace(/\./g,'').replace(',','.')):0; }
+  function durationNum(v){ var m=String(v||'').match(/(\d+)\s*Min(?:ute)?n?/i); return m?Number(m[1]):0; }
+
+  function catalogue(){
+    var c={};
+    document.querySelectorAll('#pricing .book-link[data-service]').forEach(function(link){
+      var li=link.closest('li'); if(!li)return;
+      var name=String(link.dataset.service||'').trim(); if(!name)return;
+      var meta=li.querySelector('.service-meta');
+      var price=li.querySelector('.price');
+      c[norm(name)]={name:name,durationMinutes:durationNum(meta?meta.textContent:''),price:priceNum(price?price.textContent:'')};
+    });
+    return c;
+  }
+
+  function sync(){
+    var select=document.getElementById('booking-service');
+    var dur=document.getElementById('booking-duration');
+    var price=document.getElementById('booking-price');
+    var info=document.getElementById('booking-service-meta');
+    if(!select||!dur||!price)return;
+    var item=catalogue()[norm(select.value)]||null;
+    dur.value=item&&item.durationMinutes?String(item.durationMinutes):'';
+    price.value=item&&item.price?String(item.price):'';
+
+    if(info){
+      if(!select.value){ info.hidden=true; info.textContent=''; }
+      else{
+        info.hidden=false;
+        info.textContent=item&&item.durationMinutes
+          ? '⏱ '+item.durationMinutes+' Minuten'+(item.price?' · '+item.price.toFixed(2).replace('.',',')+' €':'')
+          : (item&&item.price?item.price.toFixed(2).replace('.',',')+' € · ':'')+'Dauer wird vom Studio bestätigt';
+      }
+    }
+  }
+
+  window.LuneSyncBookingServiceMeta=sync;
+
+  function init(){
+    var select=document.getElementById('booking-service'); if(!select)return;
+    select.addEventListener('change',sync);
+    document.addEventListener('click',function(e){
+      var link=e.target.closest&&e.target.closest('.book-link[data-service]'); if(!link)return;
+      var wanted=norm(link.dataset.service);
+      Array.from(select.options).some(function(opt){
+        if(norm(opt.value||opt.textContent)===wanted){ select.value=opt.value||opt.textContent; sync(); return true; }
+        return false;
+      });
+    },true);
+    setTimeout(sync,50);
+    setTimeout(sync,500);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init); else init();
+})();
 </script>
 
 
