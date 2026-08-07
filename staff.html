@@ -5764,5 +5764,334 @@ if(typeof window.renderAftercareDashboard==='function'){
 })();
 </script>
 
+
+<style id="lune-v39-final-fixes-css">
+.luneV39SaveFlow{
+  position:fixed;z-index:130000;right:18px;bottom:18px;
+  width:min(430px,calc(100vw - 36px));background:#fffdf9;
+  border:1px solid rgba(185,155,98,.42);border-radius:24px;
+  box-shadow:0 24px 70px rgba(42,30,20,.24);padding:16px;color:#211815;
+}
+.luneV39SaveHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.luneV39SaveEyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:#8d6d37}
+.luneV39SaveFlow h3{margin:3px 0 2px;font-size:19px}
+.luneV39SaveSub{font-size:12px;color:#776b61;line-height:1.4}
+.luneV39SaveSteps{display:grid;gap:7px;margin-top:13px}
+.luneV39SaveStep{
+  display:grid;grid-template-columns:26px 1fr;align-items:center;gap:9px;min-height:40px;
+  padding:7px 9px;border:1px solid #eadfc9;border-radius:13px;background:#fff;
+  font-size:13px;font-weight:700;
+}
+.luneV39SaveDot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#eee4d3;color:#725b36;font-size:11px;font-weight:900}
+.luneV39SaveStep.active{border-color:#dfbd69;background:#fff9eb}
+.luneV39SaveStep.active .luneV39SaveDot{background:#c7a75b;color:#211815;animation:luneV39Pulse 1s infinite}
+.luneV39SaveStep.ok{border-color:#c7dfce;background:#f5fbf6}
+.luneV39SaveStep.ok .luneV39SaveDot{background:#386b4f;color:#fff}
+.luneV39SaveStep.bad{border-color:#edc3ba;background:#fff6f4}
+.luneV39SaveStep.bad .luneV39SaveDot{background:#a94335;color:#fff}
+.luneV39SaveFinal{margin-top:11px;padding:10px 12px;border-radius:14px;background:#f5fbf6;border:1px solid #c7dfce;font-size:12px;font-weight:800;color:#285b3e}
+.luneV39SaveFinal.warn{background:#fff9eb;border-color:#ead08d;color:#815814}
+.luneV39SaveActions{display:flex;justify-content:flex-end;margin-top:10px}
+.luneV39SaveActions button{margin:0}
+@keyframes luneV39Pulse{50%{transform:scale(.82);opacity:.65}}
+@media(max-width:700px){
+  .luneV39SaveFlow{left:10px;right:10px;bottom:calc(82px + env(safe-area-inset-bottom));width:auto;border-radius:22px;padding:15px;box-shadow:0 18px 52px rgba(42,30,20,.28)}
+  .luneV39SaveFlow h3{font-size:18px}
+  .luneV39SaveStep{min-height:44px;font-size:13px}
+  .luneV39SaveActions button{width:100%;min-height:48px}
+}
+</style>
+
+<script id="lune-v39-final-3bugs-fix">
+(function(){
+'use strict';
+
+/* =========================================================
+   BUG 1 — Website duration -> Staff duration
+   ========================================================= */
+const V39_CENTRAL_SERVICE_META={"Basisbehandlung Gesicht":{"duration":60,"price":69},"Gesicht + Hals + Dekolleté":{"duration":75,"price":85},"Hydro Boost Gesicht":{"duration":75,"price":89},"Hydro Boost Gesicht & Dekolleté":{"duration":80,"price":99},"Relax & Glow Behandlung":{"duration":90,"price":110},"Hydra Glow Facial (Aquafacial)":{"duration":90,"price":130},"Aknebehandlung":{"duration":70,"price":89},"Anti-Aging Behandlung":{"duration":90,"price":120},"Sensi Treatment":{"duration":75,"price":89},"LED Maske":{"duration":10,"price":10},"Radiofrequenz":{"duration":10,"price":10},"Oberlippe Waxing":{"duration":10,"price":15},"Kinn Waxing":{"duration":10,"price":15},"Gesichtswaxing komplett":{"duration":25,"price":30}};
+
+function v39Norm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');}
+function v39Meta(name){
+  const wanted=v39Norm(name);
+  const key=Object.keys(V39_CENTRAL_SERVICE_META).find(k=>v39Norm(k)===wanted);
+  return key?V39_CENTRAL_SERVICE_META[key]:null;
+}
+
+window.luneV39RepairDurations=function(){
+  let changed=false;
+
+  (db.services||[]).forEach(function(s){
+    const m=v39Meta(s.name);
+    if(!m)return;
+    if(Number(s.durationMinutes||0)!==Number(m.duration)){
+      s.durationMinutes=Number(m.duration);
+      changed=true;
+    }
+    if(!Number(s.price||0)&&Number(m.price)>0){
+      s.price=Number(m.price);
+      changed=true;
+    }
+  });
+
+  (db.bookings||[]).forEach(function(b){
+    const m=v39Meta(b.service);
+    if(!m)return;
+
+    // Important: only repair single-service Website bookings.
+    const isWebsite=String(b.source||'').toLowerCase()==='website';
+    const oneService=!Array.isArray(b.services)||b.services.length<=1;
+    if(!isWebsite||!oneService)return;
+
+    const correct=Number(m.duration);
+    if(!Array.isArray(b.services)||!b.services.length){
+      b.services=[{
+        id:b.serviceId||'',
+        name:b.service||'Behandlung',
+        durationMinutes:correct,
+        price:Number(b.plannedTotal||m.price||0)
+      }];
+      changed=true;
+    }else{
+      if(Number(b.services[0].durationMinutes||0)!==correct){
+        b.services[0].durationMinutes=correct;
+        changed=true;
+      }
+      if(!Number(b.services[0].price||0)&&m.price){
+        b.services[0].price=Number(m.price);
+        changed=true;
+      }
+    }
+
+    if(Number(b.totalDurationMinutes||0)!==correct){
+      b.totalDurationMinutes=correct;
+      b.durationMinutes=correct;
+      changed=true;
+    }
+    if(!Number(b.plannedTotal||0)&&m.price){
+      b.plannedTotal=Number(m.price);
+      changed=true;
+    }
+  });
+
+  if(changed){
+    try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+  }
+  return changed;
+};
+
+
+/* =========================================================
+   BUG 2 — confirmation timestamp displayed in Europe/Berlin
+   ========================================================= */
+window.luneV39BerlinTime=function(value){
+  if(!value)return '—';
+  const d=new Date(value);
+  if(isNaN(d.getTime()))return String(value);
+  return new Intl.DateTimeFormat('de-DE',{
+    timeZone:'Europe/Berlin',
+    day:'2-digit',month:'2-digit',year:'numeric',
+    hour:'2-digit',minute:'2-digit',
+    hour12:false
+  }).format(d).replace(',', ' ·')+' Uhr';
+};
+
+function v39FixVisibleConfirmationTimestamp(){
+  const detail=document.getElementById('bookingDetail');
+  if(!detail)return;
+
+  const id=document.getElementById('bookingEditId')?.value;
+  const booking=(db.bookings||[]).find(b=>String(b.id||'')===String(id||''));
+  if(!booking||!booking.confirmationSentAt)return;
+
+  const local=luneV39BerlinTime(booking.confirmationSentAt);
+  detail.querySelectorAll('.small').forEach(function(el){
+    if(/Bestätigungs-E-Mail \+ ICS gesendet/.test(el.textContent||'')){
+      el.textContent='✓ Bestätigungs-E-Mail + ICS gesendet · '+local;
+    }
+  });
+}
+
+
+/* =========================================================
+   BUG 3 — visible save -> cloud -> verified flow on mobile
+   ========================================================= */
+function v39Esc(v){
+  return String(v||'').replace(/[&<>"']/g,function(ch){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
+  });
+}
+
+function v39Flow(title){
+  document.querySelector('.luneV39SaveFlow')?.remove();
+  const box=document.createElement('div');
+  box.className='luneV39SaveFlow';
+  box.setAttribute('role','status');
+  box.setAttribute('aria-live','polite');
+  box.innerHTML=`
+    <div class="luneV39SaveHead">
+      <div>
+        <div class="luneV39SaveEyebrow">Termin · Speicherung</div>
+        <h3>${v39Esc(title||'Termin speichern')}</h3>
+        <div class="luneV39SaveSub">Sie sehen sofort, ob der Termin lokal und im Cloud gespeichert wurde.</div>
+      </div>
+    </div>
+    <div class="luneV39SaveSteps">
+      <div class="luneV39SaveStep" data-v39-step="0"><span class="luneV39SaveDot">1</span><span>Termin wird gespeichert…</span></div>
+      <div class="luneV39SaveStep" data-v39-step="1"><span class="luneV39SaveDot">2</span><span>Cloud wird synchronisiert…</span></div>
+      <div class="luneV39SaveStep" data-v39-step="2"><span class="luneV39SaveDot">3</span><span>Cloud-Speicherung wird geprüft…</span></div>
+    </div>
+    <div class="luneV39SaveFinal" hidden></div>
+    <div class="luneV39SaveActions"><button class="secondary" data-v39-close hidden>Schließen</button></div>
+  `;
+  document.body.appendChild(box);
+
+  function row(i){return box.querySelector('[data-v39-step="'+i+'"]');}
+  return {
+    active(i,text){const r=row(i);if(!r)return;r.className='luneV39SaveStep active';if(text)r.querySelector('span:last-child').textContent=text;},
+    ok(i,text){const r=row(i);if(!r)return;r.className='luneV39SaveStep ok';r.querySelector('.luneV39SaveDot').textContent='✓';if(text)r.querySelector('span:last-child').textContent=text;},
+    bad(i,text){const r=row(i);if(!r)return;r.className='luneV39SaveStep bad';r.querySelector('.luneV39SaveDot').textContent='×';if(text)r.querySelector('span:last-child').textContent=text;},
+    final(text,warn){const f=box.querySelector('.luneV39SaveFinal');f.hidden=false;f.className='luneV39SaveFinal'+(warn?' warn':'');f.textContent=text;},
+    closeable(ms){
+      const b=box.querySelector('[data-v39-close]');b.hidden=false;b.onclick=function(){box.remove();};
+      if(ms)setTimeout(function(){if(document.body.contains(box))box.remove();},ms);
+    }
+  };
+}
+
+async function v39PushVerify(bookingId){
+  if(!(window.LuneStaffCloudSync&&
+       typeof window.LuneStaffCloudSync.isReady==='function'&&
+       window.LuneStaffCloudSync.isReady()&&
+       typeof window.LuneStaffCloudSync.push==='function')){
+    return {cloud:false,verified:false};
+  }
+
+  await window.LuneStaffCloudSync.push();
+
+  if(typeof window.LuneStaffCloudSync.pull==='function'){
+    await window.LuneStaffCloudSync.pull();
+    luneV39RepairDurations();
+    const found=(db.bookings||[]).some(b=>String(b.id||'')===String(bookingId||''));
+    return {cloud:true,verified:found};
+  }
+  return {cloud:true,verified:true};
+}
+
+
+/* Apply duration repair before all rendering. */
+const previousRenderAll39=window.renderAll;
+if(typeof previousRenderAll39==='function'){
+  window.renderAll=function(){
+    luneV39RepairDurations();
+    return previousRenderAll39.apply(this,arguments);
+  };
+}
+
+/* Fix duration + local confirmation time every time a booking is opened. */
+const previousOpenBooking39=window.openBooking;
+if(typeof previousOpenBooking39==='function'){
+  window.openBooking=function(id){
+    luneV39RepairDurations();
+    const r=previousOpenBooking39.apply(this,arguments);
+    setTimeout(v39FixVisibleConfirmationTimestamp,0);
+    return r;
+  };
+}
+
+/* Save wrapper — preserves existing validations and business logic. */
+const previousSaveBooking39=window.saveBooking;
+if(typeof previousSaveBooking39==='function'){
+  window.saveBooking=async function(){
+    luneV39RepairDurations();
+
+    const wasEdit=!!document.getElementById('bookingEditId')?.value;
+    const beforeId=String(document.getElementById('bookingEditId')?.value||'');
+    const flow=v39Flow(wasEdit?'Terminänderung speichern':'Neuen Termin speichern');
+    const btn=document.getElementById('bookingSaveBtn');
+    const oldLabel=btn?btn.textContent:'';
+
+    if(btn){btn.disabled=true;btn.textContent='Wird gespeichert…';}
+    flow.active(0);
+
+    const nativeAlert=window.alert;
+    window.alert=function(message){
+      const txt=String(message||'');
+      if(txt==='Termin gespeichert'||txt==='Termin geändert')return;
+      return nativeAlert.call(window,message);
+    };
+
+    try{
+      await Promise.resolve(previousSaveBooking39.apply(this,arguments));
+    }catch(err){
+      window.alert=nativeAlert;
+      flow.bad(0,'Termin konnte nicht gespeichert werden');
+      flow.final('Speicherung fehlgeschlagen. Bitte Eingaben prüfen.',true);
+      flow.closeable();
+      if(btn){btn.disabled=false;btn.textContent=oldLabel||'Termin speichern';}
+      throw err;
+    }finally{
+      window.alert=nativeAlert;
+    }
+
+    let savedId=String(document.getElementById('bookingEditId')?.value||beforeId||'');
+    if(!savedId&&(db.bookings||[]).length)savedId=String(db.bookings[db.bookings.length-1].id||'');
+
+    const saved=(db.bookings||[]).find(b=>String(b.id||'')===savedId);
+    if(!saved){
+      flow.bad(0,'Termin wurde nicht angelegt');
+      flow.final('Keine Speicherung erkannt. Bitte erneut versuchen.',true);
+      flow.closeable();
+      if(btn){btn.disabled=false;btn.textContent=oldLabel||'Termin speichern';}
+      return;
+    }
+
+    flow.ok(0,wasEdit?'Termin geändert · lokal gespeichert':'Termin gespeichert · lokal gespeichert');
+    flow.active(1);
+
+    try{
+      const result=await v39PushVerify(savedId);
+      if(!result.cloud){
+        flow.bad(1,'Cloud nicht verbunden');
+        flow.bad(2,'Cloud-Prüfung nicht möglich');
+        flow.final('Termin ist lokal gespeichert. Cloud-Verbindung bitte prüfen.',true);
+        flow.closeable();
+      }else{
+        flow.ok(1,'Cloud synchronisiert');
+        flow.active(2);
+        if(result.verified){
+          flow.ok(2,'Termin im Cloud bestätigt');
+          flow.final('✓ Termin sicher gespeichert und synchronisiert.',false);
+          flow.closeable(2600);
+        }else{
+          flow.bad(2,'Termin im Cloud nicht gefunden');
+          flow.final('Lokal gespeichert · Cloud-Prüfung bitte wiederholen.',true);
+          flow.closeable();
+        }
+      }
+    }catch(err){
+      console.error('V39 Cloud Sync',err);
+      flow.bad(1,'Cloud-Synchronisierung fehlgeschlagen');
+      flow.bad(2,'Cloud-Prüfung nicht möglich');
+      flow.final('Termin lokal gespeichert · Cloud bitte erneut synchronisieren.',true);
+      flow.closeable();
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent=wasEdit?'Änderung speichern':'Termin speichern';}
+      try{openBooking(savedId);}catch(_){}
+    }
+  };
+}
+
+luneV39RepairDurations();
+window.addEventListener('lune:cloud-db-updated',function(){
+  try{
+    luneV39RepairDurations();
+    setTimeout(v39FixVisibleConfirmationTimestamp,0);
+  }catch(_){}
+});
+
+})();
+</script>
+
 </body>
 </html>
