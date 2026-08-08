@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Lune Beauty Staff CRM Final</title>
+<title>Lune Beauty Staff CRM · Production Master</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -522,6 +522,17 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
     <div id="paymentReconciliation"></div>
     <div class="backupGrid"><button class="gold" onclick="endOfDayCloudBackup()">Tagesabschluss</button><button class="secondary" onclick="printDayInvoices()">Tagesrechnungen PDF / Drucken</button><button class="secondary" onclick="exportDay()">Export secours</button><button class="secondary" onclick="backupJSON()">Backup secours</button><button class="secondary" onclick="tab('tagescheck')">Checklist Tagesende</button><button class="secondary" onclick="openAdminHub()">Admin</button></div>
     <p class="small">Un clic suffit : clôture, synchronisation Cloud si connectée, et sauvegardes de sécurité.</p>
+  </div>
+  <div class="card" id="productionIntegrityCard">
+    <div class="cleanSectionHead"><div><div class="brandEyebrow">PRODUKTIONSSTART</div><h2>Datenintegrität & Testbereinigung</h2><p class="small">Erst prüfen, dann gezielt bereinigen. Echte Daten werden niemals automatisch ausgewählt.</p></div></div>
+    <div id="productionIntegritySummary" class="summaryLine"><span>Audit noch nicht ausgeführt.</span></div>
+    <div id="productionIntegrityDetail" class="small" style="margin-top:10px"></div>
+    <div class="bookingActions noPrint" style="margin-top:12px">
+      <button class="gold" onclick="productionAudit(true)">Integrität prüfen</button>
+      <button class="secondary" onclick="productionBackup()">Backup JSON</button>
+      <button class="secondary" onclick="productionRepairSafeDuplicates()">Sichere Dubletten bereinigen</button>
+      <button class="bad" onclick="productionDeleteTestData()">TEST-Daten bereinigen</button>
+    </div>
   </div>
 </section>
 
@@ -1113,20 +1124,64 @@ function validatePaymentBeforeInvoice(){
   return true;
 }
 function createInvoice(){
+  window.__luneInvoiceCreateLock=window.__luneInvoiceCreateLock||false;
+  if(window.__luneInvoiceCreateLock){
+    alert("Die Rechnung wird bereits erstellt. Bitte kurz warten.");
+    return;
+  }
   let items=collectInvoiceItems();
   if(!items.length){alert("Bitte mindestens eine Position erfassen.");return;}
   if(!validatePaymentBeforeInvoice())return;
   let bookingId=$("iBookingId").value||"";
-  if(bookingId){let active=activeInvoiceForBooking(bookingId);if(active){alert("Für diesen Termin existiert bereits eine aktive Rechnung. Erst stornieren, dann kann eine neue Rechnung erstellt werden.");tab("invoices");setTimeout(()=>renderInvoice(active.id,"invoiceDetail"),0);return;}}
-  else if(!confirm("Diese Rechnung ist keinem Termin zugeordnet. Nur fortfahren bei Produktverkauf oder Ausnahme ohne RDV.")){return;}
-  let c=cust($("iCustomer").value,$("iPhone").value,$("iEmail").value,$("iAddress").value);
-  let subtotal=items.reduce((s,x)=>s+x.total,0),discount=0;
-  if($("iDiscountType").value==="percent")discount=subtotal*(Number($("iDiscountValue").value)||0)/100;
-  if($("iDiscountType").value==="amount")discount=Number($("iDiscountValue").value)||0;
-  let inv={id:nextId(db.invoices,"I"),number:nextInvoiceNumber(),customerId:c.id,customer:c.name,phone:c.phone,email:c.email,address:c.address,items,subtotal,discount,total:Math.max(0,subtotal-discount),payment:$("iPayment").value,status:"erstellt",invoiceDate:TODAY(),klein:db.settings.klein,stockApplied:false,stornoDate:"",stornoReason:"",bookingId,internalNote:$("iInternalNote")?$("iInternalNote").value:"",invoiceReason:$("iInvoiceReason")?$("iInvoiceReason").value:""};
-  db.invoices.push(inv);
-  if(bookingId){let b=db.bookings.find(x=>x.id===bookingId);if(b&&b.status!=="storniert")b.status="beendet";}
-  persist(); renderInvoice(inv.id,"invoicePreviewBox"); resetInvoiceForm(false);
+  if(bookingId){
+    let active=activeInvoiceForBooking(bookingId);
+    if(active){
+      alert("Für diesen Termin existiert bereits eine aktive Rechnung. Die vorhandene Rechnung wird geöffnet.");
+      tab("invoices");setTimeout(()=>renderInvoice(active.id,"invoiceDetail"),0);return;
+    }
+  }else if(!confirm("Diese Rechnung ist keinem Termin zugeordnet. Nur fortfahren bei Produktverkauf oder Ausnahme ohne RDV.")){return;}
+
+  const customerRaw=String($("iCustomer").value||"").trim().toLowerCase();
+  const subtotalPreview=items.reduce((s,x)=>s+Number(x.total||0),0);
+  let discountPreview=0;
+  if($("iDiscountType").value==="percent")discountPreview=subtotalPreview*(Number($("iDiscountValue").value)||0)/100;
+  if($("iDiscountType").value==="amount")discountPreview=Number($("iDiscountValue").value)||0;
+  const totalPreview=Math.max(0,subtotalPreview-discountPreview);
+  const signature=JSON.stringify({
+    bookingId:String(bookingId||""),
+    customer:customerRaw,
+    total:Number(totalPreview||0).toFixed(2),
+    payment:String($("iPayment").value||""),
+    items:items.map(x=>[String(x.type||""),String(x.description||""),Number(x.qty||0),Number(x.price||0),String(x.serviceId||""),String(x.productId||"")])
+  });
+
+  // Prevent the same click/action from creating a second invoice within two minutes.
+  const recent=(db.invoices||[]).find(i=>
+    i.status!=="storniert" &&
+    String(i._createSignature||"")===signature &&
+    i.createdAt && !isNaN(Date.parse(i.createdAt)) && Date.now()-Date.parse(i.createdAt)<120000
+  );
+  if(recent){
+    alert("Diese Rechnung wurde gerade bereits erstellt. Die vorhandene Rechnung wird geöffnet.");
+    tab("invoices");setTimeout(()=>renderInvoice(recent.id,"invoiceDetail"),0);return;
+  }
+
+  window.__luneInvoiceCreateLock=true;
+  const createBtn=document.querySelector('#invoice button[onclick="createInvoice()"]');
+  if(createBtn){createBtn.disabled=true;createBtn.dataset.oldLabel=createBtn.textContent;createBtn.textContent="Wird erstellt…";}
+  try{
+    let c=cust($("iCustomer").value,$("iPhone").value,$("iEmail").value,$("iAddress").value);
+    let subtotal=items.reduce((s,x)=>s+x.total,0),discount=0;
+    if($("iDiscountType").value==="percent")discount=subtotal*(Number($("iDiscountValue").value)||0)/100;
+    if($("iDiscountType").value==="amount")discount=Number($("iDiscountValue").value)||0;
+    let inv={id:nextId(db.invoices,"I"),number:nextInvoiceNumber(),customerId:c.id,customer:c.name,phone:c.phone,email:c.email,address:c.address,items,subtotal,discount,total:Math.max(0,subtotal-discount),payment:$("iPayment").value,status:"erstellt",invoiceDate:TODAY(),klein:db.settings.klein,stockApplied:false,stornoDate:"",stornoReason:"",bookingId,internalNote:$("iInternalNote")?$("iInternalNote").value:"",invoiceReason:$("iInvoiceReason")?$("iInvoiceReason").value:"",createdAt:new Date().toISOString(),_createSignature:signature};
+    db.invoices.push(inv);
+    if(bookingId){let b=db.bookings.find(x=>x.id===bookingId);if(b&&b.status!=="storniert")b.status="beendet";}
+    persist(); renderInvoice(inv.id,"invoicePreviewBox"); resetInvoiceForm(false);
+  }finally{
+    window.__luneInvoiceCreateLock=false;
+    if(createBtn){createBtn.disabled=false;createBtn.textContent=createBtn.dataset.oldLabel||"Rechnung erstellen";delete createBtn.dataset.oldLabel;}
+  }
 }
 function statusBadge(status){
   if(status==="bezahlt")return '<span class="badge ok">bezahlt</span>';
@@ -1235,19 +1290,28 @@ function reverseStockForInvoice(inv){
   inv.stockApplied=false;
 }
 function markPaid(id){
+  window.__lunePaymentLocks=window.__lunePaymentLocks||new Set();
+  const key=String(id||"");
+  if(window.__lunePaymentLocks.has(key)){alert("Die Zahlung wird bereits verbucht. Bitte kurz warten.");return;}
   let inv=db.invoices.find(x=>x.id===id); if(!inv)return;
   if(inv.status==="bezahlt"){alert("Diese Rechnung ist bereits als bezahlt markiert. Der Vorgang kann nicht ein zweites Mal gebucht werden.");return;}
   if(inv.status==="storniert"){alert("Stornierte Rechnungen können nicht als bezahlt markiert werden.");return;}
-  if(!confirm(`Rechnung ${inv.number} wirklich als bezahlt markieren?
-
-Dieser Vorgang bucht Zahlung und Lagerbestand nur einmal.`))return;
+  const alreadyReceived=(db.payments||[]).filter(p=>String(p.invoiceNumber||"")===String(inv.number||"")&&p.status==="received");
+  if(alreadyReceived.length){
+    alert("Für diese Rechnungsnummer existiert bereits eine empfangene Zahlung. Es wird nichts erneut gebucht. Bitte unter Abschluss → Datenintegrität prüfen.");
+    return;
+  }
+  if(!confirm(`Rechnung ${inv.number} wirklich als bezahlt markieren?\n\nDieser Vorgang bucht Zahlung und Lagerbestand genau einmal.`))return;
   let miss=checkStockForInvoice(inv);
   if(miss.length && !confirm("Achtung: Bestand reicht nicht aus:\n\n"+miss.join("\n")+"\n\nTrotzdem als bezahlt markieren und Bestand buchen?"))return;
-  inv.status="bezahlt"; inv.paidDate=TODAY(); applyStockForInvoice(inv);
-  if(!db.payments.find(p=>p.invoiceNumber===inv.number&&p.status==="received")){
-    db.payments.push({id:nextId(db.payments,"P"),invoiceNumber:inv.number,paymentDate:TODAY(),customer:inv.customer,amount:inv.total,method:inv.payment,status:"received"});
+  window.__lunePaymentLocks.add(key);
+  try{
+    inv.status="bezahlt"; inv.paidDate=TODAY(); inv.paidAt=inv.paidAt||new Date().toISOString(); applyStockForInvoice(inv);
+    db.payments.push({id:nextId(db.payments,"P"),invoiceNumber:inv.number,paymentDate:TODAY(),customer:inv.customer,amount:inv.total,method:inv.payment,status:"received",createdAt:new Date().toISOString()});
+    persist(); renderInvoice(id,"invoiceDetail"); renderInvoice(id,"invoicePreviewBox");
+  }finally{
+    window.__lunePaymentLocks.delete(key);
   }
-  persist(); renderInvoice(id,"invoiceDetail"); renderInvoice(id,"invoicePreviewBox");
 }
 function stornoInvoice(id){
   let inv=db.invoices.find(x=>x.id===id); if(!inv||inv.status==="storniert")return;
@@ -3943,7 +4007,7 @@ body{min-height:100vh}
   function dashboardData(){
     const now=Date.now();
     const requested=(db.bookings||[]).filter(b=>b.status==="angefragt");
-    const emailFailures=(db.bookings||[]).filter(b=>b.status==="bestätigt"&&!b.confirmationSentAt);
+    const emailFailures=(db.bookings||[]).filter(b=>b.status==="bestätigt"&&!b.confirmationSentAt&&!b.confirmationEmailOptOut);
     const openInvoices=(db.invoices||[]).filter(i=>i.status==="erstellt");
     const unsent=(db.invoices||[]).filter(i=>i.status!=="storniert"&&!i.emailSentAt&&!i.whatsappPreparedAt&&!i.driveFileId);
     const duplicates=(db.bookings||[]).filter(b=>b.customerMatchRequired);
@@ -7487,6 +7551,140 @@ setTimeout(function(){
   try{v45FixOperationalFollowupCard();}catch(_){}
 },220);
 
+})();
+</script>
+
+
+<style id="lune-production-master-css">
+#productionIntegrityCard{border-color:rgba(185,155,98,.36)}
+#productionIntegritySummary span.ok{border-color:#c7dfce;background:#f5fbf6;color:#386b4f}
+#productionIntegritySummary span.warn{border-color:#ead9b7;background:#fffaf1;color:#8a6429}
+#productionIntegritySummary span.bad{border-color:#e8c8bf;background:#fff6f4;color:#a94335}
+.productionAuditList{display:grid;gap:7px;margin-top:10px}.productionAuditItem{border:1px solid var(--line);border-radius:12px;padding:9px 11px;background:#fff}
+</style>
+<script id="lune-production-master-js">
+(function(){
+'use strict';
+function pmEsc(v){return typeof esc==='function'?esc(v):String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]);}
+function pmNorm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');}
+function pmMoney(v){return Math.round(Number(v||0)*100)/100;}
+function pmItemSig(inv){return JSON.stringify((inv.items||[]).map(x=>[pmNorm(x.type),pmNorm(x.description),Number(x.qty||0),pmMoney(x.price),pmMoney(x.total),String(x.serviceId||''),String(x.productId||'')]).sort());}
+function pmInvoiceSig(inv){return JSON.stringify({bookingId:String(inv.bookingId||''),customerId:String(inv.customerId||''),customer:pmNorm(inv.customer),total:pmMoney(inv.total),payment:String(inv.payment||''),items:pmItemSig(inv)});}
+function pmRichness(inv){let s=0;if(inv.status==='bezahlt')s+=100;if(inv.stockApplied)s+=40;if(inv.driveFileId||inv.archivedAt)s+=30;if(inv.emailSentAt)s+=20;if(Array.isArray(inv.emailHistory))s+=Math.min(10,inv.emailHistory.length);if(inv.createdAt)s+=1;return s;}
+function pmExplicitTest(v){const s=pmNorm(v);if(!s)return false;return /(^|[\s._-])(test|demo|dummy)([\s._-]|$)/i.test(s)||/^test\d*/i.test(s)||/^demo\d*/i.test(s);}
+function pmIsTestCustomer(c){return !!c&&(pmExplicitTest(c.name)||pmExplicitTest(c.email)||pmExplicitTest(c.notes));}
+function pmIsTestBooking(b,testCustomers){return !!b&&(testCustomers.has(String(b.customerId||''))||pmExplicitTest(b.name)||pmExplicitTest(b.email)||pmExplicitTest(b.notes)||pmExplicitTest(b.source));}
+function pmIsTestInvoice(i,testCustomers,testBookings){return !!i&&(testCustomers.has(String(i.customerId||''))||testBookings.has(String(i.bookingId||''))||pmExplicitTest(i.customer)||pmExplicitTest(i.email)||pmExplicitTest(i.internalNote)||pmExplicitTest(i.invoiceReason));}
+function pmAudit(){
+  const invoices=db.invoices||[],payments=db.payments||[],customers=db.customers||[],bookings=db.bookings||[];
+  const numberGroups=new Map();invoices.forEach(i=>{const n=String(i.number||'').trim();if(!n)return;if(!numberGroups.has(n))numberGroups.set(n,[]);numberGroups.get(n).push(i);});
+  const duplicateNumbers=[...numberGroups.entries()].filter(([,rows])=>rows.length>1);
+  const safeInvoiceGroups=[],invoiceConflicts=[];
+  duplicateNumbers.forEach(([number,rows])=>{const sigs=new Set(rows.map(pmInvoiceSig));(sigs.size===1?safeInvoiceGroups:invoiceConflicts).push({number,rows});});
+  const activeBookingMap=new Map();invoices.filter(i=>i.status!=='storniert'&&i.bookingId).forEach(i=>{const k=String(i.bookingId);if(!activeBookingMap.has(k))activeBookingMap.set(k,[]);activeBookingMap.get(k).push(i);});
+  const activeByBooking=[...activeBookingMap.entries()].filter(([,rows])=>rows.length>1);
+  const paymentMap=new Map();payments.filter(p=>p.status==='received'&&p.invoiceNumber).forEach(p=>{const k=String(p.invoiceNumber);if(!paymentMap.has(k))paymentMap.set(k,[]);paymentMap.get(k).push(p);});
+  const paymentGroups=[...paymentMap.entries()].filter(([,rows])=>rows.length>1);
+  const testCustomerIds=new Set(customers.filter(pmIsTestCustomer).map(c=>String(c.id)));
+  const testBookingIds=new Set(bookings.filter(b=>pmIsTestBooking(b,testCustomerIds)).map(b=>String(b.id)));
+  const testInvoiceIds=new Set(invoices.filter(i=>pmIsTestInvoice(i,testCustomerIds,testBookingIds)).map(i=>String(i.id)));
+  const testInvoiceNumbers=new Set(invoices.filter(i=>testInvoiceIds.has(String(i.id))).map(i=>String(i.number||'')));
+  const testFlows=(db.aftercareFlows||[]).filter(f=>testCustomerIds.has(String(f.customerId||''))||testBookingIds.has(String(f.bookingId||''))||pmExplicitTest(f.customerName)||pmExplicitTest(f.personalNote));
+  const testSkin=(db.skinAnalyses||[]).filter(x=>testCustomerIds.has(String(x.customerId||''))||pmExplicitTest(x.name)||pmExplicitTest(x.source));
+  return {safeInvoiceGroups,invoiceConflicts,activeByBooking,paymentGroups,testCustomerIds,testBookingIds,testInvoiceIds,testInvoiceNumbers,testFlows,testSkin};
+}
+function pmNames(set,arr){return arr.filter(x=>set.has(String(x.id))).map(x=>x.name||x.number||x.id).slice(0,25);}
+window.productionAudit=function(showAlert){
+  const a=pmAudit(),summary=document.getElementById('productionIntegritySummary'),detail=document.getElementById('productionIntegrityDetail');
+  const safeCount=a.safeInvoiceGroups.reduce((n,g)=>n+g.rows.length-1,0),payCount=a.paymentGroups.reduce((n,g)=>n+g[1].length-1,0),manual=a.invoiceConflicts.length+a.activeByBooking.length;
+  if(summary)summary.innerHTML=''+
+    '<span class="'+(safeCount?'warn':'ok')+'">Sichere Rechnungsdubletten: <b>'+safeCount+'</b></span>'+
+    '<span class="'+(payCount?'warn':'ok')+'">Doppelte Zahlungen: <b>'+payCount+'</b></span>'+
+    '<span class="'+(manual?'bad':'ok')+'">Manuell prüfen: <b>'+manual+'</b></span>'+
+    '<span class="'+(a.testCustomerIds.size||a.testBookingIds.size||a.testInvoiceIds.size?'warn':'ok')+'">TEST: <b>'+a.testCustomerIds.size+' Kundinnen · '+a.testBookingIds.size+' Termine · '+a.testInvoiceIds.size+' Rechnungen</b></span>';
+  const parts=[];
+  if(a.invoiceConflicts.length)parts.push('<div class="productionAuditItem"><b>Gleiche Rechnungsnummer mit unterschiedlichem Inhalt – nicht automatisch löschen:</b><br>'+a.invoiceConflicts.map(g=>pmEsc(g.number)+' ('+g.rows.length+')').join(', ')+'</div>');
+  if(a.activeByBooking.length)parts.push('<div class="productionAuditItem"><b>Mehrere aktive Rechnungen für denselben Termin – manuell prüfen:</b><br>'+a.activeByBooking.map(([id,rows])=>pmEsc(id)+' → '+rows.map(r=>pmEsc(r.number)).join(', ')).join('<br>')+'</div>');
+  const names=pmNames(a.testCustomerIds,db.customers||[]);if(names.length)parts.push('<div class="productionAuditItem"><b>Als TEST/DEMO erkannt:</b><br>'+names.map(pmEsc).join(', ')+'</div>');
+  if(detail)detail.innerHTML=parts.length?'<div class="productionAuditList">'+parts.join('')+'</div>':'<div class="productionAuditItem">Keine Konflikte erkannt.</div>';
+  if(showAlert)alert('Integritätsprüfung abgeschlossen. Bitte Ergebnis im Tagesabschluss prüfen.');
+  return a;
+};
+window.productionBackup=function(){
+  const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),source:'Lune Beauty Production Master',db:db},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Lune_Beauty_Backup_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+};
+function pmMergeMeta(target,source){
+  ['driveFileId','driveFileUrl','archivedAt','emailSentAt','emailSentTo','deliveryMethod','deliveryStatus','whatsappPreparedAt','whatsappPhone','paidAt','paidDate','confirmationSentAt'].forEach(k=>{if(!target[k]&&source[k])target[k]=source[k];});
+  if(source.status==='bezahlt')target.status='bezahlt';
+  const histories=[...(Array.isArray(target.emailHistory)?target.emailHistory:[]),...(Array.isArray(source.emailHistory)?source.emailHistory:[])];
+  if(histories.length){const seen=new Set();target.emailHistory=histories.filter(x=>{const k=JSON.stringify(x);if(seen.has(k))return false;seen.add(k);return true;});}
+}
+window.productionRepairSafeDuplicates=async function(){
+  const a=pmAudit(),invExtra=a.safeInvoiceGroups.reduce((n,g)=>n+g.rows.length-1,0),payExtra=a.paymentGroups.reduce((n,g)=>n+g[1].length-1,0);
+  if(!invExtra&&!payExtra){alert('Keine sicheren Dubletten gefunden.');productionAudit(false);return;}
+  productionBackup();
+  if(!confirm('Gefunden: '+invExtra+' sichere Rechnungsdubletten und '+payExtra+' doppelte Zahlung(en).\n\nBackup wurde heruntergeladen. Automatisch werden nur Rechnungen mit gleicher Nummer UND identischem Inhalt zusammengeführt. Fortfahren?'))return;
+  if(prompt('Zur Sicherheit bitte exakt BEREINIGEN eingeben:','')!=='BEREINIGEN')return;
+  const removeInvoiceIds=new Set();
+  a.safeInvoiceGroups.forEach(g=>{
+    const rows=g.rows.slice().sort((x,y)=>pmRichness(y)-pmRichness(x));const keep=rows[0];
+    rows.slice(1).forEach(extra=>{
+      // If both duplicate records posted stock, undo exactly the duplicate posting before deleting it.
+      if(extra.stockApplied&&keep.stockApplied&&typeof reverseStockForInvoice==='function')reverseStockForInvoice(extra);
+      pmMergeMeta(keep,extra);
+      if(!keep.stockApplied&&extra.stockApplied)keep.stockApplied=true;
+      removeInvoiceIds.add(String(extra.id));
+    });
+  });
+  db.invoices=(db.invoices||[]).filter(i=>!removeInvoiceIds.has(String(i.id)));
+  const removePaymentIds=new Set();
+  a.paymentGroups.forEach(([number,rows])=>{
+    const sorted=rows.slice().sort((x,y)=>String(x.createdAt||x.paymentDate||'').localeCompare(String(y.createdAt||y.paymentDate||'')));
+    sorted.slice(1).forEach(p=>removePaymentIds.add(String(p.id)));
+  });
+  db.payments=(db.payments||[]).filter(p=>!removePaymentIds.has(String(p.id)));
+  persist();
+  try{if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()&&window.LuneStaffCloudSync.push)await window.LuneStaffCloudSync.push();}catch(e){console.warn('Cloud sync after duplicate repair',e);}
+  renderAll();productionAudit(false);alert('Sichere Dubletten wurden bereinigt. Alle Konfliktfälle blieben unverändert.');
+};
+window.productionDeleteTestData=async function(){
+  const a=pmAudit();
+  if(!a.testCustomerIds.size&&!a.testBookingIds.size&&!a.testInvoiceIds.size&&!a.testFlows.length&&!a.testSkin.length){alert('Keine eindeutig als TEST/DEMO markierten Daten gefunden.');return;}
+  const names=pmNames(a.testCustomerIds,db.customers||[]);
+  if(!confirm('TEST-Bereinigung:\n\nKundinnen: '+a.testCustomerIds.size+'\nTermine: '+a.testBookingIds.size+'\nRechnungen: '+a.testInvoiceIds.size+'\nNachbetreuung: '+a.testFlows.length+'\nSkin Checks: '+a.testSkin.length+'\n\nErkannte Kundinnen: '+(names.join(', ')||'—')+'\n\nNur explizit TEST/DEMO/DUMMY markierte oder damit verknüpfte Daten werden ausgewählt.'))return;
+  productionBackup();
+  if(prompt('Backup wurde heruntergeladen. Zur endgültigen Bereinigung bitte exakt TEST LÖSCHEN eingeben:','')!=='TEST LÖSCHEN')return;
+  const testInvoices=(db.invoices||[]).filter(i=>a.testInvoiceIds.has(String(i.id)));
+  testInvoices.forEach(i=>{if(i.stockApplied&&typeof reverseStockForInvoice==='function')reverseStockForInvoice(i);});
+  db.invoices=(db.invoices||[]).filter(i=>!a.testInvoiceIds.has(String(i.id)));
+  db.payments=(db.payments||[]).filter(p=>!a.testInvoiceNumbers.has(String(p.invoiceNumber||'')));
+  db.aftercareFlows=(db.aftercareFlows||[]).filter(f=>!a.testCustomerIds.has(String(f.customerId||''))&&!a.testBookingIds.has(String(f.bookingId||''))&&!pmExplicitTest(f.customerName)&&!pmExplicitTest(f.personalNote));
+  db.skinAnalyses=(db.skinAnalyses||[]).filter(x=>!a.testCustomerIds.has(String(x.customerId||''))&&!pmExplicitTest(x.name)&&!pmExplicitTest(x.source));
+  db.bookings=(db.bookings||[]).filter(b=>!a.testBookingIds.has(String(b.id)));
+  db.customers=(db.customers||[]).filter(c=>!a.testCustomerIds.has(String(c.id)));
+  db.stockMovements=(db.stockMovements||[]).filter(m=>!a.testInvoiceNumbers.has(String(m.ref||'')));
+  persist();
+  try{if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()&&window.LuneStaffCloudSync.push)await window.LuneStaffCloudSync.push();}catch(e){console.warn('Cloud sync after test cleanup',e);}
+  renderAll();productionAudit(false);alert('TEST-Daten wurden bereinigt.');
+};
+
+// Keep the V22 cards synchronized with the same final V45 resolution rules, without changing their design.
+function pmResolvedAftercare(customerId){return (db.aftercareFlows||[]).some(f=>String(f.customerId||'')===String(customerId||'')&&(f.status==='converted'||f.status==='done'||f.status==='stopped'||!!f.successorBookingId));}
+function pmFutureBooking(customerId){return (db.bookings||[]).some(b=>String(b.customerId||'')===String(customerId||'')&&b.status!=='storniert'&&String(b.date||'')>=String(TODAY()));}
+function pmFollowupCustomers(){return (db.customers||[]).filter(c=>{const rows=(typeof customerBookings==='function'?customerBookings(c):(db.bookings||[]).filter(b=>String(b.customerId||'')===String(c.id||'')));return rows.some(b=>b.status==='beendet')&&!pmResolvedAftercare(c.id)&&!pmFutureBooking(c.id);});}
+function pmFixOperationalCards(){
+  const panel=document.getElementById('v22OperationalDashboard');if(!panel)return;
+  const cards=[...panel.querySelectorAll('.v22DashCard')];
+  const emailCard=cards.find(x=>(x.textContent||'').includes('Bestätigung offen'));
+  if(emailCard){const rows=(db.bookings||[]).filter(b=>b.status==='bestätigt'&&!b.confirmationSentAt&&!b.confirmationEmailOptOut);const b=emailCard.querySelector('b');if(b)b.textContent=rows.length;const spans=emailCard.querySelectorAll('span');if(spans[1])spans[1].textContent='E-Mail/ICS offen · Opt-out ausgeschlossen';}
+  const followCard=cards.find(x=>(x.textContent||'').includes('Folgetermin offen'));
+  if(followCard){const rows=pmFollowupCustomers();const b=followCard.querySelector('b');if(b)b.textContent=rows.length;const spans=followCard.querySelectorAll('span');if(spans[1])spans[1].textContent=rows.length?'Behandlung abgeschlossen · keine gelöste Nachbetreuung / kein Folgetermin':'Keine offene Rebooking-Aufgabe';}
+}
+const pmOldRenderAll=window.renderAll;if(typeof pmOldRenderAll==='function')window.renderAll=function(){const r=pmOldRenderAll.apply(this,arguments);setTimeout(pmFixOperationalCards,0);return r;};
+const pmOldTab=window.tab;if(typeof pmOldTab==='function')window.tab=function(name){const r=pmOldTab.apply(this,arguments);if(name==='close')setTimeout(()=>productionAudit(false),30);return r;};
+window.addEventListener('lune:cloud-db-updated',()=>setTimeout(()=>{pmFixOperationalCards();if(!document.getElementById('close')?.classList.contains('hidden'))productionAudit(false);},100));
+setTimeout(pmFixOperationalCards,250);
 })();
 </script>
 
