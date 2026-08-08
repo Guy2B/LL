@@ -6946,5 +6946,309 @@ setTimeout(v43EnsureAgendaToggle,100);
 })();
 </script>
 
+
+<style id="lune-v44-visibility-css">
+.v44InvoiceStatus{border:1px solid #ead9b7;background:#fffaf1;border-radius:16px;padding:12px;margin:10px 0}
+.v44InvoiceStatusGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.v44InvoiceState{border:1px solid #eadfc9;background:#fff;border-radius:13px;padding:10px;font-size:12px}
+.v44InvoiceState.ok{background:#f5fbf6;border-color:#c7dfce}
+.v44InvoiceState b{display:block;margin-bottom:3px}
+.v44NoMail{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1px solid #ead9b7;border-radius:14px;background:#fffaf1;margin:8px 0 4px;font-size:12px}
+.v44NoMail input{margin-top:2px}
+.v44TodayPast{opacity:.82}
+.v44TodayDone{font-size:10px;display:inline-block;margin-left:5px;padding:3px 7px;border-radius:999px;background:#f1ece4;color:#6d635b}
+@media(max-width:700px){
+  .v44InvoiceStatusGrid{grid-template-columns:1fr}
+  .v44NoMail{font-size:13px}
+}
+</style>
+
+<script id="lune-v44-visibility">
+(function(){
+'use strict';
+
+function v44Esc(v){
+  return String(v||'').replace(/[&<>"']/g,function(ch){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
+  });
+}
+function v44When(v){
+  if(!v)return '—';
+  try{
+    if(window.luneV39BerlinTime)return window.luneV39BerlinTime(v);
+    const d=new Date(v);
+    if(isNaN(d.getTime()))return String(v);
+    return new Intl.DateTimeFormat('de-DE',{
+      timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',year:'numeric',
+      hour:'2-digit',minute:'2-digit',hour12:false
+    }).format(d).replace(',',' ·')+' Uhr';
+  }catch(_){return String(v);}
+}
+async function v44Cloud(){
+  if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()&&window.LuneStaffCloudSync.push){
+    await window.LuneStaffCloudSync.push();
+  }
+}
+
+/* ============================================================
+   INVOICES — archive + email history always visible
+   ============================================================ */
+function v44EmailCount(i){
+  if(Array.isArray(i.emailHistory)&&i.emailHistory.length)return i.emailHistory.length;
+  return i.emailSentAt?Number(i.emailSendCount||1):0;
+}
+function v44InvoiceStatusHtml(i){
+  const archived=!!(i.driveFileId||i.archivedAt);
+  const count=v44EmailCount(i);
+  return '<div class="v44InvoiceStatus"><div class="brandEyebrow">Dokumentstatus</div>'+
+    '<div class="v44InvoiceStatusGrid">'+
+      '<div class="v44InvoiceState '+(archived?'ok':'')+'"><b>'+(archived?'✓ Archiviert':'Noch nicht archiviert')+'</b>'+
+        (archived?'<span>'+v44Esc(v44When(i.archivedAt||i.emailSentAt))+'</span><br><span class="small">Google Drive</span>':'<span class="small">PDF noch nicht in Drive bestätigt.</span>')+
+      '</div>'+
+      '<div class="v44InvoiceState '+(count?'ok':'')+'"><b>'+(count?'✓ Per E-Mail gesendet':'Noch nicht per E-Mail gesendet')+'</b>'+
+        (count?'<span>'+count+'× gesendet</span><br><span class="small">Letzter Versand: '+v44Esc(v44When(i.emailSentAt))+(i.emailSentTo?' · '+v44Esc(i.emailSentTo):'')+'</span>':'<span class="small">Kein E-Mail-Versand dokumentiert.</span>')+
+      '</div>'+
+    '</div></div>';
+}
+
+const oldSendInvoice44=window.sendEmail;
+if(typeof oldSendInvoice44==='function'){
+  window.sendEmail=async function(id){
+    const i=(db.invoices||[]).find(x=>String(x.id)===String(id));
+    if(!i)return oldSendInvoice44.apply(this,arguments);
+    const before=String(i.emailSentAt||'');
+    const r=await oldSendInvoice44.apply(this,arguments);
+    const fresh=(db.invoices||[]).find(x=>String(x.id)===String(id));
+    if(fresh&&fresh.emailSentAt&&String(fresh.emailSentAt)!==before){
+      fresh.emailHistory=Array.isArray(fresh.emailHistory)?fresh.emailHistory:[];
+      if(!fresh.emailHistory.some(x=>String(x.sentAt||'')===String(fresh.emailSentAt))){
+        fresh.emailHistory.push({sentAt:fresh.emailSentAt,to:fresh.emailSentTo||fresh.email||'',method:'invoice-email'});
+      }
+      fresh.emailSendCount=fresh.emailHistory.length;
+      safeStorage.setItem(KEY,JSON.stringify(db));
+      try{await v44Cloud();}catch(_){}
+      try{renderInvoice(id,'invoiceDetail');renderInvoices();}catch(_){}
+    }
+    return r;
+  };
+}
+
+const oldRenderInvoice44=window.renderInvoice;
+if(typeof oldRenderInvoice44==='function'){
+  window.renderInvoice=function(id,target){
+    const r=oldRenderInvoice44.apply(this,arguments);
+    const i=(db.invoices||[]).find(x=>String(x.id)===String(id));
+    const host=document.getElementById(target);
+    if(i&&host&&!host.querySelector('.v44InvoiceStatus')){
+      const controls=host.querySelector('.noPrint');
+      if(controls)controls.insertAdjacentHTML('beforebegin',v44InvoiceStatusHtml(i));
+      else host.insertAdjacentHTML('beforeend',v44InvoiceStatusHtml(i));
+    }
+    return r;
+  };
+}
+
+const oldRenderInvoices44=window.renderInvoices;
+if(typeof oldRenderInvoices44==='function'){
+  window.renderInvoices=function(){
+    const r=oldRenderInvoices44.apply(this,arguments);
+    document.querySelectorAll('#invoiceList .item').forEach(function(card){
+      const btn=card.querySelector('button[onclick*="renderInvoice"]');
+      const oc=btn&&btn.getAttribute('onclick')||'';
+      const m=oc.match(/renderInvoice\('([^']+)'/);
+      if(!m||card.querySelector('.v44ListDocStatus'))return;
+      const i=(db.invoices||[]).find(x=>String(x.id)===String(m[1]));
+      if(!i)return;
+      const archived=!!(i.driveFileId||i.archivedAt);
+      const count=v44EmailCount(i);
+      const line=document.createElement('div');
+      line.className='small v44ListDocStatus';
+      line.style.margin='6px 0';
+      line.innerHTML=(archived?'✓ Archiviert · '+v44Esc(v44When(i.archivedAt||i.emailSentAt)):'○ Nicht archiviert')+
+        ' &nbsp;·&nbsp; '+(count?'✓ E-Mail '+count+'×':'○ E-Mail nicht gesendet');
+      btn.insertAdjacentElement('beforebegin',line);
+    });
+    return r;
+  };
+}
+
+/* ============================================================
+   APPOINTMENT E-MAIL — client can opt out
+   ============================================================ */
+function v44CurrentBooking(){
+  const id=String(document.getElementById('bookingEditId')?.value||'');
+  return (db.bookings||[]).find(x=>String(x.id||'')===id)||null;
+}
+function v44EnsureNoMailControl(){
+  const actions=document.getElementById('bookingEmailBtn')?.closest('.bookingActions');
+  if(!actions)return;
+  let box=document.getElementById('v44NoConfirmationEmail');
+  if(!box){
+    box=document.createElement('label');
+    box.id='v44NoConfirmationEmail';
+    box.className='v44NoMail';
+    box.innerHTML='<input type="checkbox"><span><b>Keine E-Mail-Bestätigung gewünscht</b><br><span class="small">Aktivieren, wenn die Kundin ausdrücklich keine Terminbestätigung per E-Mail möchte.</span></span>';
+    actions.insertAdjacentElement('beforebegin',box);
+    box.querySelector('input').addEventListener('change',function(){
+      const b=v44CurrentBooking();
+      if(b){
+        b.confirmationEmailOptOut=!!this.checked;
+        b.confirmationEmailOptOutAt=this.checked?new Date().toISOString():'';
+        safeStorage.setItem(KEY,JSON.stringify(db));
+        v44ApplyEmailOptOut();
+        v44Cloud().catch(()=>{});
+      }
+    });
+  }
+  const b=v44CurrentBooking();
+  box.querySelector('input').checked=!!(b&&b.confirmationEmailOptOut);
+}
+function v44ApplyEmailOptOut(){
+  v44EnsureNoMailControl();
+  const b=v44CurrentBooking();
+  const btn=document.getElementById('bookingEmailBtn');
+  if(!btn)return;
+  if(b&&b.confirmationEmailOptOut){
+    btn.disabled=true;
+    btn.textContent='E-Mail nicht gewünscht';
+    btn.title='Kundin wünscht keine Terminbestätigung per E-Mail.';
+  }
+}
+const oldEmailState44=window.sendCurrentBookingConfirmationEmail;
+if(typeof oldEmailState44==='function'){
+  window.sendCurrentBookingConfirmationEmail=async function(){
+    const b=v44CurrentBooking();
+    if(b&&b.confirmationEmailOptOut){
+      return alert('Für diesen Termin wurde „Keine E-Mail-Bestätigung gewünscht“ aktiviert.');
+    }
+    return oldEmailState44.apply(this,arguments);
+  };
+}
+
+const oldOpenBookingOpt44=window.openBooking;
+if(typeof oldOpenBookingOpt44==='function'){
+  window.openBooking=function(id){
+    const r=oldOpenBookingOpt44.apply(this,arguments);
+    setTimeout(function(){v44EnsureNoMailControl();v44ApplyEmailOptOut();},40);
+    return r;
+  };
+}
+const oldNewBookingOpt44=window.newBookingForm;
+if(typeof oldNewBookingOpt44==='function'){
+  window.newBookingForm=function(){
+    const r=oldNewBookingOpt44.apply(this,arguments);
+    setTimeout(function(){
+      v44EnsureNoMailControl();
+      const box=document.getElementById('v44NoConfirmationEmail');
+      if(box)box.querySelector('input').checked=false;
+    },40);
+    return r;
+  };
+}
+
+/* Save the opt-out together with the appointment state. */
+const oldSaveBookingOpt44=window.saveBooking;
+if(typeof oldSaveBookingOpt44==='function'){
+  window.saveBooking=async function(){
+    const checked=!!document.querySelector('#v44NoConfirmationEmail input')?.checked;
+    const r=await oldSaveBookingOpt44.apply(this,arguments);
+    const b=v44CurrentBooking();
+    if(b){
+      b.confirmationEmailOptOut=checked;
+      if(checked&&!b.confirmationEmailOptOutAt)b.confirmationEmailOptOutAt=new Date().toISOString();
+      if(!checked)b.confirmationEmailOptOutAt='';
+      safeStorage.setItem(KEY,JSON.stringify(db));
+      try{await v44Cloud();}catch(_){}
+    }
+    v44ApplyEmailOptOut();
+    return r;
+  };
+}
+
+/* ============================================================
+   HEUTE — always show every non-cancelled appointment today,
+   including appointments that already happened this morning.
+   ============================================================ */
+function v44RenderTodayComplete(){
+  const host=document.getElementById('todayList');
+  if(!host)return;
+
+  const today=TODAY();
+  const now=new Date();
+  const nowMinutes=now.getHours()*60+now.getMinutes();
+
+  const rows=(db.bookings||[])
+    .filter(b=>String(b.date||'')===String(today)&&b.status!=='storniert')
+    .sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+
+  document.getElementById('kBookings').textContent=rows.length;
+
+  host.innerHTML=rows.map(function(b){
+    const tm=String(b.time||'').match(/^(\d{1,2}):(\d{2})/);
+    const mins=tm?Number(tm[1])*60+Number(tm[2]):9999;
+    const past=mins<nowMinutes;
+    const active=activeInvoiceForBooking(b.id);
+    const done=b.status==='beendet';
+    const label=active?'Rechnung öffnen':'Zur Rechnung';
+
+    return '<div class="item '+v44Esc(b.status)+(past?' v44TodayPast':'')+'">'+
+      '<div class="cleanSectionHead"><div><b>'+v44Esc(b.time)+' · '+v44Esc(b.name)+'</b>'+
+      (past?'<span class="v44TodayDone">heute bereits vorbei</span>':'')+
+      '<br><span class="small">'+v44Esc(b.service)+'</span><br>'+bookingBadge(b.status)+
+      (b.confirmationEmailOptOut?' <span class="badge">keine E-Mail gewünscht</span>':'')+
+      '</div><div class="bookingActions">'+
+      '<button class="secondary" onclick="tab(\'agenda\');openBooking(\''+v44Esc(b.id)+'\')">Öffnen</button>'+
+      '<button class="secondary" onclick="setBookingStatus(\''+v44Esc(b.id)+'\',\'angekommen\')" '+(done?'disabled':'')+'>Angekommen</button>'+
+      '<button class="gold" onclick="'+(active?("tab('invoices');setTimeout(()=>renderInvoice('"+v44Esc(active.id)+"','invoiceDetail'),0)"):"invoiceFromBooking('"+v44Esc(b.id)+"')")+'">'+label+'</button>'+
+      '</div></div></div>';
+  }).join('')||"<p class='small'>Keine Termine heute.</p>";
+
+  try{renderAftercareDashboard();}catch(_){}
+}
+
+const oldDashboard44=window.renderDashboard;
+if(typeof oldDashboard44==='function'){
+  window.renderDashboard=function(){
+    const r=oldDashboard44.apply(this,arguments);
+    v44RenderTodayComplete();
+    return r;
+  };
+}
+
+/* Dashboard card "Bestätigung offen" must ignore opt-out clients. */
+function v44FixOperationalDashboard(){
+  const card=[...document.querySelectorAll('#v22OperationalDashboard .v22DashCard')].find(x=>(x.textContent||'').includes('Bestätigung offen'));
+  if(!card)return;
+  const open=(db.bookings||[]).filter(b=>b.status==='bestätigt'&&!b.confirmationSentAt&&!b.confirmationEmailOptOut);
+  const number=card.querySelector('b');
+  if(number)number.textContent=open.length;
+  const desc=card.querySelectorAll('span')[1];
+  if(desc)desc.textContent='E-Mail/ICS offen · Opt-out ausgeschlossen';
+}
+
+const oldRenderAll44=window.renderAll;
+if(typeof oldRenderAll44==='function'){
+  window.renderAll=function(){
+    const r=oldRenderAll44.apply(this,arguments);
+    setTimeout(function(){
+      v44RenderTodayComplete();
+      v44FixOperationalDashboard();
+      v44EnsureNoMailControl();
+      v44ApplyEmailOptOut();
+    },0);
+    return r;
+  };
+}
+
+setTimeout(function(){
+  v44RenderTodayComplete();
+  v44FixOperationalDashboard();
+  v44EnsureNoMailControl();
+  v44ApplyEmailOptOut();
+},180);
+
+})();
+</script>
+
 </body>
 </html>
