@@ -2831,5 +2831,81 @@
 
 <script async src="https://www.instagram.com/embed.js"></script>
 
+
+<script id="lune-booking-hardfix-v40">
+(function(){
+  'use strict';
+  function norm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');}
+  function durationFromText(v){var m=String(v||'').match(/(\d+)\s*Min(?:ute)?n?/i);return m?Number(m[1]):0;}
+  function priceFromText(v){var m=String(v||'').match(/([\d.]+(?:,\d+)?)\s*€/);return m?Number(m[1].replace(/\./g,'').replace(',','.')):0;}
+  function lookupSelectedMeta(){
+    var form=document.getElementById('booking-form');
+    var select=form&&form.querySelector('[name="service"]');
+    if(!form||!select)return null;
+    var wanted=norm(select.value), result=null;
+    document.querySelectorAll('#pricing .book-link[data-service]').forEach(function(link){
+      if(result||norm(link.dataset.service)!==wanted)return;
+      var li=link.closest('li'); if(!li)return;
+      result={
+        durationMinutes:durationFromText(li.querySelector('.service-meta')?.textContent||''),
+        price:priceFromText(li.querySelector('.price')?.textContent||'')
+      };
+    });
+    return result;
+  }
+  function syncHidden(){
+    var meta=lookupSelectedMeta();
+    var dur=document.getElementById('booking-duration');
+    var price=document.getElementById('booking-price');
+    if(dur)dur.value=meta&&meta.durationMinutes?String(meta.durationMinutes):'';
+    if(price)price.value=meta&&meta.price?String(meta.price):'';
+    return meta;
+  }
+
+  var form=document.getElementById('booking-form');
+  if(!form)return;
+  form.addEventListener('change',function(e){if(e.target&&e.target.name==='service')syncHidden();},true);
+
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    if(!form.reportValidity())return;
+
+    var meta=syncHidden()||{};
+    var endpoint=String(window.LUNE_STAFF_CLOUD_API||'').trim();
+    if(!endpoint){alert('Booking Cloud ist nicht konfiguriert.');return;}
+
+    var fd=new FormData(form);
+    fd.set('action','publicBooking');
+    fd.set('source','Website');
+    fd.set('durationMinutes',String(meta.durationMinutes||fd.get('durationMinutes')||''));
+    fd.set('price',String(meta.price||fd.get('price')||''));
+
+    var btn=form.querySelector('button[type="submit"]');
+    var old=btn?btn.textContent:'Termin anfragen';
+    try{
+      if(btn){btn.disabled=true;btn.textContent='Wird gesendet…';}
+      var body=new URLSearchParams();
+      fd.forEach(function(v,k){body.set(k,String(v));});
+      var res=await fetch(endpoint,{method:'POST',body:body,redirect:'follow'});
+      var text=await res.text(), data;
+      try{data=JSON.parse(text);}catch(_){throw new Error('Ungültige Serverantwort');}
+      if(!data||data.ok===false)throw new Error((data&&data.error)||'Übertragung fehlgeschlagen');
+
+      var success=document.getElementById('booking-success');
+      if(success){success.textContent='Vielen Dank. Ihre Anfrage wurde sicher übermittelt.';success.classList.remove('hidden');}
+      form.reset(); syncHidden();
+    }catch(err){
+      console.error('Booking hardfix V40',err);
+      alert('Die Terminanfrage konnte nicht gesendet werden: '+(err.message||err));
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent=old;}
+    }
+  },true);
+
+  setTimeout(syncHidden,80);
+})();
+</script>
+
 </body>
 </html>
