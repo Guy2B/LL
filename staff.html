@@ -7250,5 +7250,245 @@ setTimeout(function(){
 })();
 </script>
 
+
+<style id="lune-v45-resolved-aftercare-css">
+.v45ResolvedNote{
+  display:inline-flex;align-items:center;gap:5px;margin-top:5px;
+  font-size:11px;color:#285b3e;font-weight:800
+}
+</style>
+
+<script id="lune-v45-resolved-aftercare-dashboard">
+(function(){
+'use strict';
+
+function v45Esc(v){
+  return String(v||'').replace(/[&<>"']/g,function(ch){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
+  });
+}
+
+function v45CustomerBookings(c){
+  if(typeof customerBookings==='function')return customerBookings(c)||[];
+  return (db.bookings||[]).filter(b=>String(b.customerId||'')===String(c.id||''));
+}
+
+function v45FlowsForCustomer(customerId){
+  return (db.aftercareFlows||[]).filter(f=>String(f.customerId||'')===String(customerId||''));
+}
+
+function v45HasResolvedAftercare(customerId){
+  return v45FlowsForCustomer(customerId).some(function(f){
+    return f.status==='converted' ||
+           f.status==='done' ||
+           f.status==='stopped' ||
+           !!f.successorBookingId;
+  });
+}
+
+function v45HasOpenAftercare(customerId){
+  return v45FlowsForCustomer(customerId).some(function(f){
+    return f.status==='active' && !f.successorBookingId;
+  });
+}
+
+function v45HasFutureBooking(customerId){
+  return (db.bookings||[]).some(function(b){
+    return String(b.customerId||'')===String(customerId||'') &&
+           b.status!=='storniert' &&
+           String(b.date||'')>=String(TODAY());
+  });
+}
+
+function v45NeedsAftercareTask(customer){
+  const rows=v45CustomerBookings(customer);
+  const past=rows.filter(function(b){
+    return b.status==='beendet' && String(b.date||'')<=String(TODAY());
+  });
+  if(!past.length)return false;
+
+  // No task if the process has already reached a final state,
+  // if a successor appointment is linked, or if any future appointment exists.
+  if(v45HasResolvedAftercare(customer.id))return false;
+  if(v45HasFutureBooking(customer.id))return false;
+
+  // Existing active workflow is shown by the dedicated Nachbetreuung dashboard,
+  // not duplicated as "Nachbetreuung prüfen".
+  if(v45HasOpenAftercare(customer.id))return false;
+
+  return true;
+}
+
+function v45FollowupCustomers(){
+  return (db.customers||[]).filter(function(c){
+    const rows=v45CustomerBookings(c);
+    const hasCompleted=rows.some(b=>b.status==='beendet');
+    if(!hasCompleted)return false;
+    if(v45HasResolvedAftercare(c.id))return false;
+    if(v45HasFutureBooking(c.id))return false;
+    return true;
+  });
+}
+
+/* ---------------------------------------------------------
+   FIX "Offene Aufgaben"
+   --------------------------------------------------------- */
+window.renderCrmTasks=function(){
+  const panel=document.getElementById('crmTaskPanel');
+  if(!panel)return;
+
+  const now=Date.now();
+  const tasks=[];
+
+  (db.bookings||[]).forEach(function(booking){
+    const created=Date.parse(booking.createdAt||'');
+    if(String(booking.status)==='angefragt'&&created&&now-created>24*3600000){
+      tasks.push({
+        type:'bad',icon:'⏳',
+        title:'Terminanfrage seit mehr als 24 Stunden offen',
+        text:(booking.name||'')+' · '+crmDate(booking.date)+' · '+(booking.time||''),
+        action:"tab('agenda');openBooking('"+v45Esc(booking.id)+"')"
+      });
+    }
+
+    if(String(booking.status)==='bestätigt' &&
+       !booking.confirmationSentAt &&
+       !booking.confirmationEmailOptOut){
+      const reason=!booking.email?'E-Mail-Adresse fehlt':'Bestätigungs-E-Mail nicht gesendet';
+      tasks.push({
+        type:'warn',icon:'✉️',
+        title:'Termin bestätigt, E-Mail noch offen',
+        text:(booking.name||'')+' · '+reason,
+        action:"tab('agenda');openBooking('"+v45Esc(booking.id)+"')"
+      });
+    }
+  });
+
+  (db.invoices||[]).forEach(function(invoice){
+    if(invoice.status==='erstellt'){
+      tasks.push({
+        type:'bad',icon:'€',
+        title:'Offene Rechnung',
+        text:(invoice.number||'')+' · '+(invoice.customer||'')+' · '+EUR(invoice.total),
+        action:"tab('invoices');renderInvoice('"+v45Esc(invoice.id)+"','invoiceDetail')"
+      });
+    }
+    if(invoice.status!=='storniert'&&!invoice.emailSentAt&&!invoice.whatsappPreparedAt&&!invoice.driveFileId){
+      tasks.push({
+        type:'info',icon:'🧾',
+        title:'Rechnung noch nicht archiviert oder versendet',
+        text:(invoice.number||'')+' · '+(invoice.customer||''),
+        action:"tab('invoices');renderInvoice('"+v45Esc(invoice.id)+"','invoiceDetail')"
+      });
+    }
+  });
+
+  (db.customers||[]).forEach(function(customer){
+    if(!v45NeedsAftercareTask(customer))return;
+    const past=v45CustomerBookings(customer)
+      .filter(b=>b.status==='beendet'&&String(b.date||'')<=String(TODAY()))
+      .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+
+    tasks.push({
+      type:'info',icon:'↻',
+      title:'Nachbetreuung planen',
+      text:(customer.name||'')+' · letzte Behandlung '+crmDate(past[0].date),
+      action:"tab('customers');openCustomer('"+v45Esc(customer.id)+"');setTimeout(function(){crmShowPanel('"+v45Esc(customer.id)+"','aftercare')},40)"
+    });
+  });
+
+  panel.innerHTML="<h2>Offene Aufgaben</h2>"+
+    "<p class='small'>Nur wirklich offene Vorgänge. Erledigte oder bewusst beendete Prozesse verschwinden automatisch.</p>"+
+    "<div class='crmTaskGrid'>"+
+    (tasks.length?tasks.slice(0,30).map(function(task){
+      return "<div class='crmTask "+task.type+"'><div class='crmTaskIcon'>"+task.icon+"</div>"+
+        "<div><b>"+v45Esc(task.title)+"</b><br><span class='small'>"+v45Esc(task.text)+"</span></div>"+
+        "<div class='bookingActions'><button class='secondary' onclick=\""+task.action+"\">Öffnen</button></div></div>";
+    }).join(""):"<p class='small'>Keine offenen Aufgaben.</p>")+
+    "</div>";
+};
+
+/* ---------------------------------------------------------
+   FIX "Folgetermin offen" operational card + click
+   --------------------------------------------------------- */
+const oldAction45=window.luneV22DashboardAction;
+window.luneV22DashboardAction=function(type){
+  if(type!=='followup')return oldAction45.apply(this,arguments);
+  const rows=v45FollowupCustomers();
+  if(rows[0]){
+    if(typeof luneV22OpenCustomer==='function')luneV22OpenCustomer(rows[0].id);
+    else {tab('customers');openCustomer(rows[0].id);}
+  }
+};
+
+function v45FixOperationalFollowupCard(){
+  const panel=document.getElementById('v22OperationalDashboard');
+  if(!panel)return;
+  const card=[...panel.querySelectorAll('.v22DashCard')].find(function(x){
+    return (x.textContent||'').includes('Folgetermin offen');
+  });
+  if(!card)return;
+  const rows=v45FollowupCustomers();
+  const b=card.querySelector('b');
+  if(b)b.textContent=rows.length;
+  const spans=card.querySelectorAll('span');
+  if(spans[1]){
+    spans[1].textContent=rows.length
+      ? 'Behandlung abgeschlossen · weder Folgetermin noch abgeschlossener Nachbetreuungsprozess'
+      : 'Keine offene Rebooking-Aufgabe';
+  }
+}
+
+/* ---------------------------------------------------------
+   Customer panel: wording for converted flows
+   --------------------------------------------------------- */
+const oldPanel45=window.renderCustomerAftercarePanel;
+if(typeof oldPanel45==='function'){
+  window.renderCustomerAftercarePanel=function(customerId){
+    let html=oldPanel45.apply(this,arguments);
+
+    // A linked successor appointment means unsent stages were skipped,
+    // not "completed without documented send".
+    const flows=v45FlowsForCustomer(customerId);
+    if(flows.some(f=>f.status==='converted'||f.successorBookingId)){
+      html=html.replaceAll(
+        'Abgeschlossen ohne dokumentierten Versand.',
+        'Nicht gesendet · Folgetermin bereits gebucht.'
+      );
+    }
+    return html;
+  };
+}
+
+/* ---------------------------------------------------------
+   Refresh after all older renderers have run
+   --------------------------------------------------------- */
+const oldRenderAll45=window.renderAll;
+if(typeof oldRenderAll45==='function'){
+  window.renderAll=function(){
+    const r=oldRenderAll45.apply(this,arguments);
+    setTimeout(function(){
+      try{renderCrmTasks();}catch(_){}
+      try{v45FixOperationalFollowupCard();}catch(_){}
+    },0);
+    return r;
+  };
+}
+
+window.addEventListener('lune:cloud-db-updated',function(){
+  setTimeout(function(){
+    try{renderCrmTasks();}catch(_){}
+    try{v45FixOperationalFollowupCard();}catch(_){}
+  },80);
+});
+
+setTimeout(function(){
+  try{renderCrmTasks();}catch(_){}
+  try{v45FixOperationalFollowupCard();}catch(_){}
+},220);
+
+})();
+</script>
+
 </body>
 </html>
