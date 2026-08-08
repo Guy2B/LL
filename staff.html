@@ -282,6 +282,19 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
 .dossierKpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 16px}.dossierKpi{padding:10px;border:1px solid var(--line);border-radius:16px;background:#fffdf8}.dossierKpi span{display:block;color:var(--muted);font-size:12px}.dossierKpi b{display:block;font-family:Georgia,serif;font-size:18px;margin-top:2px}
 .dossierAlert{border:1px solid #f0d99d;background:#fffaf0;border-radius:16px;padding:10px 12px;margin:10px 0}.dossierAlert.bad{border-color:#edc3ba;background:#fff6f4}.dossierSection{border:1px solid var(--line);border-radius:18px;background:#fff;margin:10px 0;overflow:hidden}.dossierSection>summary{cursor:pointer;padding:14px 16px;font-weight:800;list-style:none;background:#fffdf8}.dossierSection>summary::-webkit-details-marker{display:none}.dossierSection>summary:after{content:'＋';float:right;color:var(--gold)}.dossierSection[open]>summary:after{content:'−'}.dossierSectionBody{padding:14px 16px}.dossierSection h3{margin-top:0}.timelineItem{position:relative;padding-left:18px;margin:10px 0}.timelineItem:before{content:'';position:absolute;left:0;top:7px;width:8px;height:8px;border-radius:50%;background:var(--gold)}.timelineItem:after{content:'';position:absolute;left:3px;top:17px;bottom:-13px;width:2px;background:var(--line)}.timelineItem:last-child:after{display:none}.emptyDossier{text-align:center;padding:48px 18px}.emptyDossier .dossierAvatar{margin:0 auto 14px}.customerForm label{font-size:13px;color:#6b5a47}.customerForm textarea{min-height:74px}
 @media(max-width:760px){.customerDossierHead{grid-template-columns:auto 1fr}.dossierActions{grid-column:1/-1;justify-content:stretch}.dossierActions button{flex:1}.dossierKpis{grid-template-columns:1fr 1fr}}
+
+/* Umsatz Monat + Admin Jahresübersicht */
+#dashboard .microKpis{grid-template-columns:repeat(5,minmax(0,1fr))}
+.adminRevenueGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:16px}
+.adminRevenueMonth{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fffdf8;min-width:0}
+.adminRevenueMonth span{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
+.adminRevenueMonth b{font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:500;white-space:nowrap}
+.adminRevenueMonth.current{border-color:var(--gold);box-shadow:0 0 0 2px rgba(185,155,98,.15) inset}
+.adminRevenueTotal{margin-top:14px;padding:15px 16px;border:1px solid rgba(185,155,98,.35);border-radius:18px;background:linear-gradient(135deg,#fffdf8,#f6efe5);display:flex;justify-content:space-between;gap:16px;align-items:center}
+.adminRevenueTotal span{font-weight:800;color:#6b5a47}
+.adminRevenueTotal strong{font-family:Georgia,"Times New Roman",serif;font-size:27px;font-weight:500;color:#231915}
+@media(max-width:1000px){#dashboard .microKpis{grid-template-columns:repeat(3,1fr)}.adminRevenueGrid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:700px){#dashboard .microKpis{grid-template-columns:1fr 1fr}.adminRevenueGrid{grid-template-columns:repeat(2,1fr)}.adminRevenueTotal{align-items:flex-start;flex-direction:column}.adminRevenueTotal strong{font-size:24px}}
 </style>
 
 </head>
@@ -330,6 +343,7 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
       </div>
       <div class="microKpis">
         <div class="kpi"><span class="small">Umsatz heute</span><b id="kToday">0 €</b></div>
+        <div class="kpi"><span class="small">Umsatz Monat</span><b id="kMonth">0 €</b></div>
         <div class="kpi"><span class="small">Termine heute</span><b id="kBookings">0</b></div>
         <div class="kpi"><span class="small">Kunden</span><b id="kCustomers">0</b></div>
         <div class="kpi"><span class="small">Offen</span><b id="kOpen">0</b></div>
@@ -548,6 +562,24 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
       <button class="secondary" onclick="tab('stock');setTimeout(()=>document.querySelector('.adminAdvanced')?.scrollIntoView({behavior:'smooth',block:'start'}),80)">Stock avancé</button>
       <button class="secondary" onclick="tab('invoices')">Rechnungsarchiv</button>
       <button class="secondary" onclick="tab('treatments')">Analyse Beauté</button>
+    </div>
+  </div>
+  <div class="card" id="adminRevenueCard">
+    <div class="cleanSectionHead">
+      <div>
+        <div class="brandEyebrow">UMSATZ · ADMIN</div>
+        <h2>Jahresübersicht</h2>
+        <p class="small">Nur bezahlte Rechnungen · Zahlungsdatum wird verwendet.</p>
+      </div>
+      <div style="min-width:150px">
+        <label for="adminRevenueYear" class="small">Jahr</label>
+        <select id="adminRevenueYear" onchange="renderAdminRevenue()"></select>
+      </div>
+    </div>
+    <div id="adminRevenueMonths" class="adminRevenueGrid"></div>
+    <div class="adminRevenueTotal">
+      <span>Jahresumsatz <b id="adminRevenueYearLabel"></b></span>
+      <strong id="adminRevenueTotal">0 €</strong>
     </div>
   </div>
 </section>
@@ -1568,11 +1600,50 @@ function renderMovements(){
 function renderDashboard(){
   let paid=db.invoices.filter(i=>i.status==="bezahlt"),today=TODAY(),todayBookings=db.bookings.filter(b=>b.date===today).sort((a,b)=>String(a.time).localeCompare(String(b.time)));
   $("kToday").textContent=EUR(paid.filter(i=>(i.paidDate||i.invoiceDate)===today).reduce((s,i)=>s+i.total,0));
+  const currentMonth=String(today||"").slice(0,7);
+  if($("kMonth"))$("kMonth").textContent=EUR(paid.filter(i=>String(i.paidDate||i.invoiceDate||"").slice(0,7)===currentMonth).reduce((s,i)=>s+Number(i.total||0),0));
   $("kBookings").textContent=todayBookings.length; $("kCustomers").textContent=db.customers.length; $("kOpen").textContent=db.invoices.filter(i=>i.status==="erstellt").length;
   $("todayList").innerHTML=todayBookings.map(b=>{let active=activeInvoiceForBooking(b.id),isFee=b.status==="storniert"&&b.cancellationFee,canInvoice=b.status!=="storniert"||isFee;let invLabel=active?"Rechnung öffnen":(isFee?"Kostenpflichtig abrechnen":"Zur Rechnung");return `<div class="item ${esc(b.status)}"><div class="cleanSectionHead"><div><b>${esc(b.time)} · ${esc(b.name)}</b><br><span class="small">${esc(b.service)}</span><br>${bookingBadge(b.status)} ${b.cancellationFee?'<span class="badge bad">kostenpflichtig</span>':''}</div><div class="bookingActions"><button class="secondary" onclick="tab('agenda');openBooking('${esc(b.id)}')">Öffnen</button><button class="secondary" onclick="setBookingStatus('${esc(b.id)}','angekommen')" ${b.status==="storniert"?"disabled":""}>Angekommen</button><button class="gold" onclick="${active?`tab('invoices');setTimeout(()=>renderInvoice('${esc(active.id)}','invoiceDetail'),0)`: `invoiceFromBooking('${esc(b.id)}')`}" ${!canInvoice?"disabled":""}>${invLabel}</button></div></div></div>`;}).join("")||"<p class='small'>Keine Termine.</p>";
   let cash=paid.filter(i=>(i.paidDate||i.invoiceDate)===today).reduce((s,i)=>s+i.total,0),open=db.invoices.filter(i=>i.status==="erstellt").reduce((s,i)=>s+i.total,0);
   if($("closeSummary"))$("closeSummary").innerHTML=`<p>Umsatz bezahlt heute: <b>${EUR(cash)}</b></p><p>Offene Rechnungen: <b>${EUR(open)}</b></p><p>Stornierte Rechnungen bleiben im Export mit Status <b>storniert</b> sichtbar.</p>`;
 }
+function paidInvoiceRevenueDate(i){return String((i&&i.paidDate)||(i&&i.invoiceDate)||"");}
+function adminRevenueYears(){
+  const years=new Set([String(TODAY()).slice(0,4)]);
+  (db.invoices||[]).forEach(i=>{
+    if(i.status!=="bezahlt")return;
+    const d=paidInvoiceRevenueDate(i);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(d))years.add(d.slice(0,4));
+  });
+  return [...years].filter(Boolean).sort((a,b)=>Number(b)-Number(a));
+}
+function renderAdminRevenue(){
+  const host=$("adminRevenueMonths"),yearSelect=$("adminRevenueYear"),totalEl=$("adminRevenueTotal"),yearLabel=$("adminRevenueYearLabel");
+  if(!host||!yearSelect||!totalEl)return;
+  const years=adminRevenueYears();
+  const previous=String(yearSelect.value||"");
+  yearSelect.innerHTML=years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join("");
+  const currentYear=String(TODAY()).slice(0,4);
+  yearSelect.value=years.includes(previous)?previous:(years.includes(currentYear)?currentYear:years[0]);
+  const year=String(yearSelect.value||currentYear);
+  const values=Array(12).fill(0);
+  (db.invoices||[]).forEach(i=>{
+    if(i.status!=="bezahlt")return;
+    const d=paidInvoiceRevenueDate(i);
+    if(d.slice(0,4)!==year)return;
+    const month=Number(d.slice(5,7));
+    if(month>=1&&month<=12)values[month-1]+=Number(i.total||0);
+  });
+  const names=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+  const nowMonth=String(TODAY()).slice(0,7);
+  host.innerHTML=values.map((v,idx)=>{
+    const ym=year+"-"+String(idx+1).padStart(2,"0");
+    return `<div class="adminRevenueMonth ${ym===nowMonth?'current':''}"><span>${names[idx]}</span><b>${EUR(v)}</b></div>`;
+  }).join("");
+  totalEl.textContent=EUR(values.reduce((a,b)=>a+b,0));
+  if(yearLabel)yearLabel.textContent=year;
+}
+
 function openAdminImport(){if(!requireSetupPin())return;tab("settings");setTimeout(()=>$("backupImportFile")?.scrollIntoView({behavior:"smooth",block:"center"}),80);}
 function showPaymentSettings(){if(!requireSetupPin())return;$("paymentSettingsBox")?.classList.remove("hidden");}
 function showResetBox(){if(!requireSetupPin())return;$("resetBox")?.classList.remove("hidden");$("resetBox")?.scrollIntoView({behavior:"smooth",block:"center"});}
@@ -1919,7 +1990,7 @@ function renderTreatmentArchive(){
   $('treatmentArchiveList').innerHTML=filtered.length?filtered.map(a=>{let c=skinAnalysisCustomer(a),reasons=Array.isArray(a.reasons)?a.reasons.join(' · '):String(a.reasons||'');return `<div class="item"><b>${esc((a.createdAt||'').slice(0,10))} · ${esc(skinAnalysisName(a))}</b><br><span class="badge">${esc(a.profileName||'Hautprofil')}</span> <span class="badge">Score ${esc(a.score||'')}/100</span><br><b>${esc(a.treatmentName||a.recommendedService||'')}</b><div class="analysisMini">${esc(reasons)}</div><div class="analysisMini">${esc(a.phone||'')} ${a.email?' · '+esc(a.email):''}</div><div class="analysisActions"><button class="secondary" onclick="openCustomerFromSkinAnalysis('${esc(a.id)}')">Kundenakte</button>${a.bookingId?`<button class="gold" onclick="openBookingFromSkinAnalysis('${esc(a.id)}')">Anfrage öffnen</button>`:`<button class="gold" onclick="newBookingFromSkinAnalysis('${esc(a.id)}')">Termin anlegen</button>`}</div></div>`;}).join(''):`<p class='small'>Noch keine Beauty-Profile gespeichert.</p>`;
   $('treatmentCatalogList').innerHTML=LUNE_TREATMENT_CATALOG.map(x=>`<div class="catalogCard"><b>${esc(x.profileName)}</b><div class="small">${esc(x.criteria)}</div><span class="badge">${esc(x.treatmentName)}</span><div class="analysisMini">Service: ${esc(x.service)}</div></div>`).join('');
 }
-function renderAll(){renderSelects();renderDashboard();renderBookings();renderCustomers();renderInvoices();renderPayments();renderProducts();renderRecipes();renderInvoiceHelper();renderTagescheck();renderClose();renderTreatmentArchive();renderAftercareDashboard();}
+function renderAll(){renderSelects();renderDashboard();renderBookings();renderCustomers();renderInvoices();renderPayments();renderProducts();renderRecipes();renderInvoiceHelper();renderTagescheck();renderClose();renderTreatmentArchive();renderAftercareDashboard();renderAdminRevenue();}
 /* V28 — Nachbetreuung & Rebooking: visible CRM workflow, non-destructive. */
 function acDateAdd(dateStr,days){
   const d=new Date((dateStr||TODAY())+"T12:00:00");
