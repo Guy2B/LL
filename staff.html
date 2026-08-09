@@ -582,6 +582,18 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
       <strong id="adminRevenueTotal">0 €</strong>
     </div>
   </div>
+  <div class="card" id="adminCalendarBackfillCard">
+    <div class="cleanSectionHead">
+      <div><div class="brandEyebrow">GOOGLE CALENDAR · ADMIN</div><h2>Bestehende Termine übernehmen</h2><p class="small">Übernimmt bestätigte Termine von heute und aus der Zukunft in „Lune Beauty Termine“. Keine Kunden-E-Mail wird dabei versendet.</p></div>
+      <span id="adminCalendarBackfillBadge" class="badge">Noch nicht geprüft</span>
+    </div>
+    <div id="adminCalendarBackfillSummary" class="summaryLine"><span>Erst prüfen, dann synchronisieren.</span></div>
+    <div id="adminCalendarBackfillDetail" class="small" style="margin-top:10px"></div>
+    <div class="bookingActions noPrint" style="margin-top:12px">
+      <button class="secondary" id="adminCalendarAuditBtn" onclick="adminCalendarBackfillAudit()">Kalender prüfen</button>
+      <button class="gold" id="adminCalendarSyncBtn" onclick="adminCalendarBackfillSync()" disabled>Bestehende Termine übernehmen</button>
+    </div>
+  </div>
 </section>
 
 <section id="settings" class="view hidden">
@@ -7759,5 +7771,22 @@ setTimeout(pmFixOperationalCards,250);
 })();
 </script>
 
+
+<script id="lune-calendar-backfill-admin">
+(function(){
+'use strict';
+const CFG='lune_staff_cloud_config_v1';
+function cfg(){try{return Object.assign({apiUrl:'',token:''},JSON.parse(safeStorage.getItem(CFG)||'{}'));}catch(_){return {apiUrl:'',token:''};}}
+function clientId(){try{let id=safeStorage.getItem('lune_staff_cloud_client_id_v1');if(!id){id='staff-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);safeStorage.setItem('lune_staff_cloud_client_id_v1',id);}return id;}catch(_){return 'staff-calendar-admin';}}
+async function post(action){const c=cfg();if(!c.apiUrl||!c.token)throw new Error('Staff Cloud ist nicht verbunden.');const body=new URLSearchParams({action:action,token:c.token,clientId:clientId()});const r=await fetch(c.apiUrl,{method:'POST',body:body,redirect:'follow'});const txt=await r.text();let data;try{data=JSON.parse(txt);}catch(_){throw new Error('Ungültige Antwort von Apps Script.');}if(!data||data.ok===false)throw new Error((data&&data.error)||'Kalender-Aktion fehlgeschlagen.');return data;}
+function esc2(v){return typeof esc==='function'?esc(v):String(v||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));}
+function setBusy(on,label){const a=document.getElementById('adminCalendarAuditBtn'),s=document.getElementById('adminCalendarSyncBtn');if(a){a.disabled=on;a.textContent=on?(label||'Wird geprüft…'):'Kalender prüfen';}if(s&&on)s.disabled=true;}
+function renderAudit(data){const sum=data.summary||{},box=document.getElementById('adminCalendarBackfillSummary'),detail=document.getElementById('adminCalendarBackfillDetail'),badge=document.getElementById('adminCalendarBackfillBadge'),sync=document.getElementById('adminCalendarSyncBtn');if(box)box.innerHTML='<span>Relevant: <b>'+Number(sum.total||0)+'</b></span><span>Bereits im Kalender: <b>'+Number(sum.alreadySynced||0)+'</b></span><span>Neu zu übernehmen: <b>'+Number(sum.toCreate||0)+'</b></span><span>Ignoriert: <b>'+Number(sum.skippedRequested||0)+' Anfragen · '+Number(sum.skippedCancelled||0)+' storniert · '+Number(sum.skippedPast||0)+' vergangen</b></span>';
+const missing=(data.rows||[]).filter(x=>x.state==='missing');if(detail)detail.innerHTML=missing.length?'<b>Neu:</b><br>'+missing.slice(0,20).map(x=>esc2(x.date)+' · '+esc2(x.time)+' · '+esc2(x.name)+' · '+esc2(x.service||'')).join('<br>')+(missing.length>20?'<br>… + '+(missing.length-20)+' weitere':''):'Alle relevanten Termine sind bereits im Kalender.';
+if(badge){badge.className='badge '+(sum.toCreate?'warn':'ok');badge.textContent=sum.toCreate?(sum.toCreate+' zu übernehmen'):'✓ Synchronisiert';}if(sync){sync.disabled=!Number(sum.toCreate||0);sync.textContent=sum.toCreate?'Bestehende Termine übernehmen':'Alles synchronisiert';}}
+window.adminCalendarBackfillAudit=async function(){setBusy(true,'Wird geprüft…');try{const data=await post('calendarBackfillAudit');renderAudit(data);}catch(err){alert('Kalender-Prüfung fehlgeschlagen: '+(err.message||err));}finally{setBusy(false);const badge=document.getElementById('adminCalendarBackfillBadge');const sync=document.getElementById('adminCalendarSyncBtn');if(sync&&badge&&badge.classList.contains('warn'))sync.disabled=false;}};
+window.adminCalendarBackfillSync=async function(){if(!confirm('Bestehende bestätigte Termine von heute und aus der Zukunft jetzt in „Lune Beauty Termine“ übernehmen?\n\nEs werden KEINE E-Mails an Kundinnen gesendet.'))return;setBusy(true,'Synchronisierung…');const sync=document.getElementById('adminCalendarSyncBtn');if(sync){sync.disabled=true;sync.textContent='Wird synchronisiert…';}try{const data=await post('calendarBackfillSync');const r=data.result||{};if(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.pull==='function'){try{await window.LuneStaffCloudSync.pull();}catch(_){}}alert('Kalender synchronisiert.\n\nNeu erstellt: '+Number(r.created||0)+'\nAktualisiert: '+Number(r.updated||0)+'\nFehler: '+Number(r.failed||0));await window.adminCalendarBackfillAudit();}catch(err){alert('Kalender-Synchronisierung fehlgeschlagen: '+(err.message||err));}finally{setBusy(false);}};
+})();
+</script>
 </body>
 </html>
