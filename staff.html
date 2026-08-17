@@ -7798,6 +7798,48 @@ window.adminCalendarBackfillSync=async function(){if(!confirm('Bestehende bestä
 #lbConsult .lbc-logo-fallback{font:500 29px/1.1 Georgia,"Times New Roman",serif!important;letter-spacing:.14em!important;color:#28231d!important;margin:8px 0 2px!important}
 #lbConsult .lbc-exit{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:92px!important;min-height:44px!important;background:#28231d!important;color:#fff!important;border:1px solid #28231d!important;box-shadow:0 8px 22px rgba(40,35,29,.18)!important;border-radius:999px!important;padding:10px 16px!important;font-weight:800!important;font-size:14px!important;line-height:1!important;opacity:1!important;-webkit-text-fill-color:#fff!important}
 #lbConsult .lbc-exit:hover{background:#3a332b!important;color:#fff!important}
+
+/* Premium Consultation — Tablet First */
+#lbConsult{
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch;
+  touch-action:manipulation;
+}
+@media (min-width:700px) and (max-width:1280px){
+  #lbConsult .lbc-shell{max-width:1040px!important;padding:calc(34px + env(safe-area-inset-top)) 34px calc(42px + env(safe-area-inset-bottom))!important}
+  #lbConsult .lbc-brand{margin-bottom:28px!important}
+  #lbConsult .lbc-logo{max-width:280px!important;max-height:135px!important}
+  #lbConsult .lbc-card{padding:34px 38px!important;border-radius:30px!important}
+  #lbConsult .lbc-card h2{font-size:34px!important;line-height:1.18!important}
+  #lbConsult .lbc-lead{font-size:18px!important;max-width:800px!important}
+  #lbConsult .lbc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
+  #lbConsult .lbc-choice{min-height:68px!important;padding:16px 18px!important;border-radius:18px!important;font-size:17px!important}
+  #lbConsult .lbc-choice input{width:22px!important;height:22px!important;flex:0 0 auto!important}
+  #lbConsult .lbc-field{margin:18px 0!important}
+  #lbConsult .lbc-field label{font-size:17px!important;margin-bottom:8px!important}
+  #lbConsult .lbc-field input,
+  #lbConsult .lbc-field textarea{font-size:18px!important;padding:16px 17px!important;border-radius:16px!important;min-height:58px!important}
+  #lbConsult .lbc-field textarea{min-height:112px!important}
+  #lbConsult .lbc-actions{gap:14px!important;margin-top:28px!important}
+  #lbConsult .lbc-actions button{min-height:60px!important;padding:15px 24px!important;font-size:17px!important}
+  #lbConsult .lbc-exit{min-width:108px!important;min-height:50px!important;font-size:15px!important;right:20px!important;top:calc(18px + env(safe-area-inset-top))!important}
+  #lbConsult .lbc-progress{height:7px!important;margin-bottom:30px!important}
+  #lbConsult .lbc-note{font-size:14px!important}
+  #lbConsult .lbc-success{padding:50px 18px!important}
+  #lbConsult .lbc-check{width:82px!important;height:82px!important;font-size:38px!important}
+  #lbConsult .lbc-tags span{font-size:15px!important;padding:9px 14px!important}
+}
+@media (min-width:900px) and (orientation:landscape){
+  #lbConsult .lbc-shell{max-width:1120px!important}
+  #lbConsult .lbc-card{padding-left:46px!important;padding-right:46px!important}
+}
+@media (pointer:coarse){
+  #lbConsult button,
+  #lbConsult input,
+  #lbConsult textarea,
+  #lbConsult .lbc-choice{touch-action:manipulation!important}
+}
+
 </style>
 <div id="lbConsult" class="hidden" aria-hidden="true"><button class="lbc-exit" type="button" onclick="lbConsultExit()">🔒 Staff</button><div class="lbc-shell"><div class="lbc-brand"><img src="assets/img/logo.png" alt="Lune Beauty" class="lbc-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="lbc-logo-fallback" style="display:none">LUNE BEAUTY</div><small>BEAUTY CONSULTATION</small></div><div class="lbc-progress"><span id="lbcProgress" style="width:20%"></span></div><div id="lbcBody"></div></div></div>
 <script id="lbPremiumConsultJs">
@@ -7809,7 +7851,7 @@ else if(C.step===2)r.innerHTML=`<div class="lbc-card"><h2>Wichtig für Ihre Beha
 else if(C.step===3)r.innerHTML=`<div class="lbc-card"><h2>Was wünschen Sie sich heute?</h2><p class="lbc-lead">So können wir Ihre Behandlung noch persönlicher gestalten.</p><div class="lbc-grid">${['Glow','Feuchtigkeit','Beruhigung','Unreinheiten','Ebenmäßiger Teint','Anti-Aging','Entspannung','Intensive Beratung'].map(q=>`<label class="lbc-choice"><input type="checkbox" name="lbcWish" value="${q}"> ${q}</label>`).join('')}</div><div class="lbc-field"><label>Wie möchten Sie Ihre Behandlung genießen?</label><div class="lbc-grid"><label class="lbc-choice"><input type="radio" name="lbcMood" value="Ruhe & Entspannung"> Ruhe & Entspannung</label><label class="lbc-choice"><input type="radio" name="lbcMood" value="Beratung & Austausch"> Beratung & Austausch</label><label class="lbc-choice"><input type="radio" name="lbcMood" value="Keine Präferenz"> Keine Präferenz</label></div></div><div class="lbc-field"><label>Noch etwas, das wir heute wissen sollten?</label><textarea id="lbcExtra"></textarea></div>${nav()}</div>`;
 else r.innerHTML=`<div class="lbc-card"><h2>Fast geschafft.</h2><p class="lbc-lead">Bitte bestätigen Sie, dass Ihre Angaben nach bestem Wissen aktuell sind.</p><label class="lbc-choice"><input type="checkbox" id="lbcConsent"> Ich bestätige meine Angaben und bin mit der Speicherung in meiner Lune Beauty Kundenakte zur kosmetischen Beratung und Behandlung einverstanden.</label><div class="lbc-field"><label>Bestätigung · Vor- und Nachname</label><input id="lbcSign" value="${X(c.name||'')}"></div><p class="lbc-note">Kosmetische Beratung – keine medizinische Diagnose.</p><div class="lbc-actions"><button class="lbc-secondary" onclick="lbConsultPrev()">Zurück</button><button class="lbc-primary" onclick="lbConsultSubmit()">Sicher speichern</button></div></div>`}
 function cap(){if(C.step===0){C.a.name=V('lbcName');C.a.phone=V('lbcPhone');C.a.email=V('lbcEmail')}if(C.step===1){C.a.skin=CK('lbcSkin');C.a.skinNote=V('lbcSkinNote')}if(C.step===2){C.a.allergies=V('lbcAllergies');C.a.contra=CK('lbcContra');C.a.actives=CK('lbcAct');C.a.contraNote=V('lbcContraNote');C.a.medication=V('lbcMedication');C.a.lastReaction=V('lbcReaction')}if(C.step===3){C.a.wishes=CK('lbcWish');C.a.mood=(document.querySelector('[name="lbcMood"]:checked')||{}).value||'';C.a.extra=V('lbcExtra')}}
-window.lbConsultNext=function(){cap();if(C.step===0&&!C.a.name){alert('Bitte geben Sie Ihren Namen ein.');return}C.step=Math.min(4,C.step+1);render();scrollTo(0,0)};window.lbConsultPrev=function(){cap();C.step=Math.max(0,C.step-1);render();scrollTo(0,0)};window.startLbConsult=function(customerId,bookingId){if(!(db.customers||[]).some(x=>x.id===customerId)){alert('Kundenakte nicht gefunden.');return}C={customerId,bookingId:bookingId||'',step:0,a:{}};E('lbConsult').classList.remove('hidden');document.body.style.overflow='hidden';render()};window.lbConsultExit=function(){let code=prompt('Staff-Code:');if(code!==PIN){alert('Code incorrect.');return}E('lbConsult').classList.add('hidden');document.body.style.overflow=''};
+window.lbConsultNext=function(){cap();if(C.step===0&&!C.a.name){alert('Bitte geben Sie Ihren Namen ein.');return}C.step=Math.min(4,C.step+1);render();scrollTo(0,0)};window.lbConsultPrev=function(){cap();C.step=Math.max(0,C.step-1);render();scrollTo(0,0)};window.startLbConsult=function(customerId,bookingId){if(!(db.customers||[]).some(x=>x.id===customerId)){alert('Kundenakte nicht gefunden.');return}C={customerId,bookingId:bookingId||'',step:0,a:{}};E('lbConsult').classList.remove('hidden');document.body.style.overflow='hidden';try{let el=E('lbConsult');if(el&&el.requestFullscreen&&!document.fullscreenElement){el.requestFullscreen().catch(()=>{})}}catch(_){}render()};window.lbConsultExit=function(){let code=prompt('Staff-Code:');if(code!==PIN){alert('Code incorrect.');return}E('lbConsult').classList.add('hidden');document.body.style.overflow='';try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{})}catch(_){}};
 window.lbConsultSubmit=function(){cap();if(!E('lbcConsent')?.checked){alert('Bitte bestätigen Sie die Einwilligung.');return}let sign=V('lbcSign');if(!sign){alert('Bitte geben Sie Ihren Namen ein.');return}let c=cu(),b=bk(),now=new Date().toISOString();c.name=C.a.name||c.name;c.phone=C.a.phone||c.phone;c.email=C.a.email||c.email;c.anamnesis=Object.assign({skin:'',allergies:'',contra:'',medication:'',lastReaction:''},c.anamnesis||{});c.anamnesis.skin=[...(C.a.skin||[]),C.a.skinNote].filter(Boolean).join(' · ');c.anamnesis.allergies=C.a.allergies||'Keine bekannt';c.anamnesis.contra=[...(C.a.contra||[]),C.a.contraNote].filter(Boolean).join(' · ')||'Keine bekannt';c.anamnesis.medication=[...(C.a.actives||[]),C.a.medication].filter(Boolean).join(' · ')||'Keine angegeben';c.anamnesis.lastReaction=C.a.lastReaction||'';c.consultationForms=Array.isArray(c.consultationForms)?c.consultationForms:[];let entry={id:'CF'+Date.now(),submittedAt:now,bookingId:C.bookingId||'',version:'premium-v1',answers:JSON.parse(JSON.stringify(C.a)),signature:sign,consent:true,wishes:C.a.wishes||[],experiencePreference:C.a.mood||'',extra:C.a.extra||''};c.consultationForms.push(entry);c.beautyPreferences={wishes:entry.wishes,experiencePreference:entry.experiencePreference,updatedAt:now};if(b){b.consultationCompletedAt=now;b.consultationFormId=entry.id}persist();let tags=[...(entry.wishes||[]),entry.experiencePreference].filter(Boolean);E('lbcProgress').style.width='100%';E('lbcBody').innerHTML=`<div class="lbc-card lbc-success"><div class="lbc-check">✓</div><h2>Vielen Dank${c.name?', '+X(String(c.name).split(' ')[0]):''}.</h2><p class="lbc-lead">Ihre Beauty Consultation ist vollständig. Wir haben Ihre Angaben für Ihre persönliche Behandlung vorbereitet.</p>${tags.length?`<div class="lbc-tags">${tags.map(t=>`<span>${X(t)}</span>`).join('')}</div>`:''}<p><b>Bitte geben Sie das Gerät jetzt an Ihre Beauty Expertin zurück.</b></p><div class="lbc-actions"><button class="lbc-primary" onclick="lbConsultExit()">An Staff übergeben</button></div></div>`};
 function bookingLaunch(){
   let d=E('bookingDetail'); if(!d||d.querySelector('.lb-consult-launch'))return;
