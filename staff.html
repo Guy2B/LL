@@ -7965,5 +7965,28 @@ let oc=window.openCustomer;window.openCustomer=function(id){let r=oc.apply(this,
 })();
 </script>
 
+
+<style>
+#lbsv{position:fixed;inset:0;z-index:100020;background:#f4efe7;overflow:auto;padding:24px}#lbsv.hidden{display:none!important}.lbsvw{max-width:1050px;margin:auto}.lbsvh{display:flex;justify-content:space-between;gap:15px;margin-bottom:18px}.lbsvh h2{margin:0;font:500 30px Georgia,serif}.lbsva{display:flex;gap:8px}.lbsva button,.lbsvsave{border:0;border-radius:999px;padding:11px 16px;font-weight:800}.lbsvdark,.lbsvsave{background:#28231d;color:#fff}.lbsvlight{background:#fff}.lbsvg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.lbsvc{background:#fff;border:1px solid #e1d6c8;border-radius:20px;padding:19px}.lbsvc h3{font:600 18px Georgia,serif;margin:0 0 10px}.lbsvr{display:grid;grid-template-columns:140px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid #f0ebe4}.lbsvk{color:#796e60;font-size:13px}.lbsvv{font-weight:700}.lbsvwarn{border:2px solid #a78755;background:#fffaf1}.lbsvfull{grid-column:1/-1}.lbsvc textarea{box-sizing:border-box;width:100%;min-height:72px;padding:10px;border:1px solid #d9cfc1;border-radius:11px;margin:5px 0 12px}.lbsvc label{font-weight:800;font-size:13px}.lbsvsave{width:100%;min-height:48px}@media(max-width:760px){.lbsvg{grid-template-columns:1fr}.lbsvfull{grid-column:auto}.lbsvh{display:block}.lbsva{margin-top:12px}.lbsvr{grid-template-columns:115px 1fr}}@media print{body>*:not(#lbsv){display:none!important}#lbsv{position:static!important;padding:0!important;background:#fff!important}.lbsva,.lbsvsave{display:none!important}}
+</style>
+<div id="lbsv" class="hidden"><div class="lbsvw"><div class="lbsvh"><div><h2 id="lbsvTitle"></h2><div id="lbsvSub"></div></div><div class="lbsva"><button class="lbsvlight" onclick="window.print()">PDF / Drucken</button><button class="lbsvdark" onclick="closeLbsv()">Schließen</button></div></div><div class="lbsvg" id="lbsvBody"></div></div></div>
+<script>
+(function(){
+const G=id=>document.getElementById(id),H=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])),A=v=>Array.isArray(v)&&v.length?v.join(' · '):'–',R=(k,v)=>'<div class="lbsvr"><div class="lbsvk">'+H(k)+'</div><div class="lbsvv">'+H(v||'–')+'</div></div>';
+window.openLbsv=function(cid){let c=(db.customers||[]).find(x=>x.id===cid),l=(c?.consultationForms||[]).slice(-1)[0];if(!l){alert('Noch keine Beauty Consultation vorhanden.');return}let a=l.answers||{},s=(a.safety||[]).filter(x=>x!=='Nichts davon'),addr=[a.street,[a.zip,a.city].filter(Boolean).join(' ')].filter(Boolean).join(', '),warn=s.length||a.bloodThinner||a.allergies;
+G('lbsvTitle').textContent=(c.name||'Kundin')+' · Beauty Consultation';G('lbsvSub').textContent='Ausgefüllt: '+String(l.submittedAt||'').slice(0,16).replace('T',' ');
+let html='<section class="lbsvc"><h3>Kontaktdaten</h3>'+R('Adresse',addr)+R('Telefon',c.phone)+R('E-Mail',c.email)+R('Gefunden über',a.source||c.referralSource)+'</section>';
+html+='<section class="lbsvc"><h3>Haut & Routine</h3>'+R('Haut',A(a.skin))+R('Routine',A(a.routine))+R('Produkte',a.currentProducts)+R('Produktempfehlung',a.productRecommendation)+'</section>';
+html+='<section class="lbsvc"><h3>Wohlbefinden</h3>'+R('Stress',a.stress)+R('Schlaf',a.sleep)+R('Behandlung',a.mood)+'</section>';
+html+='<section class="lbsvc '+(warn?'lbsvwarn':'')+'"><h3>Wichtig vor der Behandlung</h3>'+R('Hinweise',A(s))+R('Blutverdünner',a.bloodThinner)+R('Allergien',a.allergies)+R('Medikamente',a.medication)+R('Letzte Reaktion',a.lastReaction)+R('Zusatz',a.safetyNote)+'</section>';
+html+='<section class="lbsvc lbsvfull"><h3>Behandlungswunsch</h3>'+R('Wünsche',A(a.wishes))+R('Mitteilung',a.extra)+'</section>';
+html+='<section class="lbsvc lbsvfull"><h3>Beauty Expertin · Beratung</h3><label>Hautbeobachtung</label><textarea id="lbsvObs"></textarea><label>Behandlungsziel / Empfehlung</label><textarea id="lbsvRec"></textarea><label>Empfohlene Produkte / Homecare</label><textarea id="lbsvHome"></textarea><button id="lbsvSave" class="lbsvsave">Beratung speichern</button></section>';
+G('lbsvBody').innerHTML=html;let n=l.expertNotes||{};G('lbsvObs').value=n.observation||'';G('lbsvRec').value=n.recommendation||'';G('lbsvHome').value=n.homecare||'';G('lbsvSave').onclick=function(){saveLbsv(cid,l.id)};G('lbsv').classList.remove('hidden');document.body.style.overflow='hidden'};
+window.closeLbsv=function(){G('lbsv').classList.add('hidden');document.body.style.overflow=''};
+window.saveLbsv=function(cid,fid){let c=(db.customers||[]).find(x=>x.id===cid),l=(c?.consultationForms||[]).find(x=>x.id===fid);if(!l)return;l.expertNotes={observation:G('lbsvObs').value.trim(),recommendation:G('lbsvRec').value.trim(),homecare:G('lbsvHome').value.trim(),updatedAt:new Date().toISOString()};c.beautyConsultationNotes=l.expertNotes;persist();alert('Beratung gespeichert.')};
+function enhance(){document.querySelectorAll('.lb-consult-launch').forEach(box=>{if(box.querySelector('.lbsvopen'))return;let d=box.closest('#customerDetail,#bookingDetail'),cid='';if(d?.id==='customerDetail')cid=G('customerId')?.value||'';if(d?.id==='bookingDetail'){let bid=G('bookingId')?.value||'',b=(db.bookings||[]).find(x=>x.id===bid);cid=b?.customerId||''}let c=(db.customers||[]).find(x=>x.id===cid);if(!c||(c.consultationForms||[]).length<1)return;let b=document.createElement('button');b.className='gold lbsvopen';b.style.marginLeft='8px';b.textContent='Consultation ansehen';b.onclick=()=>openLbsv(cid);box.appendChild(b)})}new MutationObserver(enhance).observe(document.body,{childList:true,subtree:true});setTimeout(enhance,500)
+})();
+</script>
+
 </body>
 </html>
