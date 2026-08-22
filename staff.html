@@ -444,7 +444,7 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
       <input id="iEmail" placeholder="Email"><textarea id="iAddress" placeholder="Adresse Kunde"></textarea><textarea id="iInternalNote" placeholder="Interne Notiz (nicht auf Rechnung sichtbar)"></textarea>
       <h3><span class="stepPill">1</span> Leistungen</h3><div id="serviceLines"></div><button class="secondary" onclick="addServiceLine()">+ Leistung</button>
       <h3><span class="stepPill">2</span> Verkaufsprodukte</h3><div id="productLines"></div><button class="secondary" onclick="addProductLine()">+ Produkt</button>
-      <h3><span class="stepPill">3</span> Rabatt & Zahlung</h3><div class="row3"><select id="iDiscountType"><option value="">Kein Rabatt</option><option value="percent">%</option><option value="amount">€</option></select><input id="iDiscountValue" type="number" value="0"><select id="iPayment" onchange="paymentHint()"><option value="bar">Bar</option><option value="karte">Karte</option><option value="paypal">PayPal</option><option value="ueberweisung">Überweisung (SEPA)</option></select></div>
+      <h3><span class="stepPill">3</span> Rabatt & Zahlung</h3><div class="row3"><select id="iDiscountType"><option value="">Kein Rabatt</option><option value="percent">%</option><option value="amount">€</option></select><input id="iDiscountValue" type="number" value="0"><select id="iPayment" onchange="paymentHint()"><option value="bar">Bar</option><option value="sumup">SumUp Solo Lite</option><option value="karte">Karte (manuell)</option><option value="paypal">PayPal</option><option value="ueberweisung">Überweisung (SEPA)</option></select></div>
       <p id="payHint" class="small"></p>
       <button class="gold" onclick="createInvoice()">Rechnung erstellen</button><button class="secondary" onclick="resetInvoiceForm(true)">Neue Rechnung leeren</button>
     </div>
@@ -8008,5 +8008,120 @@ window.invoiceFromBooking=function(id){const b=(db.bookings||[]).find(x=>String(
 const oldOpen=window.openBooking;window.openBooking=function(id){oldOpen(id);const b=(db.bookings||[]).find(x=>String(x.id)===String(id)),box=$('bookingDetail');if(!b||!box)return;if(b.status==='storniert'){const fee=!!b.cancellationFee,label=b.noShow||b.cancellationType==='noshow'?'No-show':b.cancellationType==='late'?'Storno <24h':'Storno >24h';const existing=box.querySelector('.v44FeeSummary');if(!existing){const d=document.createElement('div');d.className='v44FeeSummary stornoFeeBox';d.innerHTML='<b>'+label+'</b><br>'+(fee?'Ausfallgebühr freigegeben. Eine Rechnung kann direkt aus diesem Termin erstellt werden.':'Keine Ausfallgebühr vorgesehen.');box.insertBefore(d,box.querySelector('.bookingActions')||null)}}};
 })();
 </script>
+
+<style id="lune-sumup-solo-lite-css">
+.sumupLiteBox{border:1px solid rgba(185,155,98,.42);background:linear-gradient(135deg,#fffdf8,#f7efe3);border-radius:18px;padding:14px;margin:12px 0}
+.sumupLiteBox h3{margin:0 0 6px}.sumupLiteAmount{font-family:Georgia,"Times New Roman",serif;font-size:28px;margin:8px 0}
+.sumupLiteState{margin-top:8px;padding:9px 11px;border-radius:12px;font-size:13px;background:#fff}
+.sumupLiteState.wait{border:1px solid #f0d99d;background:#fffaf0;color:#8a5a10}.sumupLiteState.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}
+.sumupLiteState.bad{border:1px solid #fecaca;background:#fff6f4;color:#a94335}
+</style>
+<script id="lune-sumup-solo-lite">
+(function(){
+'use strict';
+const KEY='lune_sumup_affiliate_key_v1';
+const APP_ID='de.lunebeauty.crm';
+
+function suAffiliateKey(){
+  let key='';
+  try{key=String(safeStorage.getItem(KEY)||'').trim();}catch(_){}
+  if(key)return key;
+  key=String(prompt('SumUp Affiliate Key eingeben:\n\nDie Key bleibt nur lokal auf diesem Staff-Gerät gespeichert. Nicht im Chat teilen.','')||'').trim();
+  if(!key)return '';
+  try{safeStorage.setItem(KEY,key);}catch(_){}
+  return key;
+}
+window.configureSumUpSoloLite=function(){
+  const old=(()=>{try{return String(safeStorage.getItem(KEY)||'');}catch(_){return '';}})();
+  const key=prompt('SumUp Affiliate Key:',old);
+  if(key===null)return;
+  const clean=String(key||'').trim();
+  try{if(clean)safeStorage.setItem(KEY,clean); else safeStorage.removeItem(KEY);}catch(_){}
+  alert(clean?'SumUp Solo Lite wurde auf diesem Gerät konfiguriert.':'SumUp Affiliate Key wurde entfernt.');
+};
+function normalizePhone(p){return String(p||'').replace(/[^\d+]/g,'');}
+function foreignId(inv){
+  if(inv.sumupForeignTxId)return inv.sumupForeignTxId;
+  const base='LUNE-'+String(inv.number||inv.id||Date.now()).replace(/[^A-Za-z0-9_-]/g,'-')+'-'+Date.now().toString(36);
+  inv.sumupForeignTxId=base.slice(0,120);
+  return inv.sumupForeignTxId;
+}
+function buildUri(inv){
+  const key=suAffiliateKey(); if(!key)throw new Error('Keine SumUp Affiliate Key gespeichert.');
+  const q=new URLSearchParams();
+  q.set('affiliate-key',key);
+  q.set('app-id',APP_ID);
+  q.set('total',Number(inv.total||0).toFixed(2));
+  q.set('currency','EUR');
+  q.set('title','Lune Beauty · '+String(inv.number||'Rechnung'));
+  if(inv.email)q.set('receipt-email',String(inv.email));
+  if(inv.phone)q.set('receipt-mobilephone',normalizePhone(inv.phone));
+  q.set('foreign-tx-id',foreignId(inv));
+  return 'sumupmerchant://pay/1.0?'+q.toString();
+}
+window.startSumUpSoloLitePayment=function(id){
+  const inv=(db.invoices||[]).find(x=>String(x.id)===String(id)); if(!inv)return alert('Rechnung nicht gefunden.');
+  if(inv.status==='bezahlt')return alert('Diese Rechnung ist bereits bezahlt.');
+  if(inv.status==='storniert')return alert('Stornierte Rechnungen können nicht bezahlt werden.');
+  if(Number(inv.total||0)<=0)return alert('Der Rechnungsbetrag muss größer als 0 € sein.');
+  try{
+    const uri=buildUri(inv);
+    inv.sumupState='opened';
+    inv.sumupStartedAt=new Date().toISOString();
+    inv.sumupAmount=Number(inv.total||0);
+    persist();
+    window.location.href=uri;
+  }catch(e){alert('SumUp konnte nicht geöffnet werden: '+(e.message||e));}
+};
+window.confirmSumUpSoloLitePayment=function(id){
+  const inv=(db.invoices||[]).find(x=>String(x.id)===String(id));if(!inv)return;
+  if(inv.status==='bezahlt')return alert('Diese Rechnung ist bereits bezahlt.');
+  if(!confirm('Hat SumUp die Kartenzahlung über '+EUR(inv.total)+' ERFOLGREICH bestätigt?\n\nNur bei sichtbarer erfolgreicher SumUp-Zahlung fortfahren.'))return;
+  inv.sumupState='merchant_confirmed';
+  inv.sumupConfirmedAt=new Date().toISOString();
+  persist();
+  markPaid(id);
+};
+function makeSumupPanel(inv){
+  const box=document.createElement('div'); box.className='sumupLiteBox';
+  const h=document.createElement('h3'); h.textContent='SumUp Solo Lite'; box.appendChild(h);
+  const p=document.createElement('div'); p.className='small'; p.textContent='Betrag wird an die SumUp App übertragen. Die App verbindet sich per Bluetooth mit dem Solo Lite.'; box.appendChild(p);
+  const amount=document.createElement('div'); amount.className='sumupLiteAmount'; amount.textContent=EUR(inv.total); box.appendChild(amount);
+  const actions=document.createElement('div'); actions.className='bookingActions';
+  const send=document.createElement('button'); send.className='gold'; send.textContent=EUR(inv.total)+' an SumUp senden'; send.onclick=()=>startSumUpSoloLitePayment(inv.id); actions.appendChild(send);
+  const ok=document.createElement('button'); ok.className='ok'; ok.textContent='✓ SumUp-Zahlung erfolgreich'; ok.onclick=()=>confirmSumUpSoloLitePayment(inv.id); actions.appendChild(ok);
+  box.appendChild(actions);
+  const state=document.createElement('div'); state.className='sumupLiteState '+(inv.sumupState?'wait':''); state.textContent=inv.sumupState==='opened'?'Zahlung wurde an SumUp übergeben.':'Noch nicht an SumUp gesendet.'; box.appendChild(state);
+  return box;
+}
+const oldRenderInvoice=window.renderInvoice;
+window.renderInvoice=function(id,target){
+  const r=oldRenderInvoice.apply(this,arguments);
+  const inv=(db.invoices||[]).find(x=>String(x.id)===String(id));
+  const host=document.getElementById(target);
+  if(inv&&host&&inv.payment==='sumup'){
+    host.querySelectorAll('.sumupLiteBox').forEach(x=>x.remove());
+    const actions=host.querySelector('.noPrint');
+    if(actions&&inv.status==='erstellt'){
+      [...actions.querySelectorAll('button')].forEach(b=>{if((b.getAttribute('onclick')||'').includes('markPaid('))b.style.display='none';});
+      actions.parentNode.insertBefore(makeSumupPanel(inv),actions);
+    }
+  }
+  return r;
+};
+const oldPayLabel=window.payLabel;
+window.payLabel=function(v){if(v==='sumup')return 'SumUp Solo Lite';return oldPayLabel?oldPayLabel(v):v;};
+function addSetupButton(){
+  const close=document.getElementById('close'); if(!close||document.getElementById('sumupLiteSetup'))return;
+  const card=document.createElement('div');card.id='sumupLiteSetup';card.className='card adminAdvanced';
+  const h=document.createElement('h2');h.textContent='SumUp Solo Lite';card.appendChild(h);
+  const p=document.createElement('p');p.className='small';p.textContent='Payment Switch · App-to-App Übergabe. Affiliate Key wird lokal auf diesem Staff-Gerät gespeichert.';card.appendChild(p);
+  const b=document.createElement('button');b.className='secondary';b.textContent='Affiliate Key konfigurieren';b.onclick=configureSumUpSoloLite;card.appendChild(b);
+  close.appendChild(card);
+}
+setTimeout(addSetupButton,500);
+})();
+</script>
+
 </body>
 </html>
