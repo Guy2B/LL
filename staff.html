@@ -8123,5 +8123,42 @@ setTimeout(addSetupButton,500);
 })();
 </script>
 
+
+<script id="lune-v46-login-orphan-text-cleanup">
+(function(){
+'use strict';
+function cleanOrphanLoginText(){
+  const roots=[document.body,document.querySelector('main')].filter(Boolean);
+  roots.forEach(function(root){
+    Array.from(root.childNodes).forEach(function(node){
+      if(node.nodeType!==Node.TEXT_NODE)return;
+      const value=String(node.textContent||'').trim();
+      if(value==='n'||value==='\\n') node.remove();
+    });
+  });
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',cleanOrphanLoginText,{once:true});
+}else{
+  cleanOrphanLoginText();
+}
+const observer=new MutationObserver(function(mutations){
+  let relevant=false;
+  mutations.forEach(function(m){
+    m.addedNodes.forEach(function(node){
+      if(node.nodeType===Node.TEXT_NODE){
+        const value=String(node.textContent||'').trim();
+        if(value==='n'||value==='\\n'){node.remove();relevant=true;}
+      }
+    });
+  });
+  if(relevant)cleanOrphanLoginText();
+});
+observer.observe(document.documentElement,{childList:true,subtree:true});
+setTimeout(cleanOrphanLoginText,0);
+setTimeout(cleanOrphanLoginText,500);
+})();
+</script>
+
 </body>
 </html>
