@@ -2678,7 +2678,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!$("loginBox").class
       ${duplicateHtml}${warnings.join('')}
       <div class="dossierKpis"><div class="dossierKpi"><span>Termine</span><b>${bs.length}</b></div><div class="dossierKpi"><span>Rechnungen</span><b>${is.length}</b></div><div class="dossierKpi"><span>Umsatz bezahlt</span><b>${EUR(revenue)}</b></div><div class="dossierKpi"><span>Nächster Termin</span><b style="font-size:15px">${nextBooking?esc(nextBooking.date+' '+nextBooking.time):'–'}</b></div></div>
       <div class="crmDossierNav"><button data-panel="overview" onclick="crmShowPanel('${esc(id)}','overview')">Übersicht</button><button data-panel="anamnesis" onclick="crmShowPanel('${esc(id)}','anamnesis')">Anamnese</button><button data-panel="timeline" onclick="crmShowPanel('${esc(id)}','timeline')">Verlauf</button><button data-panel="billing" onclick="crmShowPanel('${esc(id)}','billing')">Rechnungen</button><button data-panel="aftercare" onclick="crmShowPanel('${esc(id)}','aftercare')">Nachbetreuung</button></div>
-      <div class="crmPanel" data-panel="overview"><div class="crmSafetyGrid"><div class="crmSafetyCard"><b>Kontakt & Identität</b><label>Name</label><input id="cName" value="${esc(c.name)}"><div class="row"><div><label>Telefon</label><input id="cPhone" value="${esc(c.phone||'')}"></div><div><label>E-Mail</label><input id="cEmail" value="${esc(c.email||'')}"></div></div><label>Adresse</label><textarea id="cAddress">${esc(c.address||'')}</textarea></div><div class="crmSafetyCard"><b>Interne Notizen</b><textarea id="cNotes" placeholder="Präferenzen, Gesprächsnotizen, wichtige Hinweise ...">${esc(c.notes||'')}</textarea><p class="small">Diese Notizen erscheinen nicht auf der Rechnung.</p></div></div><div class="bookingActions"><button class="gold" onclick="saveCustomer('${esc(id)}')">Kundenakte speichern</button></div></div>
+      <div class="crmPanel" data-panel="overview"><div class="crmSafetyGrid"><div class="crmSafetyCard"><b>Kontakt & Identität</b><label>Name</label><input id="cName" value="${esc(c.name)}"><label>Geburtsdatum</label><input id="cBirthDate" type="date" autocomplete="bday" value="${esc(c.birthDate||'')}"><div class="row"><div><label>Telefon</label><input id="cPhone" value="${esc(c.phone||'')}"></div><div><label>E-Mail</label><input id="cEmail" value="${esc(c.email||'')}"></div></div><label>Adresse</label><textarea id="cAddress">${esc(c.address||'')}</textarea></div><div class="crmSafetyCard"><b>Interne Notizen</b><textarea id="cNotes" placeholder="Präferenzen, Gesprächsnotizen, wichtige Hinweise ...">${esc(c.notes||'')}</textarea><p class="small">Diese Notizen erscheinen nicht auf der Rechnung.</p></div></div><div class="bookingActions"><button class="gold" onclick="saveCustomer('${esc(id)}')">Kundenakte speichern</button></div></div>
       <div class="crmPanel" data-panel="anamnesis"><div class="crmSafetyGrid"><div><label>Hauttyp / Hautzustand</label><textarea id="cSkin" placeholder="Hauttyp / Hautzustand">${esc(a.skin)}</textarea></div><div><label>Allergien / Unverträglichkeiten</label><textarea id="cAllergies" placeholder="Allergien / Unverträglichkeiten">${esc(a.allergies)}</textarea></div><div><label>Kontraindikationen</label><textarea id="cContra" placeholder="Schwangerschaft / Erkrankungen / Kontraindikationen">${esc(a.contra)}</textarea></div><div><label>Medikamente / Wirkstoffe</label><textarea id="cMedication" placeholder="Medikamente / Wirkstoffe">${esc(a.medication)}</textarea></div></div><label>Reaktion nach letzter Behandlung</label><textarea id="cLastReaction" placeholder="Reaktionen nach der letzten Behandlung">${esc(a.lastReaction)}</textarea><div class="bookingActions"><button class="gold" onclick="saveCustomer('${esc(id)}')">Anamnese speichern</button></div></div>
       <div class="crmPanel" data-panel="timeline"><h3>Gesamter Kundenverlauf</h3>${crmVerlauf(c,bs,is,hs)}</div>
       <div class="crmPanel" data-panel="billing"><h3>Rechnungen · ${is.length}</h3>${is.length?is.slice().reverse().map(i=>`<div class="item ${esc(i.status)}"><b>${esc(i.number)}</b> ${statusBadge(i.status)} · ${EUR(i.total)}<br><span class="small">${(i.items||[]).map(x=>esc(x.description)).join(' · ')}</span><br><button class="secondary" onclick="tab('invoices');setTimeout(()=>renderInvoice('${esc(i.id)}','invoiceDetail'),0)">Rechnung öffnen</button></div>`).join(''):'<p class="small">Noch keine Rechnungen.</p>'}</div>
@@ -2691,7 +2691,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!$("loginBox").class
     const c=(db.customers||[]).find(x=>x.id===id);if(!c)return;
     // Fields can live in separate panels; preserve values when a panel is not mounted.
     const val=(key,fallback)=>{const el=document.getElementById(key);return el?el.value:fallback};
-    c.name=val('cName',c.name)||'Kunde'; c.phone=val('cPhone',c.phone); c.email=val('cEmail',c.email); c.address=val('cAddress',c.address); c.notes=val('cNotes',c.notes);
+    c.name=val('cName',c.name)||'Kunde'; c.birthDate=val('cBirthDate',c.birthDate||''); c.phone=val('cPhone',c.phone); c.email=val('cEmail',c.email); c.address=val('cAddress',c.address); c.notes=val('cNotes',c.notes);
     const a=Object.assign({skin:'',allergies:'',contra:'',medication:'',lastReaction:''},c.anamnesis||{});
     c.anamnesis={skin:val('cSkin',a.skin),allergies:val('cAllergies',a.allergies),contra:val('cContra',a.contra),medication:val('cMedication',a.medication),lastReaction:val('cLastReaction',a.lastReaction)};
     (db.bookings||[]).forEach(b=>{if(b.customerId===id){b.name=c.name;b.phone=c.phone;b.email=c.email;}});(db.invoices||[]).forEach(i=>{if(i.customerId===id){i.customer=c.name;i.phone=c.phone;i.email=c.email;i.address=c.address;}});
@@ -7861,6 +7861,7 @@ function render(){
   prog(); let c=cu(),a=c?.anamnesis||{},r=E('lbcBody'); if(!c||!r)return;
   if(C.step===0) r.innerHTML=`<div class="lbc-card"><h2>Ihre Kontaktdaten</h2><p class="lbc-lead">Bitte prüfen oder ergänzen Sie kurz Ihre Angaben.</p>
     <div class="lbc-field"><label>Vor- und Nachname</label><input id="lbcName" value="${X(c.name||'')}"></div>
+    <div class="lbc-field"><label>Geburtsdatum</label><input id="lbcBirthDate" type="date" autocomplete="bday" required value="${X(c.birthDate||'')}"><div class="small">Bitte geben Sie Ihr Geburtsdatum ein.</div></div>
     <div class="lbc-grid"><div class="lbc-field"><label>Telefon</label><input id="lbcPhone" value="${X(c.phone||'')}"></div><div class="lbc-field"><label>E-Mail</label><input id="lbcEmail" value="${X(c.email||'')}"></div></div>
     <div class="lbc-field"><label>Straße + Hausnummer</label><input id="lbcStreet" value="${X(c.street||c.address||'')}"></div>
     <div class="lbc-grid"><div class="lbc-field"><label>PLZ</label><input id="lbcZip" inputmode="numeric" value="${X(c.zip||'')}"></div><div class="lbc-field"><label>Ort</label><input id="lbcCity" value="${X(c.city||'')}"></div></div>
@@ -7898,13 +7899,13 @@ function render(){
     <p class="lbc-note">Kosmetische Beratung – keine medizinische Diagnose.</p><div class="lbc-actions"><button class="lbc-secondary" onclick="lbConsultPrev()">Zurück</button><button class="lbc-primary" onclick="lbConsultSubmit()">Sicher speichern</button></div></div>`;
 }
 function cap(){
-  if(C.step===0){C.a.name=V('lbcName');C.a.phone=V('lbcPhone');C.a.email=V('lbcEmail');C.a.street=V('lbcStreet');C.a.zip=V('lbcZip');C.a.city=V('lbcCity');C.a.source=ONE('lbcSource')}
+  if(C.step===0){C.a.name=V('lbcName');C.a.birthDate=V('lbcBirthDate');C.a.phone=V('lbcPhone');C.a.email=V('lbcEmail');C.a.street=V('lbcStreet');C.a.zip=V('lbcZip');C.a.city=V('lbcCity');C.a.source=ONE('lbcSource')}
   if(C.step===1){C.a.skin=CK('lbcSkin');C.a.routine=CK('lbcRoutine');C.a.currentProducts=V('lbcProducts');C.a.productRecommendation=ONE('lbcRecommend')}
   if(C.step===2){C.a.stress=ONE('lbcStress');C.a.sleep=ONE('lbcSleep');C.a.mood=ONE('lbcMood')}
   if(C.step===3){C.a.safety=CK('lbcSafety');C.a.allergies=V('lbcAllergies');C.a.bloodThinner=V('lbcBlood');C.a.safetyNote=V('lbcSafetyNote');C.a.medication=V('lbcMedication');C.a.lastReaction=V('lbcReaction')}
   if(C.step===4){C.a.wishes=CK('lbcWish');C.a.extra=V('lbcExtra')}
 }
-window.lbConsultNext=function(){cap();if(C.step===0&&!C.a.name){alert('Bitte geben Sie Ihren Namen ein.');return}C.step=Math.min(5,C.step+1);render();scrollTo(0,0)};
+window.lbConsultNext=function(){cap();if(C.step===0&&!C.a.name){alert('Bitte geben Sie Ihren Namen ein.');return}if(C.step===0&&!C.a.birthDate){alert('Bitte geben Sie Ihr Geburtsdatum ein.');E('lbcBirthDate')?.focus();return}C.step=Math.min(5,C.step+1);render();scrollTo(0,0)};
 window.lbConsultPrev=function(){cap();C.step=Math.max(0,C.step-1);render();scrollTo(0,0)};
 window.startLbConsult=function(customerId,bookingId){
   let c=(db.customers||[]).find(x=>x.id===customerId);if(!c){alert('Kundenakte nicht gefunden.');return}
@@ -7922,7 +7923,7 @@ window.lbConsultSubmit=function(){
   cap();if(!E('lbcConsent')?.checked){alert('Bitte bestätigen Sie die Einwilligung.');return}
   let sign=V('lbcSign');if(!sign){alert('Bitte geben Sie Ihren Namen ein.');return}
   let c=cu(),b=bk(),now=new Date().toISOString();
-  c.name=C.a.name||c.name;c.phone=C.a.phone||c.phone;c.email=C.a.email||c.email;
+  c.name=C.a.name||c.name;c.birthDate=C.a.birthDate||c.birthDate||'';c.phone=C.a.phone||c.phone;c.email=C.a.email||c.email;
   c.street=C.a.street||c.street||'';c.zip=C.a.zip||c.zip||'';c.city=C.a.city||c.city||'';
   c.address=[c.street,[c.zip,c.city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
   if(C.a.source)c.referralSource=C.a.source;
@@ -8159,6 +8160,7 @@ setTimeout(cleanOrphanLoginText,0);
 setTimeout(cleanOrphanLoginText,500);
 })();
 </script>
+
 
 </body>
 </html>
