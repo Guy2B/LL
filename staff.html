@@ -782,7 +782,22 @@ async function resetOperationalDataCloud(){
   }
 }
 
-function nextId(a,p){return p+(a.length?Math.max(...a.map(x=>Number(String(x.id||"").replace(/\D/g,""))||0))+1:1);}
+function nextId(a,p){
+  /* Never reuse an appointment ID that is still referenced by historical data.
+     This prevents an old invoice from appearing on a newly-created appointment
+     after an earlier appointment has been deleted. */
+  let ids=(Array.isArray(a)?a:[]).map(x=>String(x&&x.id||""));
+  if(p==="B" && typeof db!=="undefined" && db){
+    (db.invoices||[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
+    (db.aftercareFlows||[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
+    (db.skinAnalyses||[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
+    (db.customers||[]).forEach(c=>{
+      (c&&Array.isArray(c.consultationForms)?c.consultationForms:[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
+    });
+  }
+  const nums=ids.filter(id=>id.startsWith(p)).map(id=>Number(id.replace(/\D/g,""))||0);
+  return p+((nums.length?Math.max(...nums):0)+1);
+}
 function normalizeDb(d){
   d.settings=Object.assign(defaultDb().settings,d.settings||{});
   if(!String(d.settings.paypal||"").trim()) d.settings.paypal="barosdedjilla@yahoo.fr";
@@ -1038,8 +1053,8 @@ async function deleteTestBooking(id){
 
 function cancelBookingFromForm(){let id=$("bookingEditId").value;if(!id)return alert("Bitte zuerst einen Termin öffnen oder bearbeiten.");cancelBooking(id);}
 function setBookingStatus(id,status){let b=db.bookings.find(x=>x.id===id);if(!b)return;b.status=status;persist();openBooking(id);}
-function invoicesForBooking(id){return db.invoices.filter(i=>i.bookingId===id);}
-function activeInvoiceForBooking(id){return db.invoices.find(i=>i.bookingId===id&&i.status!=="storniert");}
+function invoicesForBooking(id){return db.invoices.filter(i=>String(i.bookingId||"")===String(id||""));}
+function activeInvoiceForBooking(id){return db.invoices.find(i=>String(i.bookingId||"")===String(id||"")&&i.status!=="storniert");}
 function invoiceFromBooking(id){
   let b=db.bookings.find(x=>x.id===id);if(!b)return;
   let active=activeInvoiceForBooking(id);
@@ -1144,7 +1159,7 @@ function collectInvoiceItems(){
     let s=db.services.find(x=>x.id===l.querySelector(".svc").value),q=Number(l.querySelector(".qty").value)||1,p=Number(l.querySelector(".price").value)||0;
     if(s){
       let type=noConsumption?"Ausfallhonorar":"Leistung";
-      let desc=noConsumption?`${s.name} – Ausfallhonorar gemäß AGB / § 615 BGB`:s.name;
+      let desc=noConsumption?(String(reason||"").toLowerCase().includes("nichterscheinen")?`${s.name} – No-show / Ausfallhonorar gemäß AGB / § 615 BGB`:`${s.name} – Ausfallhonorar gemäß AGB / § 615 BGB`):s.name;
       items.push({type,description:desc,qty:q,price:p,total:q*p,serviceId:s.id,noConsumption,reason});
     }
   });
@@ -8006,7 +8021,7 @@ window.cancelBooking=function(id){v44OpenStorno(id)};
 window.isCancellationFee=function(b){if(!b)return false;if(b.status==='storniert'&&typeof b.cancellationFee==='boolean')return b.cancellationFee;return appointmentPassed(b)||lateWindow(b)};
 function reasonFor(b){return b.noShow||b.cancellationType==='noshow'?'Ausfallgebühr · Nichterscheinen':b.cancellationType==='late'?'Ausfallgebühr · kurzfristige Stornierung <24h':'Ausfallgebühr'}
 window.invoiceFromBooking=function(id){const b=(db.bookings||[]).find(x=>String(x.id)===String(id));if(!b)return;const active=activeInvoiceForBooking(id);if(active){alert('Für diesen Termin existiert bereits eine aktive Rechnung.');tab('invoices');setTimeout(()=>renderInvoice(active.id,'invoiceDetail'),0);return}if(b.status==='storniert'&&!b.cancellationFee){alert('Dieser Termin wurde rechtzeitig storniert. Keine Ausfallrechnung vorgesehen.');return}const c=(db.customers||[]).find(x=>x.id===b.customerId)||{},isFee=b.status==='storniert'&&!!b.cancellationFee;resetInvoiceForm(false);$('iCustomer').value=b.name;$('iPhone').value=b.phone||'';$('iEmail').value=b.email||'';$('iAddress').value=c.address||'';$('iBookingId').value=b.id;if($('iNoConsumption'))$('iNoConsumption').value=isFee?'1':'';if($('iInvoiceReason'))$('iInvoiceReason').value=isFee?reasonFor(b):'';$('serviceLines').innerHTML='';const treatments=typeof normalizedBookingTreatments==='function'?normalizedBookingTreatments(b):[{id:b.serviceId,price:b.plannedTotal||0}];treatments.forEach(t=>{addServiceLine(t.id);const line=[...document.querySelectorAll('#serviceLines .serviceLine')].slice(-1)[0];if(line){const q=line.querySelector('.qty'),pr=line.querySelector('.price');if(q)q.value=1;if(pr&&Number(t.price)>=0)pr.value=Number(t.price||0)}});if(isFee&&$('iInternalNote'))$('iInternalNote').value=reasonFor(b)+' · Termin '+b.date+' '+b.time+' · Kein Service-/Produktverbrauch buchen.';tab('invoice');if(isFee&&$('invoicePreviewBox'))$('invoicePreviewBox').innerHTML='<div class="stornoFeeBox"><b>'+reasonFor(b)+'</b><br>Die Positionen sind als Ausfallhonorar vorbereitet. Betrag vor Erstellung prüfen.</div>'};
-const oldOpen=window.openBooking;window.openBooking=function(id){oldOpen(id);const b=(db.bookings||[]).find(x=>String(x.id)===String(id)),box=$('bookingDetail');if(!b||!box)return;if(b.status==='storniert'){const fee=!!b.cancellationFee,label=b.noShow||b.cancellationType==='noshow'?'No-show':b.cancellationType==='late'?'Storno <24h':'Storno >24h';const existing=box.querySelector('.v44FeeSummary');if(!existing){const d=document.createElement('div');d.className='v44FeeSummary stornoFeeBox';d.innerHTML='<b>'+label+'</b><br>'+(fee?'Ausfallgebühr freigegeben. Eine Rechnung kann direkt aus diesem Termin erstellt werden.':'Keine Ausfallgebühr vorgesehen.');box.insertBefore(d,box.querySelector('.bookingActions')||null)}}};
+const oldOpen=window.openBooking;window.openBooking=function(id){oldOpen(id);const b=(db.bookings||[]).find(x=>String(x.id)===String(id)),box=$('bookingDetail');if(!b||!box)return;if(b.status==='storniert'){const fee=!!b.cancellationFee,label=b.noShow||b.cancellationType==='noshow'?'No-show':b.cancellationType==='late'?'Storno <24h':'Storno >24h';if((b.noShow||b.cancellationType==='noshow')&&!activeInvoiceForBooking(b.id)){const actions=box.querySelector('.bookingActions');if(actions){const invoiceButtons=[...actions.querySelectorAll('button')].filter(x=>String(x.getAttribute('onclick')||'').includes('invoiceFromBooking'));invoiceButtons.forEach(x=>x.textContent='No-show Rechnung erstellen')}}const existing=box.querySelector('.v44FeeSummary');if(!existing){const d=document.createElement('div');d.className='v44FeeSummary stornoFeeBox';d.innerHTML='<b>'+label+'</b><br>'+(fee?'Ausfallgebühr freigegeben. Eine Rechnung kann direkt aus diesem Termin erstellt werden.':'Keine Ausfallgebühr vorgesehen.');box.insertBefore(d,box.querySelector('.bookingActions')||null)}}};
 })();
 </script>
 
