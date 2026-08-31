@@ -295,6 +295,37 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
 .adminRevenueTotal strong{font-family:Georgia,"Times New Roman",serif;font-size:27px;font-weight:500;color:#231915}
 @media(max-width:1000px){#dashboard .microKpis{grid-template-columns:repeat(3,1fr)}.adminRevenueGrid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:700px){#dashboard .microKpis{grid-template-columns:1fr 1fr}.adminRevenueGrid{grid-template-columns:repeat(2,1fr)}.adminRevenueTotal{align-items:flex-start;flex-direction:column}.adminRevenueTotal strong{font-size:24px}}
+
+/* V25: Finanzen — vorhandene Zahlungen als Einnahmen + neue Betriebsausgaben */
+.financeKpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0}
+.financeKpi{border:1px solid var(--line);border-radius:18px;padding:14px;background:#fffdf8;min-width:0}
+.financeKpi span{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+.financeKpi b{font-family:Georgia,"Times New Roman",serif;font-size:22px;font-weight:500;white-space:nowrap}
+.financeKpi.ok{border-color:#cfe2d4;background:#f6fbf7}.financeKpi.bad{border-color:#edc3ba;background:#fff6f4}.financeKpi.warn{border-color:#f0d99d;background:#fffaf0}
+.financeMonths{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.financeMonth{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff;min-width:0}
+.financeMonth.current{border-color:var(--gold);box-shadow:0 0 0 2px rgba(185,155,98,.15) inset}
+.financeMonth h3{margin:0 0 8px;font-size:15px}.financeMonth p{margin:4px 0;font-size:13px}.financeMonth .positive{color:#166534}.financeMonth .negative{color:#b83227}
+.financeBarRow{display:grid;grid-template-columns:minmax(150px,1fr) 3fr minmax(90px,auto);gap:12px;align-items:center;margin:9px 0}
+.financeBarTrack{height:12px;border-radius:999px;background:#f1ece4;overflow:hidden}.financeBarFill{height:100%;background:linear-gradient(90deg,#8a6f45,var(--gold));border-radius:999px}
+.expenseFormGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.expenseFormGrid .wide{grid-column:span 2}
+.expensePreview{margin-top:10px;padding:12px;border:1px solid rgba(185,155,98,.35);border-radius:14px;background:#fffaf0;font-weight:800}
+#expenseTable td,#expenseTable th{white-space:nowrap}#expenseTable td:nth-child(3){white-space:normal;min-width:220px}
+@media(max-width:1000px){.financeKpis{grid-template-columns:repeat(3,1fr)}.financeMonths{grid-template-columns:repeat(3,1fr)}.expenseFormGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.financeKpis,.financeMonths,.expenseFormGrid{grid-template-columns:1fr}.expenseFormGrid .wide{grid-column:auto}.financeBarRow{grid-template-columns:1fr}.financeBarTrack{height:10px}}
+
+
+/* V25.1 — Finance expense form layout fix */
+#finance > .grid{grid-template-columns:minmax(360px,.9fr) minmax(0,1.6fr);align-items:start}
+#finance .expenseFormGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+#finance .expenseFormGrid > div{min-width:0}
+#finance .expenseFormGrid label{display:block;margin-bottom:2px;white-space:normal}
+#finance .expenseFormGrid input,
+#finance .expenseFormGrid select{width:100%;min-width:0;margin:4px 0 0}
+#finance .expenseFormGrid .wide{grid-column:1 / -1}
+#finance .expensePreview{line-height:1.55}
+@media(max-width:1180px){#finance > .grid{grid-template-columns:1fr}#finance .expenseFormGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){#finance .expenseFormGrid{grid-template-columns:1fr}#finance .expenseFormGrid .wide{grid-column:auto}}
 </style>
 
 </head>
@@ -487,6 +518,72 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
 
 <section id="payments" class="view hidden"><div class="card"><h2>Zahlungen</h2><button class="secondary" onclick="exportCSV('payments')">CSV</button><div class="scroll"><table id="paymentsTable"></table></div></div></section>
 
+<section id="finance" class="view hidden">
+  <div class="card">
+    <div class="cleanSectionHead">
+      <div>
+        <div class="brandEyebrow">FINANZEN · ADMIN</div>
+        <h2>Einnahmen & Ausgaben</h2>
+        <p class="small">Einnahmen werden automatisch aus bestehenden Zahlungen und bezahlten Rechnungen übernommen. Nur Ausgaben werden zusätzlich erfasst.</p>
+      </div>
+      <div style="min-width:150px">
+        <label for="financeYear" class="small">Jahr</label>
+        <select id="financeYear" onchange="renderFinance()"></select>
+      </div>
+    </div>
+    <div class="financeKpis">
+      <div class="financeKpi ok"><span>Einnahmen bezahlt</span><b id="financeIncomeTotal">0 €</b></div>
+      <div class="financeKpi bad"><span>Ausgaben bezahlt</span><b id="financeExpenseTotal">0 €</b></div>
+      <div class="financeKpi"><span>Ergebnis</span><b id="financeResultTotal">0 €</b></div>
+      <div class="financeKpi warn"><span>Offene Rechnungen</span><b id="financeOpenInvoices">0 €</b></div>
+      <div class="financeKpi warn"><span>Offene Ausgaben</span><b id="financeOpenExpenses">0 €</b></div>
+    </div>
+    <div class="bookingActions noPrint">
+      <button class="secondary" onclick="exportCSV('expenses')">Ausgaben CSV</button>
+      <button class="gold" onclick="chooseExpenseExcelImport()">📥 Ausgaben aus Excel importieren</button>
+      <input id="expenseExcelImportFile" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" class="hidden" onchange="importExpensesExcelFile(event)">
+      <button class="secondary" onclick="exportExcelBackup()">Komplettes Excel-Backup</button>
+      <select id="invoiceCloudMonth" title="Monat für Rechnungs-Cloud-Check" style="max-width:150px"></select>
+      <button class="gold" onclick="checkMonthlyInvoiceCloud()">☁️ Monats-Cloud-Check</button>
+      <button class="secondary" onclick="backupJSON()">Komplettes JSON-Backup</button>
+    </div>
+    <div id="financeMonths" class="financeMonths"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="cleanSectionHead"><div><h2>Betriebsausgabe erfassen</h2><p class="small">Keine zweite Erfassung der Einnahmen: diese kommen automatisch aus dem bestehenden Rechnungs- und Zahlungssystem.</p></div></div>
+      <input id="expenseEditId" type="hidden">
+      <div class="expenseFormGrid">
+        <div><label>Belegdatum</label><input id="eDate" type="date"></div>
+        <div><label>Status</label><select id="eStatus" onchange="previewExpense()"><option value="bezahlt">Bezahlt</option><option value="offen">Offen</option></select></div>
+        <div><label>Kategorie</label><select id="eCategory"><option>Produkte & Material</option><option>Miete</option><option>Energie & Wasser</option><option>Telefon & Internet</option><option>Marketing & Werbung</option><option>Versicherungen</option><option>Weiterbildung</option><option>Reinigung</option><option>Fahrtkosten</option><option>Bank- & Zahlungsgebühren</option><option>Steuern & Abgaben</option><option>Personal & Fremdleistungen</option><option>Sonstiges</option></select></div>
+        <div><label>Zahlungsart</label><select id="eMethod"><option value="bar">Bar</option><option value="karte">Karte</option><option value="paypal">PayPal</option><option value="ueberweisung">Überweisung (SEPA)</option><option value="sonstiges">Sonstiges</option></select></div>
+        <div class="wide"><label>Beschreibung</label><input id="eDescription" placeholder="z. B. Kosmetikprodukte, Miete, Werbung"></div>
+        <div><label>Lieferant / Empfänger</label><input id="eSupplier" placeholder="Name"></div>
+        <div><label>Beleg / Referenz</label><input id="eReference" placeholder="Rechnungsnummer"></div>
+        <div><label>Netto €</label><input id="eNet" type="number" min="0" step="0.01" placeholder="0,00" oninput="previewExpense()"></div>
+        <div><label>MwSt.</label><select id="eTax" onchange="previewExpense()"><option value="0">0 %</option><option value="0.07">7 %</option><option value="0.19" selected>19 %</option></select></div>
+        <div class="wide"><label>Interne Notiz</label><input id="eNotes" placeholder="Optional"></div>
+      </div>
+      <div id="expensePreview" class="expensePreview">Brutto: 0,00 €</div>
+      <div class="bookingActions noPrint" style="margin-top:12px"><button class="gold" onclick="saveExpense()">Ausgabe speichern</button><button class="secondary" onclick="clearExpenseForm()">Formular leeren</button></div>
+      <p class="small">Die MwSt.-Angabe dient der Dokumentation. Steuerliche Behandlung bitte mit der Steuerberatung abstimmen.</p>
+    </div>
+
+    <div class="card">
+      <div class="cleanSectionHead"><div><h2>Ausgabenliste</h2><p class="small">Bezahlte Ausgaben fließen automatisch in die Finanzübersicht ein.</p></div></div>
+      <div class="row3"><input id="financeExpenseSearch" placeholder="Suche" oninput="renderExpenseTable()"><input id="financeExpenseMonth" type="month" onchange="renderExpenseTable()"><select id="financeExpenseStatus" onchange="renderExpenseTable()"><option value="all">Alle Status</option><option value="bezahlt">Bezahlt</option><option value="offen">Offen</option></select></div>
+      <div class="scroll"><table id="expenseTable"></table></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cleanSectionHead"><div><h2>Ausgaben nach Kategorie</h2><p class="small">Nur bezahlte Ausgaben des ausgewählten Jahres.</p></div></div>
+    <div id="financeCategoryBreakdown"></div>
+  </div>
+</section>
+
 <section id="stock" class="view hidden">
   <div class="card">
     <h2>Lager</h2>
@@ -557,6 +654,7 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
     <div class="adminGrid">
       <button class="gold" onclick="tab('settings')">Einstellungen</button>
       <button class="gold" onclick="tab('payments')">Zahlungen</button>
+      <button class="gold" onclick="tab('finance')">Finanzen</button>
       <button class="secondary" onclick="openAdminImport()">Import / Export</button>
       <button class="secondary" onclick="showResetBox();tab('settings')">Reset / Neustart</button>
       <button class="secondary" onclick="tab('stock');setTimeout(()=>document.querySelector('.adminAdvanced')?.scrollIntoView({behavior:'smooth',block:'start'}),80)">Stock avancé</button>
@@ -637,7 +735,7 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
         <button class="secondary" onclick="if(requireSetupPin())restoreBeforeImport()">Vor Reset/Import zurück</button>
         <p class="small"><b>Hinweis:</b> Wenn Kunden nach dem Reset wieder erscheinen, liegen sie noch im Cloud. Nutze „Kunden/Testdaten lokal + Cloud endgültig löschen“ und redéploie Apps Script V18.</p>
       </div>
-      <p class="small"><b>Gelöscht:</b> Kunden, Termine, Rechnungen, Zahlungen, Verbrauchs-/Lagerbewegungen und Tageszähler der Rechnungen. <b>Behalten:</b> Produkte, Grundlager, Institut-Stock, Service-Rezepte, Zahlungsdaten und CI-Einstellungen.</p>
+      <p class="small"><b>Gelöscht:</b> Kunden, Termine, Rechnungen, Zahlungen, Verbrauchs-/Lagerbewegungen und Tageszähler der Rechnungen. <b>Behalten:</b> Betriebsausgaben, Produkte, Grundlager, Institut-Stock, Service-Rezepte, Zahlungsdaten und CI-Einstellungen.</p>
       <div id="resetStatus" class="statusNote small"></div>
     </div>
 
@@ -664,11 +762,24 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
 
 <script>
 const PIN="210815", KEY="lune_staff_v32_true_qr";
+const FINANCE_EXPENSES_KEY=KEY+"_finance_expenses_v1";
 const CLEAN_START_FLAG=KEY+"_clean_start_v40_20260628";
 const LOGO_SRC="asset/img/logo";
 function absUrl(path){try{return new URL(path, location.href).href}catch(e){return path}}
 function resolvedLogoSrc(){let img=document.querySelector('.brandLogo');return (img&&(img.currentSrc||img.src))||absUrl(LOGO_SRC);}
 const seedServices=[{"id":"S1","name":"Basisbehandlung Gesicht","price":69},{"id":"S2","name":"Gesicht + Hals + Dekolleté","price":85},{"id":"S3","name":"Hydro Boost Gesicht","price":89},{"id":"S4","name":"Hydro Boost Gesicht & Dekolleté","price":99},{"id":"S5","name":"Relax & Glow Behandlung","price":110},{"id":"S6","name":"Hydra Glow Facial (Aquafacial)","price":130},{"id":"S7","name":"Aknebehandlung","price":89},{"id":"S8","name":"Anti-Aging Behandlung","price":120},{"id":"S9","name":"Sensi Treatment","price":89},{"id":"S10","name":"LED Maske","price":10},{"id":"S11","name":"Radiofrequenz","price":10},{"id":"S12","name":"Wimpernfärben","price":20},{"id":"S13","name":"Augenbrauen färben","price":15},{"id":"S14","name":"Augenbrauenkorrektur","price":15},{"id":"S15","name":"Basis Fußpflege","price":50},{"id":"S16","name":"Spa Fußpflege","price":65}];
+
+/* Lune Beauty — dépenses synchronisées depuis la feuille Excel "Ausgaben".
+   64 lignes source, références uniques; merge sans doublons avec les données CRM existantes. */
+const seedFinanceExpenses=[{"id":"XLS-002","date":"2024-12-31","category":"Fortbildung","description":"Fortbildung 2024: Anzahlung 1.000 € + Raten März-Dez. 10×350 € + Zusatzkosten 1.000 €","supplier":"Ausbildungsinstitut","net":5500.0,"tax":0.0,"taxAmount":0.0,"gross":5500.0,"method":"Überweisung","status":"bezahlt","paidDate":"2024-12-31","reference":"FORT-2024","notes":"Option 2: Jahreszeile | Unterkategorie: Ausbildung Studio"},{"id":"XLS-003","date":"2025-12-31","category":"Fortbildung","description":"Fortbildung 2025: Raten Jan-Feb. 2×350 € + Zusatzkosten 1.000 €","supplier":"Ausbildungsinstitut","net":1700.0,"tax":0.0,"taxAmount":0.0,"gross":1700.0,"method":"Überweisung","status":"bezahlt","paidDate":"2025-12-31","reference":"FORT-2025","notes":"Option 2: Jahreszeile | Unterkategorie: Ausbildung Studio"},{"id":"XLS-004","date":"2025-06-15","category":"Anlagegut / GWG","description":"Arbeitsliege / Lit de travail, Kauf Juni 2025","supplier":"eBay Kleinanzeigen","net":400.0,"tax":0.0,"taxAmount":0.0,"gross":400.0,"method":"Bar/Privat","status":"bezahlt","paidDate":"2025-06-15","reference":"EBAY-LIEGE-2025-06","notes":"Privatkauf; in Anlagegueter_AfA als GWG sichtbar | Unterkategorie: Arbeitsliege"},{"id":"XLS-005","date":"2025-06-15","category":"Anlagegut","description":"RUCK PODOLOG NOVA, Kauf Juni 2025","supplier":"eBay Kleinanzeigen","net":1200.0,"tax":0.0,"taxAmount":0.0,"gross":1200.0,"method":"Bar/Privat","status":"bezahlt","paidDate":"2025-06-15","reference":"EBAY-RUCK-2025-06","notes":"Privatkauf; in Anlagegueter_AfA erfasst | Unterkategorie: Podologiegerät"},{"id":"XLS-006","date":"2026-03-30","category":"IT / Website","description":"STRATO Domainpaket .de lunebeauty.de (30.03.2026–29.03.2027)","supplier":"STRATO GmbH","net":0.5,"tax":0.19,"taxAmount":0.1,"gross":0.6,"method":"PayPal","status":"bezahlt","paidDate":"2026-03-30","reference":"DRP151745407","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Domain"},{"id":"XLS-007","date":"2026-05-05","category":"Marketing","description":"Flyer 1000, Plakate 2 inkl. Lieferkosten","supplier":"Vistaprint B.V.","net":55.45,"tax":0.19,"taxAmount":10.53,"gross":65.98,"method":"Unbekannt","status":"bezahlt","paidDate":"2026-05-05","reference":"0236584131 / VP_HB9S1HB8","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Drucksachen"},{"id":"XLS-008","date":"2026-06-07","category":"Marketing","description":"Flyer 1000","supplier":"Vistaprint B.V.","net":52.09,"tax":0.19,"taxAmount":9.9,"gross":61.99,"method":"Unbekannt","status":"bezahlt","paidDate":"2026-06-07","reference":"0236881130 / VP_9QBZHLWJ","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Drucksachen"},{"id":"XLS-009","date":"2026-03-30","category":"Einrichtung","description":"VASAGLE Regal / Bücherregal 5 Ebenen LGT050A01","supplier":"Amazon EU S.à r.l.","net":54.61,"tax":0.19,"taxAmount":10.37,"gross":64.98,"method":"Unbekannt","status":"bezahlt","paidDate":"2026-03-30","reference":"DE614DZYEAEUI","notes":"Aus vorherigem Dashboard übernommen; in Anlagegueter_AfA sichtbar | Unterkategorie: Regal"},{"id":"XLS-010","date":"2026-04-01","category":"Miete","description":"Miete Geschäftsraum April 2026","supplier":"Vermieter","net":400.0,"tax":0.0,"taxAmount":0.0,"gross":400.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-04-01","reference":"MIETE-2026-04","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Geschäftsraum"},{"id":"XLS-011","date":"2026-05-01","category":"Miete","description":"Miete Geschäftsraum May 2026","supplier":"Vermieter","net":400.0,"tax":0.0,"taxAmount":0.0,"gross":400.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-05-01","reference":"MIETE-2026-05","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Geschäftsraum"},{"id":"XLS-012","date":"2026-06-01","category":"Miete","description":"Miete Geschäftsraum June 2026","supplier":"Vermieter","net":400.0,"tax":0.0,"taxAmount":0.0,"gross":400.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-06-01","reference":"MIETE-2026-06","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Geschäftsraum"},{"id":"XLS-013","date":"2026-04-30","category":"Fahrtkosten","description":"Fahrten Wohnung–Studio April 2026: 20 Tage × 8 km × 0,30 €","supplier":"Guy Beaho","net":48.0,"tax":0.0,"taxAmount":0.0,"gross":48.0,"method":"Privat-Pkw","status":"bezahlt","paidDate":"2026-04-30","reference":"FAHRT-2026-04","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Privat-Pkw"},{"id":"XLS-014","date":"2026-05-31","category":"Fahrtkosten","description":"Fahrten Wohnung–Studio May 2026: 20 Tage × 8 km × 0,30 €","supplier":"Guy Beaho","net":48.0,"tax":0.0,"taxAmount":0.0,"gross":48.0,"method":"Privat-Pkw","status":"bezahlt","paidDate":"2026-05-31","reference":"FAHRT-2026-05","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Privat-Pkw"},{"id":"XLS-015","date":"2026-06-30","category":"Fahrtkosten","description":"Fahrten Wohnung–Studio June 2026: 20 Tage × 8 km × 0,30 €","supplier":"Guy Beaho","net":48.0,"tax":0.0,"taxAmount":0.0,"gross":48.0,"method":"Privat-Pkw","status":"bezahlt","paidDate":"2026-06-30","reference":"FAHRT-2026-06","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Privat-Pkw"},{"id":"XLS-016","date":"2026-03-21","category":"Produkteinkauf","description":"Baehr Messe Düsseldorf: Fußpflegeprodukte, Masken, Desinfektion, Zubehör","supplier":"Gustav Baehr GmbH","net":182.45,"tax":0.19,"taxAmount":34.67,"gross":217.12,"method":"Karte","status":"bezahlt","paidDate":"2026-03-21","reference":"BAEHR-8916-04","notes":"PDF Rechnungssammlung S.1; Netto/MwSt exakt vom Beleg | Unterkategorie: Baehr / Fußpflegeprodukte"},{"id":"XLS-017","date":"2026-03-21","category":"Produkteinkauf","description":"CNC Cosmetic: Peel & Glow Mask, Ampullen, Seren, Creme, Zubehör","supplier":"CNC cosmetic GmbH","net":177.06,"tax":0.19,"taxAmount":33.64,"gross":210.7,"method":"Karte","status":"bezahlt","paidDate":"2026-03-21","reference":"CNC-4829","notes":"PDF Rechnungssammlung S.10; Netto/MwSt exakt vom Beleg | Unterkategorie: CNC Cosmetic"},{"id":"XLS-018","date":"2026-03-21","category":"Betriebsbedarf","description":"Kosmetik-Zubehör","supplier":"Fantasia / R. Espig KG","net":9.95,"tax":0.19,"taxAmount":1.89,"gross":11.84,"method":"Bar","status":"bezahlt","paidDate":"2026-03-21","reference":"FANTASIA-2026-03-21","notes":"PDF S.1 | Unterkategorie: Kosmetik-Zubehör"},{"id":"XLS-019","date":"2026-03-21","category":"Reisekosten","description":"Parkticket Beauty Düsseldorf 2026","supplier":"Beauty Düsseldorf","net":10.08,"tax":0.19,"taxAmount":1.92,"gross":12.0,"method":"Karte","status":"bezahlt","paidDate":"2026-03-21","reference":"PARK-2026-03-21","notes":"PDF S.1 | Unterkategorie: Parken Messe"},{"id":"XLS-020","date":"2026-03-18","category":"Dekoration / Betriebsbedarf","description":"Handtücher, Wickelunterlage, Spannglaken, Box","supplier":"Action","net":24.32,"tax":0.19,"taxAmount":4.62,"gross":28.94,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-03-18","reference":"ACTION-2026-03-18","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-021","date":"2026-04-10","category":"Dekoration / Betriebsbedarf","description":"Batterien, Set, Wäschegeld","supplier":"Action","net":17.04,"tax":0.19,"taxAmount":3.24,"gross":20.28,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-04-10","reference":"ACTION-2026-04-10","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-022","date":"2026-04-09","category":"Dekoration / Betriebsbedarf","description":"Clickdeckel, Aufbewahrung, Deko / Einrichtung","supplier":"Action","net":28.06,"tax":0.19,"taxAmount":5.33,"gross":33.39,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-04-09","reference":"ACTION-2026-04-09","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-023","date":"2026-04-13","category":"Dekoration / Betriebsbedarf","description":"Kleinteile / Batterien","supplier":"Action","net":2.24,"tax":0.19,"taxAmount":0.43,"gross":2.67,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-04-13","reference":"ACTION-2026-04-13","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-024","date":"2026-03-09","category":"Dekoration / Betriebsbedarf","description":"Handtücher, Wickerkörbe, Magnetrolle, Zubehör","supplier":"Action","net":55.92,"tax":0.19,"taxAmount":10.63,"gross":66.55,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-03-09","reference":"ACTION-2026-03-09","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-025","date":"2026-06-18","category":"Dekoration / Betriebsbedarf","description":"Einkaufstasche, Papkartusche, Duftkartusche, Auslauf","supplier":"Action","net":17.62,"tax":0.19,"taxAmount":3.35,"gross":20.97,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-06-18","reference":"ACTION-2026-06-18","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-026","date":"2026-03-30","category":"Dekoration / Betriebsbedarf","description":"Batterien / Kleinteile","supplier":"Action","net":1.92,"tax":0.19,"taxAmount":0.37,"gross":2.29,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-03-30","reference":"ACTION-2026-03-30","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-027","date":"2026-05-09","category":"Dekoration / Betriebsbedarf","description":"Aufbewahrungskorb nach Retoure","supplier":"Action","net":4.19,"tax":0.19,"taxAmount":0.8,"gross":4.99,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-05-09","reference":"ACTION-2026-05-09","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-028","date":"2026-05-07","category":"Dekoration / Betriebsbedarf","description":"Aufbewahrungskörbe Bambus","supplier":"Action","net":27.19,"tax":0.19,"taxAmount":5.17,"gross":32.36,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-05-07","reference":"ACTION-2026-05-07","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-029","date":"2026-04-28","category":"Dekoration / Betriebsbedarf","description":"Pro-Max Verlängerung / Batterie / Lampe","supplier":"Action","net":7.65,"tax":0.19,"taxAmount":1.45,"gross":9.1,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-04-28","reference":"ACTION-2026-04-28","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-030","date":"2026-03-30","category":"Dekoration / Betriebsbedarf","description":"Siebeimer, Tissue, Laterne, Aufbewahrung, Klebeband","supplier":"Action","net":44.53,"tax":0.19,"taxAmount":8.46,"gross":52.99,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-03-30","reference":"ACTION-2026-03-30-2","notes":"PDF Rechnungssammlung; kleine Belege gruppiert nach Ticket | Unterkategorie: Action Kleinkäufe"},{"id":"XLS-031","date":"2026-03-27","category":"Einrichtung","description":"Gleiter/Haken für FIXI Schiene","supplier":"JYSK","net":15.13,"tax":0.19,"taxAmount":2.87,"gross":18.0,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-03-27","reference":"JYSK-2026-03-27","notes":"PDF Rechnungssammlung | Unterkategorie: JYSK Einrichtung / Deko"},{"id":"XLS-032","date":"2026-03-30","category":"Einrichtung","description":"Retoure Haken FIXI Schiene","supplier":"JYSK","net":-6.3,"tax":0.19,"taxAmount":-1.2,"gross":-7.5,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-03-30","reference":"JYSK-RETOUR-2026-03-30","notes":"PDF Rechnungssammlung | Unterkategorie: JYSK Einrichtung / Deko"},{"id":"XLS-033","date":"2026-05-12","category":"Einrichtung","description":"Deko, Teelichthalter, Holztabletts, Duftkerzen","supplier":"JYSK","net":26.47,"tax":0.19,"taxAmount":5.03,"gross":31.5,"method":"Karte/Bar","status":"bezahlt","paidDate":"2026-05-12","reference":"JYSK-2026-05-12","notes":"PDF Rechnungssammlung | Unterkategorie: JYSK Einrichtung / Deko"},{"id":"XLS-034","date":"2026-05-28","category":"Einrichtung","description":"Hot Air Stop + mobiles Klimagerät","supplier":"OBI","net":199.14,"tax":0.19,"taxAmount":37.84,"gross":236.98,"method":"Karte","status":"bezahlt","paidDate":"2026-05-28","reference":"OBI-2026-05-28","notes":"PDF S.3; in Anlagegueter_AfA sichtbar | Unterkategorie: Klimagerät"},{"id":"XLS-035","date":"2026-04-14","category":"Dekoration / Betriebsbedarf","description":"Lampen / Dekoration","supplier":"TK Maxx","net":29.4,"tax":0.19,"taxAmount":5.59,"gross":34.99,"method":"Karte","status":"bezahlt","paidDate":"2026-04-14","reference":"EXCEL-AUSGABE-035","notes":"PDF Rechnungssammlung; teilweise kleine Belege | Unterkategorie: TK Maxx Kleinkäufe"},{"id":"XLS-036","date":"2026-05-04","category":"Dekoration / Betriebsbedarf","description":"Dekorative Artikel","supplier":"TK Maxx","net":17.63,"tax":0.19,"taxAmount":3.35,"gross":20.98,"method":"Karte","status":"bezahlt","paidDate":"2026-05-04","reference":"EXCEL-AUSGABE-036","notes":"PDF Rechnungssammlung; teilweise kleine Belege | Unterkategorie: TK Maxx Kleinkäufe"},{"id":"XLS-037","date":"2026-05-03","category":"Dekoration / Betriebsbedarf","description":"Bilder / Untersetzer / Dekoration","supplier":"TK Maxx","net":34.42,"tax":0.19,"taxAmount":6.54,"gross":40.96,"method":"Karte","status":"bezahlt","paidDate":"2026-05-03","reference":"EXCEL-AUSGABE-037","notes":"PDF Rechnungssammlung; teilweise kleine Belege | Unterkategorie: TK Maxx Kleinkäufe"},{"id":"XLS-038","date":"2026-03-21","category":"Dekoration / Betriebsbedarf","description":"Beauty / Dekoration","supplier":"TK Maxx","net":19.32,"tax":0.19,"taxAmount":3.67,"gross":22.99,"method":"Karte","status":"bezahlt","paidDate":"2026-03-21","reference":"EXCEL-AUSGABE-038","notes":"PDF Rechnungssammlung; teilweise kleine Belege | Unterkategorie: TK Maxx Kleinkäufe"},{"id":"XLS-039","date":"2026-03-23","category":"Einrichtung","description":"Kissen/Decke/Matte/Teppich o. ä.","supplier":"POCO","net":20.1,"tax":0.19,"taxAmount":3.82,"gross":23.92,"method":"Karte","status":"bezahlt","paidDate":"2026-03-23","reference":"POCO-2026-03-23","notes":"PDF S.6 | Unterkategorie: Textilien / Deko"},{"id":"XLS-040","date":"2026-04-10","category":"Einrichtung","description":"Atlanta Kommode 14 weiß/weiß Hochglanz MDF","supplier":"POCO","net":168.06,"tax":0.19,"taxAmount":31.93,"gross":199.99,"method":"EC-Karte","status":"bezahlt","paidDate":"2026-04-10","reference":"POCO-3621593","notes":"PDF S.13; in Anlagegueter_AfA sichtbar | Unterkategorie: Kommode"},{"id":"XLS-041","date":"2026-04-02","category":"Betriebsbedarf","description":"Tacker-Set und Batterien","supplier":"KiK","net":3.18,"tax":0.19,"taxAmount":0.6,"gross":3.78,"method":"Bar","status":"bezahlt","paidDate":"2026-04-02","reference":"KIK-2026-04-02","notes":"PDF S.8 | Unterkategorie: Kleinteile"},{"id":"XLS-042","date":"2026-05-20","category":"Dekoration / Betriebsbedarf","description":"Metallwaren / Kleinteile","supplier":"TEDi","net":3.36,"tax":0.19,"taxAmount":0.64,"gross":4.0,"method":"Bar","status":"bezahlt","paidDate":"2026-05-20","reference":"TEDI-2026-05-20","notes":"PDF S.7 | Unterkategorie: Kleinteile"},{"id":"XLS-043","date":"2026-03-30","category":"Einrichtung","description":"Sansevieria Pflanze / Dekoration","supplier":"IKEA","net":16.8,"tax":0.19,"taxAmount":3.19,"gross":19.99,"method":"Karte/Lastschrift","status":"bezahlt","paidDate":"2026-03-30","reference":"IKEA-2026-03-30-1","notes":"PDF Rechnungssammlung; Möbel/Deko erfasst | Unterkategorie: IKEA Pflanze / Deko"},{"id":"XLS-044","date":"2026-03-30","category":"Einrichtung","description":"LOHALS Teppich, KORNSPÄRR Vorhang, STRANDMON Kopfteil, PRISILLADE Übertöpf","supplier":"IKEA","net":128.54,"tax":0.19,"taxAmount":24.42,"gross":152.96,"method":"Karte/Lastschrift","status":"bezahlt","paidDate":"2026-03-30","reference":"IKEA-2026-03-30-2","notes":"PDF Rechnungssammlung; Möbel/Deko erfasst | Unterkategorie: IKEA Einrichtung / Textilien"},{"id":"XLS-045","date":"2026-03-27","category":"Einrichtung","description":"Kleiderschrank / Aufbewahrung (PAX/FJÄLLBO o. ä.)","supplier":"IKEA","net":100.81,"tax":0.19,"taxAmount":19.15,"gross":119.96,"method":"Karte/Lastschrift","status":"bezahlt","paidDate":"2026-03-27","reference":"IKEA-2026-03-27","notes":"PDF Rechnungssammlung; Möbel/Deko erfasst | Unterkategorie: IKEA Möbel / Aufbewahrung"},{"id":"XLS-046","date":"2026-03-28","category":"Einrichtung","description":"ONSVIG Teppich und MURVEL Schuhablage","supplier":"IKEA","net":51.25,"tax":0.19,"taxAmount":9.74,"gross":60.99,"method":"Karte/Lastschrift","status":"bezahlt","paidDate":"2026-03-28","reference":"IKEA-2026-03-28-1","notes":"PDF Rechnungssammlung; Möbel/Deko erfasst | Unterkategorie: IKEA Einrichtung / Textilien"},{"id":"XLS-047","date":"2026-03-28","category":"Einrichtung","description":"ALEX Aufbewahrung, KALLAX, ROSENROBIN, RÅSKOG/RARITIG, LACK, LÖVBACKEN","supplier":"IKEA","net":363.83,"tax":0.19,"taxAmount":69.13,"gross":432.96,"method":"Karte/Lastschrift","status":"bezahlt","paidDate":"2026-03-28","reference":"IKEA-2026-03-28-2","notes":"PDF Rechnungssammlung; Möbel/Deko erfasst | Unterkategorie: IKEA Möbel / Aufbewahrung"},{"id":"XLS-048","date":"2026-03-26","category":"Einrichtung","description":"Kleinteile / Gläser / UTBYTTERA Box","supplier":"IKEA","net":28.4,"tax":0.19,"taxAmount":5.4,"gross":33.8,"method":"Karte/Lastschrift","status":"bezahlt","paidDate":"2026-03-26","reference":"IKEA-2026-03-26","notes":"PDF Rechnungssammlung; Möbel/Deko erfasst | Unterkategorie: IKEA Einrichtung / Deko"},{"id":"XLS-049","date":"2026-05-09","category":"Produkteinkauf","description":"Braukmann Rechnung 2026-320762","supplier":"Braukmann","net":1594.17,"tax":0.19,"taxAmount":302.89,"gross":1897.06,"method":"Lastschrift","status":"bezahlt","paidDate":"2026-05-09","reference":"2026-320762","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Braukmann"},{"id":"XLS-050","date":"2026-06-22","category":"Produkteinkauf","description":"Braukmann Rechnung 2026-327947","supplier":"Braukmann","net":105.19,"tax":0.19,"taxAmount":19.99,"gross":125.18,"method":"Lastschrift","status":"bezahlt","paidDate":"2026-06-22","reference":"2026-327947","notes":"Aus vorherigem Dashboard übernommen | Unterkategorie: Braukmann"},{"id":"XLS-051","date":"2026-07-01","category":"Miete","description":"Miete Geschäftsraum Juli 2026","supplier":"Vermieter","net":400.0,"tax":0.0,"taxAmount":0.0,"gross":400.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-07-01","reference":"MIETE-2026-07","notes":"Monatlicher Mietbetrag seit April 2026: 400 € | Unterkategorie: Geschäftsraum"},{"id":"XLS-052","date":"2026-07-01","category":"Telefon / Internet","description":"Telefon + Internet Juli 2026","supplier":"Telekom/Provider","net":30.0,"tax":0.0,"taxAmount":0.0,"gross":30.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-07-01","reference":"TEL-INET-2026-07","notes":"Monatlicher Fixbetrag laut Angabe: 30 €; MwSt. mangels Beleg nicht aufgeteilt | Unterkategorie: Telefon & Internet"},{"id":"XLS-053","date":"2026-08-01","category":"Miete","description":"Miete Geschäftsraum August 2026","supplier":"Vermieter","net":400.0,"tax":0.0,"taxAmount":0.0,"gross":400.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-08-01","reference":"MIETE-2026-08","notes":"Monatlicher Mietbetrag seit April 2026: 400 € | Unterkategorie: Geschäftsraum"},{"id":"XLS-054","date":"2026-08-01","category":"Telefon / Internet","description":"Telefon + Internet August 2026","supplier":"Telekom/Provider","net":30.0,"tax":0.0,"taxAmount":0.0,"gross":30.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-08-01","reference":"TEL-INET-2026-08","notes":"Monatlicher Fixbetrag laut Angabe: 30 €; MwSt. mangels Beleg nicht aufgeteilt | Unterkategorie: Telefon & Internet"},{"id":"XLS-055","date":"2026-08-20","category":"Marketing","description":"TikTok Promote In-App-Kauf","supplier":"Apple / TikTok Promote","net":13.17,"tax":0.19,"taxAmount":2.5,"gross":15.67,"method":"Karte","status":"bezahlt","paidDate":"2026-08-20","reference":"APPLE-1-14288784131","notes":"Apple Rechnung vom 20.08.2026 | Unterkategorie: TikTok Werbung"},{"id":"XLS-056","date":"2026-08-20","category":"Marketing","description":"TikTok Promote In-App-Kauf","supplier":"Apple / TikTok Promote","net":6.58,"tax":0.19,"taxAmount":1.25,"gross":7.83,"method":"Karte","status":"bezahlt","paidDate":"2026-08-20","reference":"APPLE-1-14289327926","notes":"Apple Rechnung vom 20.08.2026 | Unterkategorie: TikTok Werbung"},{"id":"XLS-057","date":"2026-08-28","category":"Marketing","description":"Flyer 1500 + statisch haftende Aufkleber","supplier":"Vistaprint B.V.","net":62.76,"tax":0.19,"taxAmount":11.92,"gross":74.68,"method":"Karte","status":"bezahlt","paidDate":"2026-08-28","reference":"0238545785 / VP_06N1F56L","notes":"Vistaprint Rechnung vom 28.08.2026 | Unterkategorie: Drucksachen"},{"id":"XLS-058","date":"2026-08-31","category":"Betriebsbedarf","description":"Steckdosenblock","supplier":"Rossmann","net":4.19,"tax":0.19,"taxAmount":0.8,"gross":4.99,"method":"Bar","status":"bezahlt","paidDate":"2026-08-31","reference":"ROSSMANN-2026-08-31","notes":"Kassenbeleg 31.08.2026 | Unterkategorie: Kleinteile"},{"id":"XLS-059","date":"2026-08-31","category":"Betriebsbedarf","description":"2 Schalen","supplier":"KiK","net":2.5,"tax":0.19,"taxAmount":0.48,"gross":2.98,"method":"Bar","status":"bezahlt","paidDate":"2026-08-31","reference":"KIK-2026-08-31","notes":"Kassenbeleg 31.08.2026 | Unterkategorie: Kleinteile"},{"id":"XLS-060","date":"2026-08-06","category":"Dekoration / Betriebsbedarf","description":"Kleinkauf / Deko (Beleg links)","supplier":"TK Maxx","net":16.78,"tax":0.19,"taxAmount":3.2,"gross":19.98,"method":"Karte","status":"bezahlt","paidDate":"2026-08-06","reference":"TKMAXX-2026-08-06-A","notes":"Foto-Beleg; 2 Positionen à 9,99 € | Unterkategorie: TK Maxx Kleinkäufe"},{"id":"XLS-061","date":"2026-08-06","category":"Dekoration / Betriebsbedarf","description":"Geschirr & Tischdeko (Beleg rechts)","supplier":"TK Maxx","net":24.34,"tax":0.19,"taxAmount":4.63,"gross":28.97,"method":"Karte","status":"bezahlt","paidDate":"2026-08-06","reference":"TKMAXX-2026-08-06-B","notes":"Foto-Beleg; Brutto 28,97 € | Unterkategorie: TK Maxx Kleinkäufe"},{"id":"XLS-062","date":"2026-07-01","category":"Parkplatz","description":"Parkplatz Juli 2026","supplier":"Vermieter","net":50.0,"tax":0.0,"taxAmount":0.0,"gross":50.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-07-01","reference":"PARKING-2026-07","notes":"Monatlicher Parkplatz ab Juli 2026: 50 € | Unterkategorie: Studio-Parkplatz"},{"id":"XLS-063","date":"2026-08-01","category":"Parkplatz","description":"Parkplatz August 2026","supplier":"Vermieter","net":50.0,"tax":0.0,"taxAmount":0.0,"gross":50.0,"method":"Überweisung","status":"bezahlt","paidDate":"2026-08-01","reference":"PARKING-2026-08","notes":"Monatlicher Parkplatz ab Juli 2026: 50 € | Unterkategorie: Studio-Parkplatz"},{"id":"XLS-064","date":"2026-07-31","category":"Fahrtkosten","description":"Fahrten Wohnung–Studio Juli 2026: 20 Tage × 8 km × 0,30 €","supplier":"Guy Beaho","net":48.0,"tax":0.0,"taxAmount":0.0,"gross":48.0,"method":"Privat-Pkw","status":"bezahlt","paidDate":"2026-07-31","reference":"FAHRT-2026-07","notes":"Monatliche Fahrtkosten seit April 2026 | Unterkategorie: Privat-Pkw"},{"id":"XLS-065","date":"2026-08-31","category":"Fahrtkosten","description":"Fahrten Wohnung–Studio August 2026: 20 Tage × 8 km × 0,30 €","supplier":"Guy Beaho","net":48.0,"tax":0.0,"taxAmount":0.0,"gross":48.0,"method":"Privat-Pkw","status":"bezahlt","paidDate":"2026-08-31","reference":"FAHRT-2026-08","notes":"Monatliche Fahrtkosten seit April 2026 | Unterkategorie: Privat-Pkw"}];
+function mergeSeedFinanceExpenses(rows){
+  rows=Array.isArray(rows)?rows:[];
+  rows=rows.filter(e=>!["MIETE-PARKING-2026-07","MIETE-PARKING-2026-08"].includes(String((e&&e.reference)||"")));
+  const refs=new Set(rows.map(e=>String(e.reference||"").trim()).filter(Boolean));
+  seedFinanceExpenses.forEach(seed=>{if(!refs.has(seed.reference)){rows.push(structuredClone(seed));refs.add(seed.reference);}});
+  return rows;
+}
+
 const seedProducts=[{"id":"P1","sku":"CNC-SET","brand":"CNC Cosmetic","name":"CNC Cosmetic Startbestand (Masken, Ampullen, Seren, Creme, Zubehör)","category":"Kosmetikprodukte","purchase":177.06,"tax":0.19,"grossPurchase":210.7,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":1.0,"supplier":"CNC Cosmetic","notes":"Startbestand übernommen","source":"CNC-4829"},{"id":"P2","sku":"BAEHR-SET","brand":"Baehr","name":"Baehr Fußpflege Startbestand (Fußpflegeprodukte, Masken, Desinfektion, Zubehör)","category":"Fußpflegeprodukte","purchase":182.45,"tax":0.19,"grossPurchase":217.12,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":1.0,"supplier":"Baehr","notes":"Startbestand übernommen","source":"BAEHR-8916-04"},{"id":"P3","sku":"00357","brand":"Braukmann","name":"BEAUTY FOR HANDS Handcreme Tag","category":"BEAUTY FOR HANDS","purchase":6.51,"tax":0.19,"grossPurchase":7.75,"sale":12.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P4","sku":"00358","brand":"Braukmann","name":"BEAUTY FOR HANDS Handcreme Nacht","category":"BEAUTY FOR HANDS","purchase":6.51,"tax":0.19,"grossPurchase":7.75,"sale":12.5,"stockLager":2.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P5","sku":"03280","brand":"Braukmann","name":"BODY LIFT Handcreme Anti-Age 100ml","category":"BODY LIFT","purchase":7.95,"tax":0.19,"grossPurchase":9.46,"sale":15.5,"stockLager":2.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P6","sku":"03283","brand":"Braukmann","name":"BODY LIFT Moringa Fußbutter 100ml","category":"BODY LIFT","purchase":9.49,"tax":0.19,"grossPurchase":11.29,"sale":18.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P7","sku":"93283","brand":"Braukmann","name":"BODY LIFT Moringa Fußbutter 200ml","category":"BODY LIFT","purchase":13.3,"tax":0.19,"grossPurchase":15.83,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P8","sku":"94179","brand":"Braukmann","name":"Geschenkverpackungen","category":"Braukmann","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P9","sku":"03739","brand":"Braukmann","name":"Display Institute Pro Lift Lyocell Maske","category":"INSTITUTE","purchase":41.0,"tax":0.19,"grossPurchase":48.79,"sale":80.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P10","sku":"07710","brand":"Braukmann","name":"Institute Reinigungs Milch sanft 200ml","category":"INSTITUTE","purchase":10.0,"tax":0.19,"grossPurchase":11.9,"sale":19.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P11","sku":"07711","brand":"Braukmann","name":"Institute Gesichts Tonic mild 200ml","category":"INSTITUTE","purchase":8.21,"tax":0.19,"grossPurchase":9.77,"sale":16.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P12","sku":"07712","brand":"Braukmann","name":"Institute Enzym Peeling Maske 125g","category":"INSTITUTE","purchase":8.97,"tax":0.19,"grossPurchase":10.67,"sale":17.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P13","sku":"07713","brand":"Braukmann","name":"Institute Gesichts Reinigungs Creme","category":"INSTITUTE","purchase":8.21,"tax":0.19,"grossPurchase":9.77,"sale":16.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P14","sku":"07714","brand":"Braukmann","name":"Institute Detox Maske 100ml","category":"INSTITUTE","purchase":8.72,"tax":0.19,"grossPurchase":10.38,"sale":17.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P15","sku":"07715","brand":"Braukmann","name":"Institute AHA Frucht Tonic 200ml","category":"INSTITUTE","purchase":8.72,"tax":0.19,"grossPurchase":10.38,"sale":17.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P16","sku":"07720","brand":"Braukmann","name":"Institute Aktivierende Tages Creme soft","category":"INSTITUTE","purchase":15.13,"tax":0.19,"grossPurchase":18.0,"sale":29.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P17","sku":"07721","brand":"Braukmann","name":"Institute Aktivierende Tages Creme rich","category":"INSTITUTE","purchase":15.13,"tax":0.19,"grossPurchase":18.0,"sale":29.5,"stockLager":2.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P18","sku":"07722","brand":"Braukmann","name":"Institute Vital Anti Falten Konzentrat","category":"INSTITUTE","purchase":18.21,"tax":0.19,"grossPurchase":21.67,"sale":35.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P19","sku":"07725","brand":"Braukmann","name":"Institute Regenerierende Nacht Creme soft 50ml","category":"INSTITUTE","purchase":16.15,"tax":0.19,"grossPurchase":19.22,"sale":31.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P20","sku":"07726","brand":"Braukmann","name":"Institute Regenerierende Nacht Creme rich 50ml","category":"INSTITUTE","purchase":16.15,"tax":0.19,"grossPurchase":19.22,"sale":31.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P21","sku":"07727","brand":"Braukmann","name":"Institute Energie Repair Konzentrat","category":"INSTITUTE","purchase":18.21,"tax":0.19,"grossPurchase":21.67,"sale":35.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P22","sku":"07728","brand":"Braukmann","name":"Institute High Multi Ceramid Serum 30ml","category":"INSTITUTE","purchase":25.13,"tax":0.19,"grossPurchase":29.9,"sale":49.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P23","sku":"07729","brand":"Braukmann","name":"Institute Make Over Relift Serum 30ml","category":"INSTITUTE","purchase":25.13,"tax":0.19,"grossPurchase":29.9,"sale":49.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P24","sku":"07730","brand":"Braukmann","name":"Institute Derma Structure Pure","category":"INSTITUTE","purchase":21.79,"tax":0.19,"grossPurchase":25.93,"sale":42.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P25","sku":"07731","brand":"Braukmann","name":"Institute Derma Structure Pure","category":"INSTITUTE","purchase":21.79,"tax":0.19,"grossPurchase":25.93,"sale":42.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P26","sku":"07732","brand":"Braukmann","name":"Institute Derma Structure 24h High Potential 50ml","category":"INSTITUTE","purchase":23.59,"tax":0.19,"grossPurchase":28.07,"sale":46.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P27","sku":"07733","brand":"Braukmann","name":"Institute Pro Lift Augen Pflege 30ml","category":"INSTITUTE","purchase":15.13,"tax":0.19,"grossPurchase":18.0,"sale":29.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P28","sku":"07735","brand":"Braukmann","name":"Institute Pro Lift Tages Creme pur 50ml","category":"INSTITUTE","purchase":24.1,"tax":0.19,"grossPurchase":28.68,"sale":47.0,"stockLager":2.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P29","sku":"07736","brand":"Braukmann","name":"Institute Pro Lift Nacht Creme 50ml","category":"INSTITUTE","purchase":26.64,"tax":0.19,"grossPurchase":31.7,"sale":50.0,"stockLager":2.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P30","sku":"07737","brand":"Braukmann","name":"Institute Pro Lift Lippen Pflege SPF 10 10ml","category":"INSTITUTE","purchase":8.21,"tax":0.19,"grossPurchase":9.77,"sale":16.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P31","sku":"07738","brand":"Braukmann","name":"Institute Pro Lift Serum 30ml","category":"INSTITUTE","purchase":25.13,"tax":0.19,"grossPurchase":29.9,"sale":49.0,"stockLager":2.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P32","sku":"07740","brand":"Braukmann","name":"Institute Alpha Immun Fluid 50ml","category":"INSTITUTE","purchase":19.49,"tax":0.19,"grossPurchase":23.19,"sale":38.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P33","sku":"07741","brand":"Braukmann","name":"Institute Augen Gel Creme 30ml","category":"INSTITUTE","purchase":11.54,"tax":0.19,"grossPurchase":13.73,"sale":22.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P34","sku":"07742","brand":"Braukmann","name":"Institute Anti Falten Hals Creme 50ml","category":"INSTITUTE","purchase":14.36,"tax":0.19,"grossPurchase":17.09,"sale":28.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P35","sku":"07743","brand":"Braukmann","name":"Institute Hydro Aktiv Frische Gel 50ml","category":"INSTITUTE","purchase":11.54,"tax":0.19,"grossPurchase":13.73,"sale":22.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P36","sku":"07750","brand":"Braukmann","name":"Institute Rich & Pure Creme Maske 50ml","category":"INSTITUTE","purchase":13.85,"tax":0.19,"grossPurchase":16.48,"sale":27.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P37","sku":"07751","brand":"Braukmann","name":"Institute Lifting Hydro Maske 50ml","category":"INSTITUTE","purchase":10.77,"tax":0.19,"grossPurchase":12.82,"sale":21.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P38","sku":"07752","brand":"Braukmann","name":"Institute Pro Lift AHA Lyocell Maske","category":"INSTITUTE","purchase":4.1,"tax":0.19,"grossPurchase":4.88,"sale":8.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P39","sku":"07753","brand":"Braukmann","name":"Institute Pro Lift Mandelic Glow Serum 25ml","category":"INSTITUTE","purchase":25.13,"tax":0.19,"grossPurchase":29.9,"sale":49.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P40","sku":"77712","brand":"Braukmann","name":"Probe Institute Enzym Peeling Maske","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P41","sku":"77713","brand":"Braukmann","name":"Probe Institute Gesichts Reinigungs Creme","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P42","sku":"77715","brand":"Braukmann","name":"Probe Institute AHA Frucht Tonic 15ml","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P43","sku":"77722","brand":"Braukmann","name":"Probe Institute Vital Anti Falten Konzentrat","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P44","sku":"77727","brand":"Braukmann","name":"Probe Institute Energie Repair Konzentrat","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P45","sku":"77730","brand":"Braukmann","name":"Probe Institute Derma Structure Pure","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P46","sku":"77731","brand":"Braukmann","name":"Probe Institute Derma Structure Pure","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P47","sku":"77732","brand":"Braukmann","name":"Probe Institute Derma Structure Pure","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P48","sku":"77733","brand":"Braukmann","name":"Probe Institute Pro Lift Augen Pflege","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P49","sku":"77734","brand":"Braukmann","name":"Probe Institute Pro Lift Tages Creme SPF10","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P50","sku":"77735","brand":"Braukmann","name":"Probe Institute Pro Lift Tages Creme Pur 7ml","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P51","sku":"77736","brand":"Braukmann","name":"Probe Institute Pro Lift Nacht Creme 7ml","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P52","sku":"77741","brand":"Braukmann","name":"Probe Institute Augen Gel Creme","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P53","sku":"77742","brand":"Braukmann","name":"Probe Institute Anti Falten Halscreme","category":"INSTITUTE","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":5.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P54","sku":"91781","brand":"Braukmann","name":"Institute Masken Bar 3x200ml 2026","category":"INSTITUTE","purchase":82.65,"tax":0.19,"grossPurchase":98.35,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-327947; EK netto nach Rabatt/Abstimmung","source":"2026-327947"},{"id":"P55","sku":"97712","brand":"Braukmann","name":"Institute Enzym Peeling Maske","category":"INSTITUTE","purchase":11.8,"tax":0.19,"grossPurchase":14.04,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P56","sku":"97713","brand":"Braukmann","name":"Institute Gesichts Reinigungs Creme","category":"INSTITUTE","purchase":11.2,"tax":0.19,"grossPurchase":13.33,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P57","sku":"97721","brand":"Braukmann","name":"Institute Aktivierende Tagescreme rich","category":"INSTITUTE","purchase":35.9,"tax":0.19,"grossPurchase":42.72,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P58","sku":"97735","brand":"Braukmann","name":"Institute Pro Lift Tages Creme Pur 100ml","category":"INSTITUTE","purchase":32.0,"tax":0.19,"grossPurchase":38.08,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P59","sku":"97737","brand":"Braukmann","name":"Institute Pro Lift Lippen Pflege SPF 10 15ml","category":"INSTITUTE","purchase":8.0,"tax":0.19,"grossPurchase":9.52,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P60","sku":"97751","brand":"Braukmann","name":"Institute Lifting Hydro Maske 200ml","category":"INSTITUTE","purchase":24.7,"tax":0.19,"grossPurchase":29.39,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P61","sku":"97758","brand":"Braukmann","name":"Institute Acerola Vital Maske","category":"INSTITUTE","purchase":12.1,"tax":0.19,"grossPurchase":14.4,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P62","sku":"97772","brand":"Braukmann","name":"Institute Arganöl Aufbaumaske","category":"INSTITUTE","purchase":24.7,"tax":0.19,"grossPurchase":29.39,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P63","sku":"97773","brand":"Braukmann","name":"Institute Mango Frischemaske 200ml","category":"INSTITUTE","purchase":24.7,"tax":0.19,"grossPurchase":29.39,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P64","sku":"97774","brand":"Braukmann","name":"Institute Erlesene Öle Creme Maske 200ml","category":"INSTITUTE","purchase":24.7,"tax":0.19,"grossPurchase":29.39,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P65","sku":"97792","brand":"Braukmann","name":"Institute Viva Ätherisches Öl 15ml","category":"INSTITUTE","purchase":8.3,"tax":0.19,"grossPurchase":9.88,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P66","sku":"98738","brand":"Braukmann","name":"Institute Pro Lift Serum 30ml","category":"INSTITUTE","purchase":15.5,"tax":0.19,"grossPurchase":18.45,"sale":15.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P67","sku":"98776","brand":"Braukmann","name":"Institute Premium Massage Gelee Mango","category":"INSTITUTE","purchase":17.6,"tax":0.19,"grossPurchase":20.94,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P68","sku":"95061","brand":"Braukmann","name":"Jeunesse Kräuter Tonic 500ml","category":"KABINETTWARE/JEUNESSE","purchase":9.7,"tax":0.19,"grossPurchase":11.54,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P69","sku":"95063","brand":"Braukmann","name":"Jeunesse Peeling 200ml","category":"KABINETTWARE/JEUNESSE","purchase":9.1,"tax":0.19,"grossPurchase":10.83,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P70","sku":"95087","brand":"Braukmann","name":"Jeunesse Hautklärungs Maske 200ml","category":"KABINETTWARE/JEUNESSE","purchase":11.0,"tax":0.19,"grossPurchase":13.09,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P71","sku":"95088","brand":"Braukmann","name":"Jeunesse AHA Frucht Peelingmaske 200ml","category":"KABINETTWARE/JEUNESSE","purchase":11.0,"tax":0.19,"grossPurchase":13.09,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P72","sku":"07900","brand":"Braukmann","name":"PROFESSIONAL Reinigungsmilch 200ml","category":"PROFESSIONAL","purchase":7.69,"tax":0.19,"grossPurchase":9.15,"sale":15.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P73","sku":"07901","brand":"Braukmann","name":"PROFESSIONAL Reinigungsgelee sensitiv 100ml","category":"PROFESSIONAL","purchase":7.69,"tax":0.19,"grossPurchase":9.15,"sale":15.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P74","sku":"07902","brand":"Braukmann","name":"PROFESSIONAL Tonic 200ml","category":"PROFESSIONAL","purchase":7.69,"tax":0.19,"grossPurchase":9.15,"sale":15.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P75","sku":"07903","brand":"Braukmann","name":"PROFESSIONAL Mizellar Tonic 200ml","category":"PROFESSIONAL","purchase":7.69,"tax":0.19,"grossPurchase":9.15,"sale":15.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P76","sku":"07904","brand":"Braukmann","name":"PROFESSIONAL Jojoba Peeling 100ml","category":"PROFESSIONAL","purchase":7.69,"tax":0.19,"grossPurchase":9.15,"sale":15.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P77","sku":"07910","brand":"Braukmann","name":"PROFESSIONAL Hyaluron Energie Creme Tag 50ml","category":"PROFESSIONAL","purchase":13.85,"tax":0.19,"grossPurchase":16.48,"sale":27.0,"stockLager":3.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P78","sku":"07911","brand":"Braukmann","name":"PROFESSIONAL Vitamin Feuchtigkeits Creme Tag 50ml","category":"PROFESSIONAL","purchase":7.44,"tax":0.19,"grossPurchase":8.85,"sale":14.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P79","sku":"07912","brand":"Braukmann","name":"PROFESSIONAL UV Tagesschutz Creme SPF 10 50ml","category":"PROFESSIONAL","purchase":10.0,"tax":0.19,"grossPurchase":11.9,"sale":19.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P80","sku":"07913","brand":"Braukmann","name":"PROFESSIONAL Weizenkeim Creme Tag 50ml","category":"PROFESSIONAL","purchase":7.44,"tax":0.19,"grossPurchase":8.85,"sale":14.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P81","sku":"07914","brand":"Braukmann","name":"PROFESSIONAL Collagen Creme Tag 50ml","category":"PROFESSIONAL","purchase":8.97,"tax":0.19,"grossPurchase":10.67,"sale":17.5,"stockLager":3.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P82","sku":"07915","brand":"Braukmann","name":"PROFESSIONAL Feuchtigkeits Creme sensitiv Tag 50ml","category":"PROFESSIONAL","purchase":8.97,"tax":0.19,"grossPurchase":10.67,"sale":17.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P83","sku":"07916","brand":"Braukmann","name":"PROFESSIONAL Natural Make-up SPF 10 hell 30ml","category":"PROFESSIONAL","purchase":8.97,"tax":0.19,"grossPurchase":10.67,"sale":17.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P84","sku":"07917","brand":"Braukmann","name":"PROFESSIONAL Natural Make-up SPF 10 mittel 30ml","category":"PROFESSIONAL","purchase":8.97,"tax":0.19,"grossPurchase":10.67,"sale":17.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P85","sku":"07920","brand":"Braukmann","name":"PROFESSIONAL Vitamin Creme Nacht 50ml","category":"PROFESSIONAL","purchase":7.18,"tax":0.19,"grossPurchase":8.54,"sale":14.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P86","sku":"07921","brand":"Braukmann","name":"PROFESSIONAL Hyaluron Repair Creme Nacht 50ml","category":"PROFESSIONAL","purchase":14.1,"tax":0.19,"grossPurchase":16.78,"sale":27.5,"stockLager":3.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P87","sku":"07922","brand":"Braukmann","name":"PROFESSIONAL Aufbau Creme Nacht 50ml","category":"PROFESSIONAL","purchase":7.44,"tax":0.19,"grossPurchase":8.85,"sale":14.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P88","sku":"07923","brand":"Braukmann","name":"PROFESSIONAL Crème Rosée Vitale Nacht 50ml","category":"PROFESSIONAL","purchase":12.82,"tax":0.19,"grossPurchase":15.26,"sale":25.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P89","sku":"07924","brand":"Braukmann","name":"PROFESSIONAL Crème Bleue Nacht 50ml","category":"PROFESSIONAL","purchase":12.82,"tax":0.19,"grossPurchase":15.26,"sale":25.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P90","sku":"07930","brand":"Braukmann","name":"PROFESSIONAL Augen Creme 30ml","category":"PROFESSIONAL","purchase":10.0,"tax":0.19,"grossPurchase":11.9,"sale":19.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P91","sku":"07931","brand":"Braukmann","name":"PROFESSIONAL Augen Balsam 30ml","category":"PROFESSIONAL","purchase":9.23,"tax":0.19,"grossPurchase":10.98,"sale":18.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P92","sku":"07932","brand":"Braukmann","name":"PROFESSIONAL 24h Melissen Hautkur 50ml","category":"PROFESSIONAL","purchase":12.82,"tax":0.19,"grossPurchase":15.26,"sale":25.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P93","sku":"07934","brand":"Braukmann","name":"PROFESSIONAL 24h Couperose Relax Intensiv 50ml","category":"PROFESSIONAL","purchase":14.87,"tax":0.19,"grossPurchase":17.7,"sale":29.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P94","sku":"07935","brand":"Braukmann","name":"PROFESSIONAL Couperose Relax Tag SPF 10 50ml","category":"PROFESSIONAL","purchase":11.28,"tax":0.19,"grossPurchase":13.42,"sale":22.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P95","sku":"07937","brand":"Braukmann","name":"PROFESSIONAL Couperose Relax Nacht 50ml","category":"PROFESSIONAL","purchase":11.28,"tax":0.19,"grossPurchase":13.42,"sale":22.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P96","sku":"07938","brand":"Braukmann","name":"PROFESSIONAL 24h Balance Creme Fluid 50ml","category":"PROFESSIONAL","purchase":7.44,"tax":0.19,"grossPurchase":8.85,"sale":14.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P97","sku":"07939","brand":"Braukmann","name":"PROFESSIONAL Couperose Relax Serum 30ml","category":"PROFESSIONAL","purchase":17.69,"tax":0.19,"grossPurchase":21.05,"sale":34.5,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P98","sku":"07942","brand":"Braukmann","name":"PROFESSIONAL Couperose Relax Packung 30ml","category":"PROFESSIONAL","purchase":6.15,"tax":0.19,"grossPurchase":7.32,"sale":12.0,"stockLager":1.0,"stockInstitut":0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P99","sku":"17916","brand":"Braukmann","name":"TESTER PROFESSIONAL Natural Make up SPF 10 hell","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P100","sku":"17917","brand":"Braukmann","name":"TESTER PROFESSIONAL Natural Make up SPF 10 mittel","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P101","sku":"17918","brand":"Braukmann","name":"TESTER PROFESSIONAL Couperose Relax Puder","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P102","sku":"17960","brand":"Braukmann","name":"TESTER PROFESSIONAL Seasation Eau de Toilette","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P103","sku":"77900","brand":"Braukmann","name":"Probe PROFESSIONAL Reinigungs Milch 15ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P104","sku":"77902","brand":"Braukmann","name":"Probe PROFESSIONAL Tonic 15ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P105","sku":"77903","brand":"Braukmann","name":"Probe PROFESSIONAL Mizellar Tonic sensitiv 15ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P106","sku":"77904","brand":"Braukmann","name":"Probe PROFESSIONAL Jojoba Peeling 7ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P107","sku":"77910","brand":"Braukmann","name":"Probe PROFESSIONAL Hyaluron Energie Creme Tag 5ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P108","sku":"77914","brand":"Braukmann","name":"Probe PROFESSIONAL Collagen Creme Tag 5ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P109","sku":"77920","brand":"Braukmann","name":"Probe PROFESSIONAL Vitamin Creme Nacht 5ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P110","sku":"77921","brand":"Braukmann","name":"Probe PROFESSIONAL Hyaluron Repair Creme Nacht 7ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P111","sku":"77922","brand":"Braukmann","name":"Probe PROFESSIONAL Aufbau Creme Nacht 5ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P112","sku":"77930","brand":"Braukmann","name":"Probe PROFESSIONAL Augen Creme 7ml","category":"PROFESSIONAL","purchase":0.0,"tax":0.19,"grossPurchase":0.0,"sale":0,"stockLager":0,"stockInstitut":10.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P113","sku":"97903","brand":"Braukmann","name":"PROFESSIONAL Mizellar Tonic 500ml","category":"PROFESSIONAL","purchase":12.8,"tax":0.19,"grossPurchase":15.23,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P114","sku":"97904","brand":"Braukmann","name":"PROFESSIONAL Jojoba Peeling 200ml","category":"PROFESSIONAL","purchase":10.2,"tax":0.19,"grossPurchase":12.14,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P115","sku":"97906","brand":"Braukmann","name":"PROFESSIONAL Papaya Enzym Peeling Schaum 250g","category":"PROFESSIONAL","purchase":13.77,"tax":0.19,"grossPurchase":16.39,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-327947; EK netto nach Rabatt/Abstimmung","source":"2026-327947"},{"id":"P116","sku":"97922","brand":"Braukmann","name":"PROFESSIONAL Aufbau Creme Nacht 200ml","category":"PROFESSIONAL","purchase":17.8,"tax":0.19,"grossPurchase":21.18,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P117","sku":"97925","brand":"Braukmann","name":"PROFESSIONAL Vitamin Massage Creme 500ml","category":"PROFESSIONAL","purchase":13.5,"tax":0.19,"grossPurchase":16.06,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P118","sku":"97930","brand":"Braukmann","name":"PROFESSIONAL Augen Creme 100ml","category":"PROFESSIONAL","purchase":22.2,"tax":0.19,"grossPurchase":26.42,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P119","sku":"97936","brand":"Braukmann","name":"PROFESSIONAL Augen Lotion 500ml","category":"PROFESSIONAL","purchase":11.0,"tax":0.19,"grossPurchase":13.09,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P120","sku":"97938","brand":"Braukmann","name":"PROFESSIONAL 24h Balance Creme Fluid 100ml","category":"PROFESSIONAL","purchase":9.9,"tax":0.19,"grossPurchase":11.78,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P121","sku":"97940","brand":"Braukmann","name":"PROFESSIONAL Vitamin Lift Effekt Maske 200ml","category":"PROFESSIONAL","purchase":17.8,"tax":0.19,"grossPurchase":21.18,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P122","sku":"97941","brand":"Braukmann","name":"PROFESSIONAL Regenerativ Packung 200ml","category":"PROFESSIONAL","purchase":17.8,"tax":0.19,"grossPurchase":21.18,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P123","sku":"97943","brand":"Braukmann","name":"PROFESSIONAL Rosenblüten Creme Maske 200ml","category":"PROFESSIONAL","purchase":17.8,"tax":0.19,"grossPurchase":21.18,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P124","sku":"97944","brand":"Braukmann","name":"PROFESSIONAL Schäumende Pflege Maske 100ml","category":"PROFESSIONAL","purchase":3.9,"tax":0.19,"grossPurchase":4.64,"sale":0,"stockLager":0,"stockInstitut":2.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P125","sku":"97948","brand":"Braukmann","name":"PROFESSIONAL Collagen Vlies Maske mit Aloe Vera","category":"PROFESSIONAL","purchase":21.0,"tax":0.19,"grossPurchase":24.99,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P126","sku":"97980","brand":"Braukmann","name":"PROFESSIONAL Vitamin C Infusion Glow Ampulle 7x2ml","category":"PROFESSIONAL","purchase":8.77,"tax":0.19,"grossPurchase":10.44,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-327947; EK netto nach Rabatt/Abstimmung","source":"2026-327947"},{"id":"P127","sku":"97981","brand":"Braukmann","name":"PROFESSIONAL Desincrustin Ampulle 7x5ml","category":"PROFESSIONAL","purchase":11.3,"tax":0.19,"grossPurchase":13.45,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P128","sku":"97983","brand":"Braukmann","name":"PROFESSIONAL Sensitin Ampulle 7x5ml","category":"PROFESSIONAL","purchase":14.2,"tax":0.19,"grossPurchase":16.9,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P129","sku":"97984","brand":"Braukmann","name":"PROFESSIONAL Atrophin Ampulle 7x5ml","category":"PROFESSIONAL","purchase":14.2,"tax":0.19,"grossPurchase":16.9,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P130","sku":"97985","brand":"Braukmann","name":"PROFESSIONAL Hydro Elastin Ampulle 7x5ml","category":"PROFESSIONAL","purchase":14.2,"tax":0.19,"grossPurchase":16.9,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P131","sku":"97987","brand":"Braukmann","name":"PROFESSIONAL Age Relax Serum Ampulle 7x5ml","category":"PROFESSIONAL","purchase":14.2,"tax":0.19,"grossPurchase":16.9,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P132","sku":"97989","brand":"Braukmann","name":"PROFESSIONAL Vital Ampulle 7x5ml","category":"PROFESSIONAL","purchase":18.1,"tax":0.19,"grossPurchase":21.54,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P133","sku":"97990","brand":"Braukmann","name":"PROFESSIONAL Vitamin Balance Öl 250ml","category":"PROFESSIONAL","purchase":8.4,"tax":0.19,"grossPurchase":10.0,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P134","sku":"44086","brand":"Braukmann","name":"Masken Pinsel","category":"ZUBEHÖR","purchase":4.5,"tax":0.19,"grossPurchase":5.35,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P135","sku":"44091","brand":"Braukmann","name":"Lippen Pinsel","category":"ZUBEHÖR","purchase":3.5,"tax":0.19,"grossPurchase":4.17,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"},{"id":"P136","sku":"90759","brand":"Braukmann","name":"Amaranth Gesichtskissen","category":"ZUBEHÖR","purchase":8.5,"tax":0.19,"grossPurchase":10.12,"sale":0,"stockLager":0,"stockInstitut":1.0,"unit":"Stk","min":2.0,"supplier":"Braukmann","notes":"Rechnungen: 2026-320762","source":"2026-320762"}];
 const seedStartBySku=Object.fromEntries(seedProducts.map(p=>[String(p.sku||p.id||"").toUpperCase(),Number(p.stockLager||0)+Number(p.stockInstitut||0)]));
 const seedRecipes={"S1":[{"sku":"97713","qty":0.02},{"sku":"97903","qty":0.02},{"sku":"97712","qty":0.02},{"sku":"97721","qty":0.02}],"S2":[{"sku":"97713","qty":0.03},{"sku":"97903","qty":0.03},{"sku":"97712","qty":0.03},{"sku":"97721","qty":0.03}],"S3":[{"sku":"97903","qty":0.02},{"sku":"97751","qty":0.03},{"sku":"97985","qty":0.15},{"sku":"97990","qty":0.02}],"S4":[{"sku":"97903","qty":0.03},{"sku":"97751","qty":0.04},{"sku":"97985","qty":0.2},{"sku":"97990","qty":0.03}],"S5":[{"sku":"97904","qty":0.02},{"sku":"98776","qty":0.03},{"sku":"97773","qty":0.03},{"sku":"97990","qty":0.03}],"S6":[{"sku":"97906","qty":0.03},{"sku":"97985","qty":0.2},{"sku":"97751","qty":0.04}],"S7":[{"sku":"95061","qty":0.03},{"sku":"95063","qty":0.03},{"sku":"95087","qty":0.04},{"sku":"97981","qty":0.15}],"S8":[{"sku":"97735","qty":0.03},{"sku":"97987","qty":0.15},{"sku":"97948","qty":0.1},{"sku":"97940","qty":0.03}],"S9":[{"sku":"77903","qty":0.05},{"sku":"97983","qty":0.15},{"sku":"97943","qty":0.03}],"S10":[],"S11":[],"S12":[],"S13":[],"S14":[],"S15":[{"sku":"93283","qty":0.03},{"sku":"BAEHR-SET","qty":0.02}],"S16":[{"sku":"93283","qty":0.05},{"sku":"BAEHR-SET","qty":0.03}]};
@@ -686,7 +797,7 @@ function crmDate(value){
 }
 const DATEKEY=()=>TODAY().replaceAll("-","");
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
-const payLabel=p=>({bar:"Bar",karte:"Karte",paypal:"PayPal",ueberweisung:"Überweisung (SEPA)"}[p]||p);
+const payLabel=p=>({bar:"Bar",sumup:"SumUp Solo Lite",karte:"Karte",paypal:"PayPal",ueberweisung:"Überweisung (SEPA)",sonstiges:"Sonstiges"}[p]||p);
 function totalStock(p){return Number(p?.stockLager||0)+Number(p?.stockInstitut||0);}
 function startStock(p){let seed=seedStartBySku[String(p?.sku||p?.id||"").toUpperCase()];let raw=p?.startQty??p?.startStock??p?.initialStock??p?.startbestand??seed;let n=Number(raw);if(!Number.isFinite(n)||n<=0)n=Number(seed);if(!Number.isFinite(n)||n<=0)n=totalStock(p);if(!Number.isFinite(n)||n<=0)n=Number(p?.min||0);return Math.max(0,n||0);}
 function reorderLimit(p){let n=startStock(p);if(n<=0)return Number(p?.min||0);if(n<=2)return Math.max(0,n-1);if(n<=3)return n-1;return n*0.70;}
@@ -718,33 +829,38 @@ function defaultDb(){
     services:structuredClone(seedServices),
     products:structuredClone(seedProducts),
     recipes:structuredClone(seedRecipes),
-    bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[],aftercareFlows:[]
+    bookings:[],customers:[],invoices:[],payments:[],expenses:structuredClone(seedFinanceExpenses),stockMovements:[],skinAnalyses:[],aftercareFlows:[]
   };
+}
+function storedFinanceExpenses(){
+  try{let rows=JSON.parse(safeStorage.getItem(FINANCE_EXPENSES_KEY)||"[]");return Array.isArray(rows)?rows:[];}catch(e){return [];}
 }
 function loadDb(){
   let base=defaultDb();
   try{
     let s=safeStorage.getItem(KEY);
-    if(s) base=Object.assign(base,JSON.parse(s));
+    if(s){let incoming=JSON.parse(s);base=Object.assign(base,incoming);if(!Array.isArray(incoming.expenses))base.expenses=storedFinanceExpenses();}
   }catch(e){}
   return normalizeDb(base);
 }
-function persist(){safeStorage.setItem(KEY,JSON.stringify(db));renderAll();}
+function persist(){safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[]));safeStorage.setItem(KEY,JSON.stringify(db));renderAll();}
 function resetOperationalData(confirmFirst=true,auto=false){
-  const msg="Testdaten wirklich zurücksetzen?\n\nGelöscht werden: Kunden, Termine, Rechnungen, Zahlungen, Verbrauchs-/Lagerbewegungen und Rechnungszähler.\nBehalten werden: Produkte/Lager-Basis, Institut-Stock, Service-Rezepte und Einstellungen.";
+  const msg="Testdaten wirklich zurücksetzen?\n\nGelöscht werden: Kunden, Termine, Rechnungen, Zahlungen, Verbrauchs-/Lagerbewegungen und Rechnungszähler.\nBehalten werden: Betriebsausgaben, Produkte/Lager-Basis, Institut-Stock, Service-Rezepte und Einstellungen.";
   if(confirmFirst&&!confirm(msg))return;
   try{safeStorage.setItem(KEY+"_before_import",JSON.stringify(db));safeStorage.setItem(KEY+"_before_reset_"+new Date().toISOString().replace(/[:.]/g,"-"),JSON.stringify(db));}catch(e){}
   const keepSettings=structuredClone((db&&db.settings)||defaultDb().settings);
   const keepServices=(db&&Array.isArray(db.services)&&db.services.length)?structuredClone(db.services):structuredClone(seedServices);
   const keepRecipes=structuredClone((db&&db.recipes)||seedRecipes);
+  const keepExpenses=structuredClone((db&&db.expenses)||storedFinanceExpenses());
   keepSettings.dailyCounters={};
-  db=normalizeDb({settings:keepSettings,services:keepServices,products:structuredClone(seedProducts),recipes:keepRecipes,bookings:[],customers:[],invoices:[],payments:[],stockMovements:[],skinAnalyses:[],aftercareFlows:[]});
+  db=normalizeDb({settings:keepSettings,services:keepServices,products:structuredClone(seedProducts),recipes:keepRecipes,bookings:[],customers:[],invoices:[],payments:[],expenses:keepExpenses,stockMovements:[],skinAnalyses:[],aftercareFlows:[]});
+  safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[]));
   safeStorage.setItem(KEY,JSON.stringify(db));
   safeStorage.setItem(CLEAN_START_FLAG,"done");
   if(auto){try{safeStorage.setItem(KEY+"_auto_clean_start_at",new Date().toISOString());}catch(e){} return;}
   renderAll(); loadSettings(); tab("dashboard");
   if($("resetStatus"))$("resetStatus").textContent="Testdaten wurden zurückgesetzt. Der vorherige Stand ist lokal unter 'Vor Reset/Import zurück' wiederherstellbar.";
-  alert("Testdaten wurden zurückgesetzt. Produkte, Grundlager, Institut-Stock, Service-Rezepte und Einstellungen bleiben erhalten.");
+  alert("Testdaten wurden zurückgesetzt. Betriebsausgaben, Produkte, Grundlager, Institut-Stock, Service-Rezepte und Einstellungen bleiben erhalten.");
 }
 
 async function resetOperationalDataCloud(){
@@ -756,6 +872,7 @@ async function resetOperationalDataCloud(){
     alert("Abgebrochen. Es wurde nichts gelöscht.");
     return;
   }
+  const keepExpenses=structuredClone((db&&db.expenses)||storedFinanceExpenses());
   try{safeStorage.setItem(KEY+"_before_cloud_reset_"+new Date().toISOString().replace(/[:.]/g,"-"),JSON.stringify(db));}catch(e){}
   if($("resetStatus"))$("resetStatus").textContent="Cloud-Löschung wird ausgeführt…";
   try{
@@ -769,7 +886,9 @@ async function resetOperationalDataCloud(){
     // Après suppression côté serveur, on importe l'état Cloud nettoyé afin que les anciens clients ne restent pas localement.
     if(window.LuneStaffCloudSync.pull) await window.LuneStaffCloudSync.pull();
     try{safeStorage.removeItem("lune_staff_seen_request_ids_v16");safeStorage.removeItem("lune_staff_seen_request_ids_v18");}catch(e){}
+    db.expenses=keepExpenses;
     if(typeof normalizeDb==="function")db=normalizeDb(db);
+    safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[]));
     safeStorage.setItem(KEY,JSON.stringify(db));
     renderAll(); loadSettings(); tab("dashboard");
     if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.refresh)window.LuneStaffLiveNotifications.refresh();
@@ -782,22 +901,7 @@ async function resetOperationalDataCloud(){
   }
 }
 
-function nextId(a,p){
-  /* Never reuse an appointment ID that is still referenced by historical data.
-     This prevents an old invoice from appearing on a newly-created appointment
-     after an earlier appointment has been deleted. */
-  let ids=(Array.isArray(a)?a:[]).map(x=>String(x&&x.id||""));
-  if(p==="B" && typeof db!=="undefined" && db){
-    (db.invoices||[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
-    (db.aftercareFlows||[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
-    (db.skinAnalyses||[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
-    (db.customers||[]).forEach(c=>{
-      (c&&Array.isArray(c.consultationForms)?c.consultationForms:[]).forEach(x=>{if(x&&x.bookingId)ids.push(String(x.bookingId));});
-    });
-  }
-  const nums=ids.filter(id=>id.startsWith(p)).map(id=>Number(id.replace(/\D/g,""))||0);
-  return p+((nums.length?Math.max(...nums):0)+1);
-}
+function nextId(a,p){return p+(a.length?Math.max(...a.map(x=>Number(String(x.id||"").replace(/\D/g,""))||0))+1:1);}
 function normalizeDb(d){
   d.settings=Object.assign(defaultDb().settings,d.settings||{});
   if(!String(d.settings.paypal||"").trim()) d.settings.paypal="barosdedjilla@yahoo.fr";
@@ -807,6 +911,7 @@ function normalizeDb(d){
   d.customers=Array.isArray(d.customers)?d.customers:[];
   d.invoices=Array.isArray(d.invoices)?d.invoices:[];
   d.payments=Array.isArray(d.payments)?d.payments:[];
+  d.expenses=mergeSeedFinanceExpenses(Array.isArray(d.expenses)?d.expenses:storedFinanceExpenses());
   d.stockMovements=Array.isArray(d.stockMovements)?d.stockMovements:[];
   d.skinAnalyses=Array.isArray(d.skinAnalyses)?d.skinAnalyses:[];
   d.aftercareFlows=Array.isArray(d.aftercareFlows)?d.aftercareFlows:[];
@@ -834,6 +939,7 @@ function normalizeDb(d){
   d.customers.forEach(c=>{c.name=c.name||"Kunde";c.phone=c.phone||"";c.email=c.email||"";c.address=c.address||"";c.notes=c.notes||"";c.anamnesis=Object.assign({skin:"",allergies:"",contra:"",medication:"",lastReaction:""},c.anamnesis||{});});
   d.bookings.forEach(b=>{b.status=b.status||"angefragt";b.notes=b.notes||"";b.cancelledAt=b.cancelledAt||"";b.cancellationReason=b.cancellationReason||"";b.cancellationFee=!!b.cancellationFee;});
   d.invoices.forEach(i=>{i.status=i.status||"erstellt";i.items=Array.isArray(i.items)?i.items:[];i.bookingId=i.bookingId||"";i.internalNote=i.internalNote||"";});
+  d.expenses.forEach((e,idx)=>{e.id=e.id||("E"+(idx+1));e.date=e.date||TODAY();e.category=e.category||"Sonstiges";e.description=e.description||"Ausgabe";e.supplier=e.supplier||"";e.net=Number(e.net||0);e.tax=Number(e.tax||0);if(e.tax>1)e.tax=e.tax/100;e.taxAmount=Number(e.taxAmount||e.net*e.tax||0);e.gross=Number(e.gross||e.net+e.taxAmount||0);e.method=e.method||"bar";e.status=e.status||"bezahlt";e.paidDate=e.status==="bezahlt"?(e.paidDate||e.date):"";e.reference=e.reference||"";e.notes=e.notes||"";});
   return d;
 }
 function nextInvoiceNumber(){
@@ -862,7 +968,7 @@ function doLogin(){
   setTimeout(async()=>{try{if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()){if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.status)window.LuneStaffLiveNotifications.status("Cloud import…","ok");await window.LuneStaffCloudSync.pull();if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.check)await window.LuneStaffLiveNotifications.check();if(window.LuneStaffLiveNotifications&&window.LuneStaffLiveNotifications.refresh)window.LuneStaffLiveNotifications.refresh();}}catch(e){console.warn("Cloud import after login failed",e);}},650);
 }
 function logout(){$("app").classList.add("hidden");$("loginBox").classList.remove("hidden");$("pinInput").value="";}
-function tab(n){if((n==="settings"||n==="payments"||n==="admin"||n==="treatments")&&!setupUnlocked){if(!requireSetupPin())return;}document.querySelectorAll(".view").forEach(v=>v.classList.add("hidden"));$(n).classList.remove("hidden");document.querySelectorAll(".tabs button[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===n));if(n==="settings")lockSettingsView();renderAll();if(window.innerWidth<901)window.scrollTo({top:0,behavior:"smooth"});}
+function tab(n){if((n==="settings"||n==="payments"||n==="finance"||n==="admin"||n==="treatments")&&!setupUnlocked){if(!requireSetupPin())return;}document.querySelectorAll(".view").forEach(v=>v.classList.add("hidden"));$(n).classList.remove("hidden");document.querySelectorAll(".tabs button[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===n));if(n==="settings")lockSettingsView();renderAll();if(window.innerWidth<901)window.scrollTo({top:0,behavior:"smooth"});}
 function init(){
   $("bDate").value=$("qDate").value=$("bookingFilter").value=TODAY();
   loadSettings(); newBookingForm(false); resetInvoiceForm(false); renderAll(); tab("dashboard");
@@ -1053,8 +1159,8 @@ async function deleteTestBooking(id){
 
 function cancelBookingFromForm(){let id=$("bookingEditId").value;if(!id)return alert("Bitte zuerst einen Termin öffnen oder bearbeiten.");cancelBooking(id);}
 function setBookingStatus(id,status){let b=db.bookings.find(x=>x.id===id);if(!b)return;b.status=status;persist();openBooking(id);}
-function invoicesForBooking(id){return db.invoices.filter(i=>String(i.bookingId||"")===String(id||""));}
-function activeInvoiceForBooking(id){return db.invoices.find(i=>String(i.bookingId||"")===String(id||"")&&i.status!=="storniert");}
+function invoicesForBooking(id){return db.invoices.filter(i=>i.bookingId===id);}
+function activeInvoiceForBooking(id){return db.invoices.find(i=>i.bookingId===id&&i.status!=="storniert");}
 function invoiceFromBooking(id){
   let b=db.bookings.find(x=>x.id===id);if(!b)return;
   let active=activeInvoiceForBooking(id);
@@ -1159,7 +1265,7 @@ function collectInvoiceItems(){
     let s=db.services.find(x=>x.id===l.querySelector(".svc").value),q=Number(l.querySelector(".qty").value)||1,p=Number(l.querySelector(".price").value)||0;
     if(s){
       let type=noConsumption?"Ausfallhonorar":"Leistung";
-      let desc=noConsumption?(String(reason||"").toLowerCase().includes("nichterscheinen")?`${s.name} – No-show / Ausfallhonorar gemäß AGB / § 615 BGB`:`${s.name} – Ausfallhonorar gemäß AGB / § 615 BGB`):s.name;
+      let desc=noConsumption?`${s.name} – Ausfallhonorar gemäß AGB / § 615 BGB`:s.name;
       items.push({type,description:desc,qty:q,price:p,total:q*p,serviceId:s.id,noConsumption,reason});
     }
   });
@@ -1671,6 +1777,121 @@ function renderAdminRevenue(){
   if(yearLabel)yearLabel.textContent=year;
 }
 
+/* --- Finanzen: bestehende Zahlungen bleiben die einzige Einnahmenquelle --- */
+function financeIncomeRows(){
+  const rows=[],seen=new Set();
+  (db.payments||[]).forEach(p=>{
+    if(p.status==="storniert")return;
+    const key=String(p.invoiceNumber||p.id||"");
+    if(key&&seen.has(key))return;
+    if(key)seen.add(key);
+    rows.push({id:p.id||key,date:String(p.paymentDate||p.date||""),amount:Number(p.amount||0),method:p.method||"",invoiceNumber:p.invoiceNumber||"",source:"payment"});
+  });
+  (db.invoices||[]).forEach(i=>{
+    if(i.status!=="bezahlt")return;
+    const key=String(i.number||i.id||"");
+    if(key&&seen.has(key))return;
+    if(key)seen.add(key);
+    rows.push({id:i.id||key,date:paidInvoiceRevenueDate(i),amount:Number(i.total||0),method:i.payment||"",invoiceNumber:i.number||"",source:"paid_invoice_fallback"});
+  });
+  return rows.filter(r=>r.date&&Number.isFinite(r.amount));
+}
+function expenseCashDate(e){return String((e&&e.paidDate)||(e&&e.date)||"");}
+function financeYears(){
+  const years=new Set([String(TODAY()).slice(0,4)]);
+  financeIncomeRows().forEach(r=>/^\d{4}/.test(r.date)&&years.add(r.date.slice(0,4)));
+  (db.expenses||[]).forEach(e=>{const d=String(e.date||e.paidDate||"");if(/^\d{4}/.test(d))years.add(d.slice(0,4));});
+  return [...years].filter(Boolean).sort((a,b)=>Number(b)-Number(a));
+}
+function financeSelectedYear(){return String($("financeYear")?.value||TODAY().slice(0,4));}
+function financeRowsForYear(year){
+  const income=financeIncomeRows().filter(r=>String(r.date).slice(0,4)===year);
+  const paidExpenses=(db.expenses||[]).filter(e=>e.status==="bezahlt"&&expenseCashDate(e).slice(0,4)===year);
+  const openExpenses=(db.expenses||[]).filter(e=>e.status==="offen"&&String(e.date||"").slice(0,4)===year);
+  const openInvoices=(db.invoices||[]).filter(i=>i.status==="erstellt"&&String(i.invoiceDate||"").slice(0,4)===year);
+  return {income,paidExpenses,openExpenses,openInvoices};
+}
+function renderFinance(){
+  const select=$("financeYear");if(!select)return;
+  const years=financeYears(),previous=String(select.value||""),current=String(TODAY()).slice(0,4);
+  select.innerHTML=years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join("");
+  select.value=years.includes(previous)?previous:(years.includes(current)?current:years[0]);
+  const year=financeSelectedYear(),data=financeRowsForYear(year);
+  const incomeTotal=data.income.reduce((s,r)=>s+Number(r.amount||0),0);
+  const expenseTotal=data.paidExpenses.reduce((s,e)=>s+Number(e.gross||0),0);
+  const result=incomeTotal-expenseTotal;
+  const openInvoices=data.openInvoices.reduce((s,i)=>s+Number(i.total||0),0);
+  const openExpenses=data.openExpenses.reduce((s,e)=>s+Number(e.gross||0),0);
+  $("financeIncomeTotal").textContent=EUR(incomeTotal);
+  $("financeExpenseTotal").textContent=EUR(expenseTotal);
+  $("financeResultTotal").textContent=EUR(result);
+  $("financeResultTotal").style.color=result<0?"#b83227":"#166534";
+  $("financeOpenInvoices").textContent=EUR(openInvoices);
+  $("financeOpenExpenses").textContent=EUR(openExpenses);
+  const names=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"],nowMonth=TODAY().slice(0,7);
+  $("financeMonths").innerHTML=names.map((name,idx)=>{
+    const ym=year+"-"+String(idx+1).padStart(2,"0");
+    const inc=data.income.filter(r=>r.date.slice(0,7)===ym).reduce((s,r)=>s+Number(r.amount||0),0);
+    const out=data.paidExpenses.filter(e=>expenseCashDate(e).slice(0,7)===ym).reduce((s,e)=>s+Number(e.gross||0),0);
+    const net=inc-out;
+    return `<div class="financeMonth ${ym===nowMonth?'current':''}"><h3>${name}</h3><p>Einnahmen: <b class="positive">${EUR(inc)}</b></p><p>Ausgaben: <b class="negative">${EUR(out)}</b></p><p>Ergebnis: <b class="${net<0?'negative':'positive'}">${EUR(net)}</b></p></div>`;
+  }).join("");
+  renderFinanceCategories(year,data.paidExpenses);
+  renderExpenseTable();
+  if($("eDate")&&!$("eDate").value)$("eDate").value=TODAY();
+  previewExpense();
+}
+function renderFinanceCategories(year,rows){
+  const host=$("financeCategoryBreakdown");if(!host)return;
+  const sums={};(rows||[]).forEach(e=>{const k=e.category||"Sonstiges";sums[k]=(sums[k]||0)+Number(e.gross||0);});
+  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+  if(!sorted.length){host.innerHTML=`<p class="small">Für ${esc(year)} sind noch keine bezahlten Ausgaben erfasst.</p>`;return;}
+  const max=Math.max(...sorted.map(x=>x[1]),1);
+  host.innerHTML=sorted.map(([name,value])=>`<div class="financeBarRow"><span>${esc(name)}</span><div class="financeBarTrack"><div class="financeBarFill" style="width:${Math.max(2,value/max*100).toFixed(1)}%"></div></div><b>${EUR(value)}</b></div>`).join("");
+}
+function previewExpense(){
+  if(!$("expensePreview"))return;
+  const net=Number($("eNet")?.value||0),tax=Number($("eTax")?.value||0),taxAmount=net*tax,gross=net+taxAmount;
+  $("expensePreview").textContent=`Netto: ${EUR(net)} · MwSt.: ${EUR(taxAmount)} · Brutto: ${EUR(gross)}`;
+}
+function clearExpenseForm(){
+  if(!$("expenseEditId"))return;
+  $("expenseEditId").value="";$("eDate").value=TODAY();$("eStatus").value="bezahlt";$("eCategory").selectedIndex=0;$("eMethod").value="bar";$("eDescription").value="";$("eSupplier").value="";$("eReference").value="";$("eNet").value="";$("eTax").value="0.19";$("eNotes").value="";previewExpense();
+}
+async function syncFinanceCloud(){
+  try{if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()&&window.LuneStaffCloudSync.push)await window.LuneStaffCloudSync.push();}catch(e){console.warn("Finance cloud sync failed; local data and backups remain available.",e);}
+}
+function saveExpense(){
+  const description=String($("eDescription")?.value||"").trim(),net=Number($("eNet")?.value||0),tax=Number($("eTax")?.value||0),date=$("eDate")?.value||TODAY(),status=$("eStatus")?.value||"bezahlt";
+  if(!description)return alert("Bitte eine Beschreibung eingeben.");
+  if(!Number.isFinite(net)||net<=0)return alert("Bitte einen gültigen Nettobetrag eingeben.");
+  const taxAmount=Math.round(net*tax*100)/100,gross=Math.round((net+taxAmount)*100)/100,id=$("expenseEditId")?.value||"";
+  const existing=(db.expenses||[]).find(e=>e.id===id),wasPaid=existing&&existing.status==="bezahlt";
+  const row={id:id||nextId(db.expenses,"E"),date,category:$("eCategory").value,description,supplier:$("eSupplier").value||"",net,tax,taxAmount,gross,method:$("eMethod").value,status,paidDate:status==="bezahlt"?(wasPaid?(existing.paidDate||date):date):"",reference:$("eReference").value||"",notes:$("eNotes").value||"",createdAt:existing?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  if(existing)Object.assign(existing,row);else db.expenses.push(row);
+  persist();clearExpenseForm();syncFinanceCloud();alert("Ausgabe gespeichert.");
+}
+function editExpense(id){
+  const e=(db.expenses||[]).find(x=>x.id===id);if(!e)return;
+  $("expenseEditId").value=e.id;$("eDate").value=e.date||TODAY();$("eStatus").value=e.status||"bezahlt";$("eCategory").value=e.category||"Sonstiges";$("eMethod").value=e.method||"bar";$("eDescription").value=e.description||"";$("eSupplier").value=e.supplier||"";$("eReference").value=e.reference||"";$("eNet").value=Number(e.net||0);$("eTax").value=String(Number(e.tax||0));$("eNotes").value=e.notes||"";previewExpense();window.scrollTo({top:$("finance")?.offsetTop||0,behavior:"smooth"});
+}
+function markExpensePaid(id){
+  const e=(db.expenses||[]).find(x=>x.id===id);if(!e||e.status==="bezahlt")return;
+  if(!confirm(`Ausgabe „${e.description}“ wirklich als bezahlt markieren?`))return;
+  e.status="bezahlt";e.paidDate=TODAY();e.updatedAt=new Date().toISOString();persist();syncFinanceCloud();
+}
+function deleteExpense(id){
+  const e=(db.expenses||[]).find(x=>x.id===id);if(!e)return;
+  if(!confirm(`Ausgabe „${e.description}“ endgültig löschen?`))return;
+  db.expenses=db.expenses.filter(x=>x.id!==id);persist();syncFinanceCloud();
+}
+function renderExpenseTable(){
+  const table=$("expenseTable");if(!table)return;
+  const q=String($("financeExpenseSearch")?.value||"").toLowerCase(),month=$("financeExpenseMonth")?.value||"",status=$("financeExpenseStatus")?.value||"all";
+  const rows=(db.expenses||[]).filter(e=>(!month||String(e.date||"").slice(0,7)===month)&&(!q||[e.description,e.category,e.supplier,e.reference,e.notes].some(v=>String(v||"").toLowerCase().includes(q)))&&(status==="all"||e.status===status)).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))||String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  table.innerHTML=`<tr><th>Datum</th><th>Kategorie</th><th>Beschreibung</th><th>Netto</th><th>MwSt.</th><th>Brutto</th><th>Zahlung</th><th>Status</th><th>Beleg</th><th>Aktion</th></tr>`+(rows.length?rows.map(e=>`<tr><td>${esc(crmDate(e.date))}</td><td>${esc(e.category)}</td><td><b>${esc(e.description)}</b>${e.supplier?`<br><span class="small">${esc(e.supplier)}</span>`:""}</td><td class="right">${EUR(e.net)}</td><td class="right">${fmt(Number(e.tax||0)*100)} %</td><td class="right"><b>${EUR(e.gross)}</b></td><td>${esc(payLabel(e.method))}</td><td><span class="badge ${e.status==='bezahlt'?'ok':'warn'}">${esc(e.status)}</span></td><td>${esc(e.reference||"")}</td><td><button class="secondary" onclick="editExpense('${esc(e.id)}')">Bearbeiten</button>${e.status==='offen'?`<button class="gold" onclick="markExpensePaid('${esc(e.id)}')">Bezahlt</button>`:""}<button class="bad" onclick="deleteExpense('${esc(e.id)}')">Löschen</button></td></tr>`).join(""):`<tr><td colspan="10" class="small">Noch keine Ausgaben erfasst.</td></tr>`);
+}
+
 function openAdminImport(){if(!requireSetupPin())return;tab("settings");setTimeout(()=>$("backupImportFile")?.scrollIntoView({behavior:"smooth",block:"center"}),80);}
 function showPaymentSettings(){if(!requireSetupPin())return;$("paymentSettingsBox")?.classList.remove("hidden");}
 function showResetBox(){if(!requireSetupPin())return;$("resetBox")?.classList.remove("hidden");$("resetBox")?.scrollIntoView({behavior:"smooth",block:"center"});}
@@ -1692,8 +1913,8 @@ function renderInvoiceHelper(){
   let candidates=today.map(b=>{let active=activeInvoiceForBooking(b.id),isFee=b.status==="storniert"&&b.cancellationFee;return `<div class="item ${esc(b.status)}"><b>${esc(b.time)} · ${esc(b.name)}</b><br>${esc(b.service)} · ${bookingBadge(b.status)} ${isFee?'<span class="badge bad">kostenpflichtig</span>':''} ${active?`<span class="badge warn">Rechnung vorhanden</span>`:""}<br><button class="gold" onclick="invoiceFromBooking('${esc(b.id)}')">${active?"Rechnung öffnen":(isFee?"Kostenpflichtig abrechnen":"Zur Rechnung")}</button><button class="secondary" onclick="tab('agenda');openBooking('${esc(b.id)}')">Termin öffnen</button></div>`;}).join("");
   el.innerHTML=`<details class="fold" open><summary>Empfohlen: Rechnung aus Termin</summary><p class="small">Um Doppelrechnungen zu vermeiden, zuerst einen Termin des Tages auswählen. Kostenpflichtige Stornierungen bleiben abrechenbar.</p>${candidates||"<p class='small'>Heute gibt es keinen passenden Termin. Eine freie Rechnung ist unten möglich.</p>"}</details><details class="fold"><summary>Verkauf ohne Termin / Ausnahme</summary><div class="freeInvoiceWarning"><b>Freie Rechnung</b><br><span class="small">Nur für Produktverkauf, Korrektur oder Kundinnen ohne Termin.</span></div></details>`;
 }
-function paymentMethodSummary(date=TODAY()){let rows={bar:0,karte:0,paypal:0,ueberweisung:0};let count={bar:0,karte:0,paypal:0,ueberweisung:0};db.payments.filter(p=>p.paymentDate===date&&p.status!=="storniert").forEach(p=>{let m=p.method||"bar";rows[m]=(rows[m]||0)+Number(p.amount||0);count[m]=(count[m]||0)+1;});return {rows,count,total:Object.values(rows).reduce((a,b)=>a+b,0)};}
-function renderClose(){if(!$("paymentReconciliation"))return;let d=TODAY(),paid=db.invoices.filter(i=>i.status==="bezahlt"&&(i.paidDate||i.invoiceDate)===d),open=db.invoices.filter(i=>i.status==="erstellt"),storno=db.invoices.filter(i=>i.status==="storniert"&&i.stornoDate===d),s=paymentMethodSummary(d);$("closeSummary").innerHTML=`<p>${backupStatusHtml()}</p><p>Umsatz bezahlt heute: <b>${EUR(s.total)}</b> · Rechnungen bezahlt: <b>${paid.length}</b> · Offen: <b>${open.length}</b> · Storniert heute: <b>${storno.length}</b></p>`;$("paymentReconciliation").innerHTML=`<div class="scroll"><table class="recoTable"><tr><th>Methode</th><th class="right">Anzahl</th><th class="right">Betrag</th><th>Contrôle</th></tr>${["bar","karte","paypal","ueberweisung"].map(m=>`<tr><td>${payLabel(m)}</td><td class="right">${s.count[m]||0}</td><td class="right">${EUR(s.rows[m]||0)}</td><td><label class="checkRow"><input type="checkbox" data-check="reco_${m}" onchange="saveDayCheck()"> vérifié</label></td></tr>`).join("")}<tr><th>Total</th><th></th><th class="right">${EUR(s.total)}</th><th></th></tr></table></div>`;let c=dayCheck();document.querySelectorAll('[data-check^="reco_"]').forEach(x=>{x.checked=!!c[x.dataset.check];});}
+function paymentMethodSummary(date=TODAY()){let rows={bar:0,sumup:0,karte:0,paypal:0,ueberweisung:0,sonstiges:0};let count={bar:0,sumup:0,karte:0,paypal:0,ueberweisung:0,sonstiges:0};financeIncomeRows().filter(p=>p.date===date).forEach(p=>{let m=p.method||"sonstiges";rows[m]=(rows[m]||0)+Number(p.amount||0);count[m]=(count[m]||0)+1;});return {rows,count,total:Object.values(rows).reduce((a,b)=>a+b,0)};}
+function renderClose(){if(!$("paymentReconciliation"))return;let d=TODAY(),paid=db.invoices.filter(i=>i.status==="bezahlt"&&(i.paidDate||i.invoiceDate)===d),open=db.invoices.filter(i=>i.status==="erstellt"),storno=db.invoices.filter(i=>i.status==="storniert"&&i.stornoDate===d),expenses=(db.expenses||[]).filter(e=>e.status==="bezahlt"&&expenseCashDate(e)===d),expenseTotal=expenses.reduce((sum,e)=>sum+Number(e.gross||0),0),s=paymentMethodSummary(d),dayResult=s.total-expenseTotal;$("closeSummary").innerHTML=`<p>${backupStatusHtml()}</p><p>Umsatz bezahlt heute: <b>${EUR(s.total)}</b> · Ausgaben heute: <b>${EUR(expenseTotal)}</b> · Tagesergebnis: <b style="color:${dayResult<0?'#b83227':'#166534'}">${EUR(dayResult)}</b><br>Rechnungen bezahlt: <b>${paid.length}</b> · Offen: <b>${open.length}</b> · Storniert heute: <b>${storno.length}</b></p>`;$("paymentReconciliation").innerHTML=`<div class="scroll"><table class="recoTable"><tr><th>Methode</th><th class="right">Anzahl</th><th class="right">Betrag</th><th>Contrôle</th></tr>${["bar","sumup","karte","paypal","ueberweisung","sonstiges"].filter(m=>(s.count[m]||0)>0||m!=="sonstiges").map(m=>`<tr><td>${payLabel(m)}</td><td class="right">${s.count[m]||0}</td><td class="right">${EUR(s.rows[m]||0)}</td><td><label class="checkRow"><input type="checkbox" data-check="reco_${m}" onchange="saveDayCheck()"> vérifié</label></td></tr>`).join("")}<tr><th>Total Einnahmen</th><th></th><th class="right">${EUR(s.total)}</th><th></th></tr><tr><th>Ausgaben</th><th class="right">${expenses.length}</th><th class="right">-${EUR(expenseTotal)}</th><th></th></tr><tr><th>Tagesergebnis</th><th></th><th class="right">${EUR(dayResult)}</th><th></th></tr></table></div>`;let c=dayCheck();document.querySelectorAll('[data-check^="reco_"]').forEach(x=>{x.checked=!!c[x.dataset.check];});}
 
 function invoicePrintCss(){return `@page{size:A4;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#171717;font-family:Arial,Helvetica,sans-serif}.invoice{width:190mm;min-height:277mm;padding:10mm;margin:0 auto;background:#fff;position:relative;font-size:11.4px;line-height:1.25;page-break-after:always;break-after:page;overflow:hidden}.invoice:last-child{page-break-after:auto;break-after:auto}.invoiceHead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #c7a75b;padding-bottom:8px;margin-bottom:9px}.invoice h2{font-size:18px;margin:0 0 4px}.invoice h3{font-size:14px;margin:7px 0}.invoice p{margin:5px 0}.logo{width:68px;max-height:68px;object-fit:contain}.logoFallback{font-size:18px;margin:0}.qrImg{width:82px;height:82px;border:1px solid #ddd;padding:5px;background:#fff}.qrWrap{margin-top:6px;padding:6px;border:1px solid #eadfc9;border-radius:10px;display:inline-block}table{width:100%;border-collapse:collapse;margin-top:7px;font-size:10.6px}th,td{border-bottom:1px solid #eee;padding:4px 3px;text-align:left}th{color:#8a6f45;text-transform:uppercase;letter-spacing:.05em;font-size:10px}.right{text-align:right}.small{font-size:9.7px;color:#555}.badge{display:inline-block;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:700;border:1px solid #eadfc9;background:#fff}.badge.ok{color:#386b4f;border-color:#cfe2d4;background:#f6fbf7}.badge.warn{color:#9a6a20;border-color:#f0d99d;background:#fffaf0}.badge.bad{color:#a94335;border-color:#edc3ba;background:#fff6f4}.badge.dark{color:#111;background:#eee}.watermark{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);font-size:44px;letter-spacing:4px;color:rgba(184,50,39,.12);font-weight:900;border:6px solid rgba(184,50,39,.10);padding:14px;pointer-events:none}@media print{html,body{width:210mm;min-height:297mm}.invoice{margin:0 auto!important}}`;}
 function invoiceForPrint(i){let html=invoiceHtml(i).replace('id="invoicePrint" class="invoice"','class="invoice"').replaceAll(' onerror="window.luneLogoFallback(this)"','');let logo=resolvedLogoSrc();html=html.replace(`src="${LOGO_SRC}"`,`src="${logo}"`);return html;}
@@ -1729,9 +1950,9 @@ function flat(rows){return rows.map(r=>{let o={};Object.keys(r).forEach(k=>o[k]=
 function csv(rows){if(!rows.length)return "";let f=flat(rows),h=[...new Set(f.flatMap(o=>Object.keys(o)))];return [h.join(";"),...f.map(r=>h.map(x=>`"${String(r[x]??"").replaceAll('"','""')}"`).join(";"))].join("\n");}
 function dl(n,c,t="text/csv;charset=utf-8"){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:t}));a.download=n;a.click();}
 function exportCSV(kind){let rows=db[kind]||[];if(!rows.length){alert("Keine Daten");return;}dl(`lune_${kind}_${TODAY()}.csv`,"\ufeff"+csv(rows));}
-function exportAllCSVs(){["bookings","customers","invoices","payments","products","stockMovements","aftercareFlows"].forEach(k=>{if((db[k]||[]).length)dl(`lune_${k}_${TODAY()}.csv`,"\ufeff"+csv(db[k]));});if($("backupStatus"))$("backupStatus").textContent="CSV-Export gestartet. Für Wiederherstellung bitte zusätzlich JSON-Backup speichern.";}
-function exportDay(){let d=TODAY(),pack={exportType:"lune_day_export",exportedAt:new Date().toISOString(),date:d,bookings:db.bookings.filter(x=>x.date===d),invoices:db.invoices.filter(x=>x.invoiceDate===d||x.paidDate===d||x.stornoDate===d),payments:db.payments.filter(x=>x.paymentDate===d),products:db.products,stockMovements:db.stockMovements.filter(x=>x.date===d),recipes:db.recipes,paymentReconciliation:paymentMethodSummary(d)};dl(`lune_tagesabschluss_${d}.json`,JSON.stringify(pack,null,2),"application/json");["bookings","invoices","payments","products","stockMovements"].forEach(k=>pack[k]?.length&&dl(`lune_${k}_${d}.csv`,"\ufeff"+csv(pack[k])));markBackupToday("day");}
-function backupJSON(){let pack={exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.4",exportedAt:new Date().toISOString(),data:db};dl(`lune_backup_complet_${TODAY()}.json`,JSON.stringify(pack,null,2),"application/json");markBackupToday("json");let c=dayCheck();c.endBackupJson=true;safeStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();if($("backupStatus"))$("backupStatus").textContent="Backup exportiert. Datei sicher speichern, z.B. iCloud/Drive/USB.";}
+function exportAllCSVs(){["bookings","customers","invoices","payments","expenses","products","stockMovements","aftercareFlows"].forEach(k=>{if((db[k]||[]).length)dl(`lune_${k}_${TODAY()}.csv`,"\ufeff"+csv(db[k]));});if($("backupStatus"))$("backupStatus").textContent="CSV-Export gestartet. Für Wiederherstellung bitte zusätzlich JSON-Backup speichern.";}
+function exportDay(){let d=TODAY(),pack={exportType:"lune_day_export",exportedAt:new Date().toISOString(),date:d,bookings:db.bookings.filter(x=>x.date===d),invoices:db.invoices.filter(x=>x.invoiceDate===d||x.paidDate===d||x.stornoDate===d),payments:db.payments.filter(x=>x.paymentDate===d),expenses:(db.expenses||[]).filter(x=>x.date===d||x.paidDate===d),products:db.products,stockMovements:db.stockMovements.filter(x=>x.date===d),recipes:db.recipes,paymentReconciliation:paymentMethodSummary(d)};dl(`lune_tagesabschluss_${d}.json`,JSON.stringify(pack,null,2),"application/json");["bookings","invoices","payments","expenses","products","stockMovements"].forEach(k=>pack[k]?.length&&dl(`lune_${k}_${d}.csv`,"\ufeff"+csv(pack[k])));markBackupToday("day");}
+function backupJSON(){let pack={exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.5",exportedAt:new Date().toISOString(),data:db};dl(`lune_backup_complet_${TODAY()}.json`,JSON.stringify(pack,null,2),"application/json");markBackupToday("json");let c=dayCheck();c.endBackupJson=true;safeStorage.setItem(KEY,JSON.stringify(db));renderTagescheck();renderClose();if($("backupStatus"))$("backupStatus").textContent="Backup exportiert. Datei sicher speichern, z.B. iCloud/Drive/USB.";}
 function extractBackupData(raw){if(raw&&raw.exportType==="lune_staff_full_backup"&&raw.data)return raw.data;if(raw&&raw.settings&&raw.invoices&&raw.products)return raw;throw new Error("Diese Datei ist kein vollständiges Staff-Backup. Bitte eine Datei lune_backup_complet_YYYY-MM-DD.json importieren.");}
 function importBackupFile(ev){
   let file=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!file)return;
@@ -1739,16 +1960,16 @@ function importBackupFile(ev){
   reader.onload=()=>{
     try{
       let raw=JSON.parse(reader.result), incoming=normalizeDb(extractBackupData(raw));
-      let info=`Backup enthält:\n- ${incoming.customers.length} Kunden\n- ${incoming.bookings.length} Termine\n- ${incoming.invoices.length} Rechnungen\n- ${incoming.payments.length} Zahlungen\n- ${incoming.products.length} Produkte\n\nAktuelle Daten werden ersetzt. Fortfahren?`;
+      let info=`Backup enthält:\n- ${incoming.customers.length} Kunden\n- ${incoming.bookings.length} Termine\n- ${incoming.invoices.length} Rechnungen\n- ${incoming.payments.length} Zahlungen\n- ${(incoming.expenses||[]).length} Ausgaben\n- ${incoming.products.length} Produkte\n\nAktuelle Daten werden ersetzt. Fortfahren?`;
       if(!confirm(info))return;
       safeStorage.setItem(KEY+"_before_import",JSON.stringify(db));
-      db=incoming; safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard");
+      db=incoming; safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[])); safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard");
       alert("Backup importiert. Daten wurden wiederhergestellt. Der vorherige Stand wurde lokal als Sicherheitskopie behalten.");
     }catch(e){alert("Import fehlgeschlagen: "+e.message);}
   };
   reader.readAsText(file);
 }
-function restoreBeforeImport(){let s=safeStorage.getItem(KEY+"_before_import");if(!s){alert("Keine lokale Sicherheitskopie vor Import gefunden.");return;}if(!confirm("Letzten Stand vor dem Import wiederherstellen? Aktuelle Daten werden ersetzt."))return;try{db=normalizeDb(JSON.parse(s));safeStorage.setItem(KEY,JSON.stringify(db));renderAll();loadSettings();tab("dashboard");alert("Vorheriger Stand wiederhergestellt.");}catch(e){alert("Wiederherstellung fehlgeschlagen: "+e.message);}}
+function restoreBeforeImport(){let s=safeStorage.getItem(KEY+"_before_import");if(!s){alert("Keine lokale Sicherheitskopie vor Import gefunden.");return;}if(!confirm("Letzten Stand vor dem Import wiederherstellen? Aktuelle Daten werden ersetzt."))return;try{db=normalizeDb(JSON.parse(s));safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[]));safeStorage.setItem(KEY,JSON.stringify(db));renderAll();loadSettings();tab("dashboard");alert("Vorheriger Stand wiederhergestellt.");}catch(e){alert("Wiederherstellung fehlgeschlagen: "+e.message);}}
 
 
 /* Excel backup/import using SheetJS. The XLSX library is loaded only when the user clicks Excel export/import. */
@@ -1780,18 +2001,19 @@ function productsForExcel(){return db.products.map(p=>({
 }));}
 function recipesForExcel(){let out=[];(db.services||[]).forEach(svc=>{(db.recipes[svc.id]||[]).forEach(r=>{let p=productBySku(r.sku);out.push({serviceId:svc.id, Service:svc.name, SKU:r.sku, Produkt:p?p.name:"", Menge:Number(r.qty||0), Einheit:p?p.unit:"Stk"});});});return out;}
 function excelBackupChunks(){
-  let raw=JSON.stringify({exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.2",exportedAt:new Date().toISOString(),data:db});
+  let raw=JSON.stringify({exportType:"lune_staff_full_backup",app:"Lune Beauty Staff",version:"4.5",exportedAt:new Date().toISOString(),data:db});
   let chunks=[]; for(let i=0;i<raw.length;i+=30000)chunks.push({part:chunks.length+1,total:Math.ceil(raw.length/30000),data:raw.slice(i,i+30000)});
   return chunks;
 }
 function exportExcelBackup(){
   ensureXLSX().then(()=>{
     let wb=XLSX.utils.book_new();
-    addSheet(wb,"README",[{Export:"Lune Beauty Staff Excel Backup",Datum:new Date().toLocaleString("de-DE"),Hinweis:"Dieses Excel ist lesbar UND reimportierbar. Für vollständige Wiederherstellung enthält es den versteckten Backup-JSON in Staff_Backup_JSON."},{Export:"Import-Regel",Datum:"",Hinweis:"Wenn Staff_Backup_JSON vorhanden ist, wird beim Import der komplette Staff-Stand wiederhergestellt. Ohne dieses Sheet werden nur erkannte Tabellen wie Produkte_Stock importiert."}]);
+    addSheet(wb,"README",[{Export:"Lune Beauty Staff Excel Backup",Datum:new Date().toLocaleString("de-DE"),Hinweis:"Dieses Excel ist lesbar UND reimportierbar. Einnahmen stammen aus Zahlungen und bezahlten Rechnungen; Betriebsausgaben stehen im Blatt Ausgaben. Für vollständige Wiederherstellung enthält es den versteckten Backup-JSON in Staff_Backup_JSON."},{Export:"Import-Regel",Datum:"",Hinweis:"Wenn Staff_Backup_JSON vorhanden ist, wird beim Import der komplette Staff-Stand wiederhergestellt. Ohne dieses Sheet werden nur erkannte Tabellen wie Produkte_Stock und Ausgaben importiert."}]);
     addSheet(wb,"Kunden",db.customers);
     addSheet(wb,"Termine",db.bookings);
     addSheet(wb,"Rechnungen",db.invoices);
     addSheet(wb,"Zahlungen",db.payments);
+    addSheet(wb,"Ausgaben",db.expenses);
     addSheet(wb,"Produkte_Stock",productsForExcel());
     addSheet(wb,"Stock_Bewegungen",db.stockMovements);
     addSheet(wb,"Service_Rezepte",recipesForExcel());
@@ -1839,6 +2061,114 @@ function productsFromExcelRows(rows){
 function recipesFromExcelRows(rows){
   let rec={}; rows.forEach(r=>{let sid=String(cell(r,["serviceId","Service ID","Leistung ID"] )||"").trim();let svc=String(cell(r,["Service","Leistung"] )||"").trim();let sku=String(cell(r,["SKU","Artikelnummer"] )||"").trim();let qty=numCell(cell(r,["Menge","qty","Verbrauch"])); if(!sid&&svc){let hit=(db.services||[]).find(s=>s.name===svc);sid=hit?hit.id:"";} if(sid&&sku&&qty){(rec[sid]=rec[sid]||[]).push({sku,qty});}});return rec;
 }
+
+/* V57 — Excel -> CRM expense import. Fixes Excel Date timezone shift; reference-first matching + safe fallback + detailed preview. */
+function chooseExpenseExcelImport(){
+  const input=$("expenseExcelImportFile");
+  if(input) input.click();
+}
+function excelDateToIso(v){
+  // V57: Excel calendar dates must stay calendar dates.
+  // Do NOT use toISOString(): in Europe/Berlin it can shift an Excel midnight date to the previous day.
+  if(v instanceof Date && !isNaN(v)){
+    const y=v.getFullYear(), m=v.getMonth()+1, d=v.getDate();
+    return `${String(y).padStart(4,"0")}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  }
+  if(typeof v==="number" && isFinite(v)){
+    const d=XLSX.SSF.parse_date_code(v);
+    if(d) return `${String(d.y).padStart(4,"0")}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+  }
+  let x=String(v??"").trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(x)) return x.slice(0,10);
+  let m=x.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/);
+  if(m){let y=Number(m[3]); if(y<100)y+=2000; return `${y}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;}
+  return "";
+}
+function normalizeExpenseStatus(v){let x=String(v||"").toLowerCase();return /offen|open|unbezahlt/.test(x)?"offen":"bezahlt";}
+function normalizeExpenseMethod(v){let x=String(v||"").toLowerCase();if(/paypal/.test(x))return"paypal";if(/über|ueber|sepa|bank/.test(x))return"ueberweisung";if(/karte|card|ec|visa|master/.test(x))return"karte";if(/bar|cash/.test(x))return"bar";return"sonstiges";}
+function normalizeExpenseTax(v){let n=numCell(v);if(n>1)n/=100;return [0,.07,.19].includes(Number(n.toFixed(2)))?Number(n.toFixed(2)):Math.max(0,n||0);}
+function expenseFromExcelRow(r,idx){
+  let date=excelDateToIso(cell(r,["date","datum","belegdatum","rechnungsdatum","buchungsdatum"]));
+  let description=String(cell(r,["description","beschreibung","ausgabe","bezeichnung","text","zweck"])||"").trim();
+  let supplier=String(cell(r,["supplier","lieferant","empfänger","empfaenger","vendor","geschäft","geschaeft"])||"").trim();
+  let reference=String(cell(r,["reference","referenz","beleg","belegnummer","beleg-nr.","beleg-nr","beleg nr","rechnungsnummer","rechnung nr","invoice","receipt"])||"").trim();
+  let category=String(cell(r,["category","kategorie","kostenart"])||"Sonstiges").trim()||"Sonstiges";
+  let status=normalizeExpenseStatus(cell(r,["status","zahlstatus"]));
+  let method=normalizeExpenseMethod(cell(r,["method","zahlung","zahlungsart","payment","payment method"]));
+  let tax=normalizeExpenseTax(cell(r,["tax","mwst","ust","steuersatz","mwst %"]));
+  let net=numCell(cell(r,["net","netto","netto €","net amount","betrag netto"]));
+  let gross=numCell(cell(r,["gross","brutto","brutto €","betrag","gesamt","total","summe"]));
+  let taxAmount=numCell(cell(r,["taxamount","mwst betrag","mwst-betrag","steuerbetrag","ust betrag"]));
+  if(!net && gross){ net=tax?gross/(1+tax):gross; }
+  if(!gross && net){ gross=net*(1+tax); }
+  if(!taxAmount) taxAmount=Math.max(0,gross-net);
+  net=Math.round(net*100)/100; gross=Math.round(gross*100)/100; taxAmount=Math.round(taxAmount*100)/100;
+  if(!date || (!description && !supplier) || gross===0) return null;
+  return {id:"",date,category,description:description||supplier,supplier,net,tax,taxAmount,gross,method,status,paidDate:status==="bezahlt"?date:"",reference,notes:String(cell(r,["notes","notizen","interne notiz","bemerkung","comment"])||"").trim(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+}
+function expenseNorm(v){return String(v??"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"");}
+function expenseRefKey(e){const r=expenseNorm(e.reference);return r?`ref|${r}`:"";}
+function expenseDateGrossKey(e){return `dg|${e.date}|${Math.round(Number(e.gross||0)*100)}`;}
+function expenseFingerprint(e){
+  // V56: Beleg-Nr. is the primary identity. Receipts without a Beleg-Nr. use date + gross amount.
+  return expenseRefKey(e)||expenseDateGrossKey(e);
+}
+function expenseImportAnalysis(parsed){
+  const current=(db.expenses||[]);
+  const refs=new Set(current.map(expenseRefKey).filter(Boolean));
+  const dateGross=new Set(current.map(expenseDateGrossKey));
+  const seenRefs=new Set(), seenDG=new Set();
+  const additions=[], duplicateRows=[];
+  parsed.forEach(e=>{
+    const rk=expenseRefKey(e), dg=expenseDateGrossKey(e);
+    let dup=false, reason="";
+    if(rk && (refs.has(rk)||seenRefs.has(rk))){dup=true;reason="gleiche Beleg-Nr.";}
+    else if(!rk && (dateGross.has(dg)||seenDG.has(dg))){dup=true;reason="ohne Beleg-Nr.: gleiches Datum + gleicher Bruttobetrag";}
+    // Migration safety: old CRM rows may have lost the Beleg-Nr.; if date+gross already exists, do not re-import.
+    else if(rk && dateGross.has(dg)){dup=true;reason="historische CRM-Zeile: gleiches Datum + gleicher Bruttobetrag";}
+    if(dup){duplicateRows.push({e,reason});return;}
+    if(rk)seenRefs.add(rk); else seenDG.add(dg);
+    additions.push(e);
+  });
+  return {additions,duplicateRows};
+}
+function expensePreviewLine(e){
+  const ref=String(e.reference||"").trim()||"ohne Beleg-Nr.";
+  const who=[e.supplier,e.description].filter(Boolean).join(" — ");
+  return `${e.date} | ${EUR(e.gross)} | ${who} | ${ref}`;
+}
+function importExpensesExcelFile(ev){
+  const file=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!file)return;
+  ensureXLSX().then(()=>file.arrayBuffer()).then(buf=>{
+    const wb=XLSX.read(buf,{type:"array",cellDates:true});
+    const rows=excelSheetRows(wb,["Ausgaben","Expenses","Betriebsausgaben"]);
+    if(!rows.length){alert("Kein Tabellenblatt 'Ausgaben' gefunden. Bitte das Lune-Beauty-Excel mit dem Blatt 'Ausgaben' auswählen.");return;}
+    const parsed=rows.map(expenseFromExcelRow).filter(Boolean);
+    if(!parsed.length){alert("Im Blatt 'Ausgaben' wurden keine importierbaren Zeilen gefunden.");return;}
+    const {additions,duplicateRows}=expenseImportAnalysis(parsed);
+    const gross=additions.reduce((a,e)=>a+Number(e.gross||0),0);
+    if(!additions.length){
+      alert(`Excel geprüft: ${parsed.length} Ausgaben erkannt.\n\n0 NEUE Ausgaben.\n${duplicateRows.length} bereits vorhanden / übersprungen.\n\nEs wird nichts verändert.`);
+      return;
+    }
+    const maxPreview=20;
+    const preview=additions.slice(0,maxPreview).map((e,i)=>`${i+1}. ${expensePreviewLine(e)}`).join("\n");
+    const more=additions.length>maxPreview?`\n… + ${additions.length-maxPreview} weitere`:"";
+    const ok=confirm(`${parsed.length} Ausgaben im Excel erkannt.\n\n${additions.length} NEUE Ausgaben werden importiert.\n${duplicateRows.length} bereits vorhanden/dupliziert werden übersprungen.\nNeue Bruttosumme: ${EUR(gross)}\n\nNEUE ZEILEN:\n${preview}${more}\n\nNur diese neuen Ausgaben ergänzen?`);
+    if(!ok)return;
+    safeStorage.setItem(KEY+"_before_expense_import",JSON.stringify(db));
+    additions.forEach(e=>e.id=nextId((db.expenses||[]).concat(additions.filter(x=>x.id)),"E"));
+    db.expenses=(db.expenses||[]).concat(additions);
+    db=normalizeDb(db);
+    safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[]));
+    safeStorage.setItem(KEY,JSON.stringify(db));
+    renderAll(); renderFinance(); renderExpenseTable();
+    try{syncFinanceCloud();}catch(e){console.warn("Cloud finance sync",e);}
+    excelSetStatus(`Ausgaben-Import: ${additions.length} neu, ${duplicateRows.length} übersprungen. Dashboard aktualisiert.`);
+    alert(`Import abgeschlossen.\n${additions.length} neue Ausgaben hinzugefügt.\n${duplicateRows.length} vorhandene Zeilen übersprungen.`);
+  }).catch(e=>alert("Ausgaben-Import fehlgeschlagen: "+e.message));
+}
+
 function importExcelFile(ev){
   let file=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!file)return;
   ensureXLSX().then(()=>file.arrayBuffer()).then(buf=>{
@@ -1852,10 +2182,11 @@ function importExcelFile(ev){
 - ${incoming.bookings.length} Termine
 - ${incoming.invoices.length} Rechnungen
 - ${incoming.payments.length} Zahlungen
+- ${(incoming.expenses||[]).length} Ausgaben
 - ${incoming.products.length} Produkte
 
 Aktuelle Daten werden ersetzt. Fortfahren?`))return;
-      safeStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel-Backup importiert. Kompletter Staff-Stand wurde wiederhergestellt."); alert("Excel-Backup importiert."); return;
+      safeStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[])); safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel-Backup importiert. Kompletter Staff-Stand wurde wiederhergestellt."); alert("Excel-Backup importiert."); return;
     }
     let incoming=structuredClone(db), changed=[];
     let productRows=excelSheetRows(wb,["Produkte_Stock","Products","Produkte","Stock"]); if(productRows.length){incoming.products=productsFromExcelRows(productRows);changed.push(`${incoming.products.length} Produkte/Lagerzeilen`);}
@@ -1864,12 +2195,13 @@ Aktuelle Daten werden ersetzt. Fortfahren?`))return;
     rows=reviveRows(excelSheetRows(wb,["Termine","Bookings","Agenda"])); if(rows.length){incoming.bookings=rows;changed.push(`${rows.length} Termine`);}
     rows=reviveRows(excelSheetRows(wb,["Rechnungen","Invoices"])); if(rows.length){incoming.invoices=rows;changed.push(`${rows.length} Rechnungen`);}
     rows=reviveRows(excelSheetRows(wb,["Zahlungen","Payments"])); if(rows.length){incoming.payments=rows;changed.push(`${rows.length} Zahlungen`);}
+    rows=reviveRows(excelSheetRows(wb,["Ausgaben","Expenses","Betriebsausgaben"])); if(rows.length){incoming.expenses=rows;changed.push(`${rows.length} Ausgaben`);}
     rows=reviveRows(excelSheetRows(wb,["Stock_Bewegungen","Stock Movements"])); if(rows.length){incoming.stockMovements=rows;changed.push(`${rows.length} Lagerbewegungen`);}
     rows=excelSheetRows(wb,["Service_Rezepte","Recipes"]); if(rows.length){incoming.recipes=Object.assign(structuredClone(db.recipes),recipesFromExcelRows(rows));changed.push("Service-Rezepte");}
     if(!changed.length){alert("Keine erkennbaren Staff-Tabellen im Excel gefunden. Erwartet: Produkte_Stock oder ein Staff-Excel-Backup.");return;}
     incoming=normalizeDb(incoming);
     if(!confirm(`Excel enthält erkannte Daten:\n- ${changed.join("\n- ")}\n\nAktuelle passende Bereiche werden ersetzt. Vorher wird lokal eine Sicherheitskopie gespeichert. Fortfahren?`))return;
-    safeStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel importiert: "+changed.join(", ")+". Vorheriger Stand kann mit 'Vor Import zurück' wiederhergestellt werden."); alert("Excel importiert.");
+    safeStorage.setItem(KEY+"_before_import",JSON.stringify(db)); db=incoming; safeStorage.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(db.expenses||[])); safeStorage.setItem(KEY,JSON.stringify(db)); renderAll(); loadSettings(); tab("dashboard"); excelSetStatus("Excel importiert: "+changed.join(", ")+". Vorheriger Stand kann mit 'Vor Import zurück' wiederhergestellt werden."); alert("Excel importiert.");
   }).catch(e=>alert("Excel-Import fehlgeschlagen: "+e.message));
 }
 
@@ -2017,7 +2349,7 @@ function renderTreatmentArchive(){
   $('treatmentArchiveList').innerHTML=filtered.length?filtered.map(a=>{let c=skinAnalysisCustomer(a),reasons=Array.isArray(a.reasons)?a.reasons.join(' · '):String(a.reasons||'');return `<div class="item"><b>${esc((a.createdAt||'').slice(0,10))} · ${esc(skinAnalysisName(a))}</b><br><span class="badge">${esc(a.profileName||'Hautprofil')}</span> <span class="badge">Score ${esc(a.score||'')}/100</span><br><b>${esc(a.treatmentName||a.recommendedService||'')}</b><div class="analysisMini">${esc(reasons)}</div><div class="analysisMini">${esc(a.phone||'')} ${a.email?' · '+esc(a.email):''}</div><div class="analysisActions"><button class="secondary" onclick="openCustomerFromSkinAnalysis('${esc(a.id)}')">Kundenakte</button>${a.bookingId?`<button class="gold" onclick="openBookingFromSkinAnalysis('${esc(a.id)}')">Anfrage öffnen</button>`:`<button class="gold" onclick="newBookingFromSkinAnalysis('${esc(a.id)}')">Termin anlegen</button>`}</div></div>`;}).join(''):`<p class='small'>Noch keine Beauty-Profile gespeichert.</p>`;
   $('treatmentCatalogList').innerHTML=LUNE_TREATMENT_CATALOG.map(x=>`<div class="catalogCard"><b>${esc(x.profileName)}</b><div class="small">${esc(x.criteria)}</div><span class="badge">${esc(x.treatmentName)}</span><div class="analysisMini">Service: ${esc(x.service)}</div></div>`).join('');
 }
-function renderAll(){renderSelects();renderDashboard();renderBookings();renderCustomers();renderInvoices();renderPayments();renderProducts();renderRecipes();renderInvoiceHelper();renderTagescheck();renderClose();renderTreatmentArchive();renderAftercareDashboard();renderAdminRevenue();}
+function renderAll(){renderSelects();renderDashboard();renderBookings();renderCustomers();renderInvoices();renderPayments();renderProducts();renderRecipes();renderInvoiceHelper();renderTagescheck();renderClose();renderTreatmentArchive();renderAftercareDashboard();renderAdminRevenue();renderFinance();}
 /* V28 — Nachbetreuung & Rebooking: visible CRM workflow, non-destructive. */
 function acDateAdd(dateStr,days){
   const d=new Date((dateStr||TODAY())+"T12:00:00");
@@ -8021,7 +8353,7 @@ window.cancelBooking=function(id){v44OpenStorno(id)};
 window.isCancellationFee=function(b){if(!b)return false;if(b.status==='storniert'&&typeof b.cancellationFee==='boolean')return b.cancellationFee;return appointmentPassed(b)||lateWindow(b)};
 function reasonFor(b){return b.noShow||b.cancellationType==='noshow'?'Ausfallgebühr · Nichterscheinen':b.cancellationType==='late'?'Ausfallgebühr · kurzfristige Stornierung <24h':'Ausfallgebühr'}
 window.invoiceFromBooking=function(id){const b=(db.bookings||[]).find(x=>String(x.id)===String(id));if(!b)return;const active=activeInvoiceForBooking(id);if(active){alert('Für diesen Termin existiert bereits eine aktive Rechnung.');tab('invoices');setTimeout(()=>renderInvoice(active.id,'invoiceDetail'),0);return}if(b.status==='storniert'&&!b.cancellationFee){alert('Dieser Termin wurde rechtzeitig storniert. Keine Ausfallrechnung vorgesehen.');return}const c=(db.customers||[]).find(x=>x.id===b.customerId)||{},isFee=b.status==='storniert'&&!!b.cancellationFee;resetInvoiceForm(false);$('iCustomer').value=b.name;$('iPhone').value=b.phone||'';$('iEmail').value=b.email||'';$('iAddress').value=c.address||'';$('iBookingId').value=b.id;if($('iNoConsumption'))$('iNoConsumption').value=isFee?'1':'';if($('iInvoiceReason'))$('iInvoiceReason').value=isFee?reasonFor(b):'';$('serviceLines').innerHTML='';const treatments=typeof normalizedBookingTreatments==='function'?normalizedBookingTreatments(b):[{id:b.serviceId,price:b.plannedTotal||0}];treatments.forEach(t=>{addServiceLine(t.id);const line=[...document.querySelectorAll('#serviceLines .serviceLine')].slice(-1)[0];if(line){const q=line.querySelector('.qty'),pr=line.querySelector('.price');if(q)q.value=1;if(pr&&Number(t.price)>=0)pr.value=Number(t.price||0)}});if(isFee&&$('iInternalNote'))$('iInternalNote').value=reasonFor(b)+' · Termin '+b.date+' '+b.time+' · Kein Service-/Produktverbrauch buchen.';tab('invoice');if(isFee&&$('invoicePreviewBox'))$('invoicePreviewBox').innerHTML='<div class="stornoFeeBox"><b>'+reasonFor(b)+'</b><br>Die Positionen sind als Ausfallhonorar vorbereitet. Betrag vor Erstellung prüfen.</div>'};
-const oldOpen=window.openBooking;window.openBooking=function(id){oldOpen(id);const b=(db.bookings||[]).find(x=>String(x.id)===String(id)),box=$('bookingDetail');if(!b||!box)return;if(b.status==='storniert'){const fee=!!b.cancellationFee,label=b.noShow||b.cancellationType==='noshow'?'No-show':b.cancellationType==='late'?'Storno <24h':'Storno >24h';if((b.noShow||b.cancellationType==='noshow')&&!activeInvoiceForBooking(b.id)){const actions=box.querySelector('.bookingActions');if(actions){const invoiceButtons=[...actions.querySelectorAll('button')].filter(x=>String(x.getAttribute('onclick')||'').includes('invoiceFromBooking'));invoiceButtons.forEach(x=>x.textContent='No-show Rechnung erstellen')}}const existing=box.querySelector('.v44FeeSummary');if(!existing){const d=document.createElement('div');d.className='v44FeeSummary stornoFeeBox';d.innerHTML='<b>'+label+'</b><br>'+(fee?'Ausfallgebühr freigegeben. Eine Rechnung kann direkt aus diesem Termin erstellt werden.':'Keine Ausfallgebühr vorgesehen.');box.insertBefore(d,box.querySelector('.bookingActions')||null)}}};
+const oldOpen=window.openBooking;window.openBooking=function(id){oldOpen(id);const b=(db.bookings||[]).find(x=>String(x.id)===String(id)),box=$('bookingDetail');if(!b||!box)return;if(b.status==='storniert'){const fee=!!b.cancellationFee,label=b.noShow||b.cancellationType==='noshow'?'No-show':b.cancellationType==='late'?'Storno <24h':'Storno >24h';const existing=box.querySelector('.v44FeeSummary');if(!existing){const d=document.createElement('div');d.className='v44FeeSummary stornoFeeBox';d.innerHTML='<b>'+label+'</b><br>'+(fee?'Ausfallgebühr freigegeben. Eine Rechnung kann direkt aus diesem Termin erstellt werden.':'Keine Ausfallgebühr vorgesehen.');box.insertBefore(d,box.querySelector('.bookingActions')||null)}}};
 })();
 </script>
 
@@ -8176,6 +8508,86 @@ setTimeout(cleanOrphanLoginText,500);
 })();
 </script>
 
+
+<script id="lune-v59-monthly-invoice-cloud-check">
+(function(){
+'use strict';
+const MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+function monthSelect(){return document.getElementById('invoiceCloudMonth');}
+function selectedYear(){const el=document.getElementById('financeYear');return Number(el&&el.value)||new Date().getFullYear();}
+function fillMonthSelect(){
+  const el=monthSelect(); if(!el)return;
+  const old=el.value;
+  el.innerHTML=MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+  const now=new Date();
+  el.value=old||String(now.getMonth()+1);
+}
+function invoiceDateParts(inv){
+  const raw=String(inv.date||inv.createdAt||'').trim();
+  let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m)return {y:+m[1],mo:+m[2]};
+  m=raw.match(/^(\d{2})\.(\d{2})\.(\d{4})/); if(m)return {y:+m[3],mo:+m[2]};
+  const d=new Date(raw); if(!isNaN(d))return {y:d.getFullYear(),mo:d.getMonth()+1};
+  return null;
+}
+function invoicesOfMonth(y,mo){
+  return (db.invoices||[]).filter(inv=>{const p=invoiceDateParts(inv);return p&&p.y===y&&p.mo===mo&&String(inv.number||inv.id||'').trim();});
+}
+function cfg(){try{return JSON.parse(localStorage.getItem('lune_staff_cloud_config_v1')||'{}');}catch(_){return {};}}
+async function post(payload){
+  const c=cfg(); if(!c.apiUrl||!c.token)throw new Error('Staff Cloud ist nicht konfiguriert.');
+  const body=new URLSearchParams(Object.assign({},payload,{token:c.token,clientId:'staff-v59-month-check'}));
+  const r=await fetch(c.apiUrl,{method:'POST',body,redirect:'follow'}); const t=await r.text();
+  let data; try{data=JSON.parse(t);}catch(_){throw new Error('Ungültige Antwort vom Cloud-Service.');}
+  if(!data||data.ok===false)throw new Error((data&&data.error)||'Cloud-Fehler'); return data;
+}
+async function uploadInvoice(inv){
+  const blob=await invoicePdfBlob(inv); const buf=await blob.arrayBuffer(); const bytes=new Uint8Array(buf);
+  let binary=''; const chunk=0x8000; for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk));
+  const base64=btoa(binary);
+  const result=await post({action:'deliverInvoice',invoiceId:inv.id,email:inv.email||'',customerName:inv.customer||'Kunde',fileName:invoiceFileName(inv),pdfBase64:base64,sendEmail:'no'});
+  if(result.driveFileId)inv.driveFileId=result.driveFileId;
+  if(result.driveFileUrl)inv.driveFileUrl=result.driveFileUrl;
+  inv.archivedAt=result.archivedAt||inv.archivedAt||new Date().toISOString();
+  inv.deliveryStatus=inv.deliveryStatus==='email-sent'?'email-sent':'archived';
+  return result;
+}
+window.checkMonthlyInvoiceCloud=async function(opts){
+  opts=opts||{}; fillMonthSelect();
+  const y=selectedYear(), mo=Number(monthSelect()&&monthSelect().value)||new Date().getMonth()+1;
+  const list=invoicesOfMonth(y,mo);
+  if(!list.length){if(!opts.silent)alert(`Keine Rechnungen für ${MONTHS[mo-1]} ${y} gefunden.`);return;}
+  const missing=list.filter(inv=>!String(inv.driveFileId||'').trim());
+  if(!missing.length){
+    if(!opts.silent)alert(`Cloud-Check ${MONTHS[mo-1]} ${y}\n\n✓ ${list.length} Rechnungen im CRM sind bereits als Cloud-archiviert markiert.\n0 fehlen.`);
+    localStorage.setItem(`lune_invoice_cloud_check_${y}_${mo}`,new Date().toISOString()); return;
+  }
+  if(!opts.silent){
+    const names=missing.slice(0,12).map(i=>'• '+String(i.number||i.id)).join('\n');
+    const more=missing.length>12?`\n… +${missing.length-12} weitere`:'';
+    if(!confirm(`Cloud-Check ${MONTHS[mo-1]} ${y}\n\n${list.length} Rechnungen gefunden.\n${missing.length} fehlen im Cloud-Archiv und werden jetzt automatisch hochgeladen.\n\n${names}${more}\n\nFortfahren?`))return;
+  }
+  let ok=0,fail=[];
+  for(const inv of missing){try{await uploadInvoice(inv);ok++;}catch(e){fail.push(`${inv.number||inv.id}: ${e.message||e}`);}}
+  persist();
+  try{if(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()&&window.LuneStaffCloudSync.push)await window.LuneStaffCloudSync.push();}catch(_){ }
+  localStorage.setItem(`lune_invoice_cloud_check_${y}_${mo}`,new Date().toISOString());
+  const msg=`Monats-Cloud-Check ${MONTHS[mo-1]} ${y}\n\nRechnungen: ${list.length}\nBereits archiviert: ${list.length-missing.length}\nNeu hochgeladen: ${ok}\nFehler: ${fail.length}`+(fail.length?'\n\n'+fail.slice(0,8).join('\n'):'')+'\n\n'+(fail.length?'Bitte die Fehler prüfen.':'✓ Monatsarchiv vollständig.');
+  if(!opts.silent||fail.length)alert(msg);
+  if(typeof renderFinance==='function')renderFinance();
+};
+function endOfMonthAutoCheck(){
+  const now=new Date(); const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+  if(tomorrow.getMonth()===now.getMonth())return;
+  const y=now.getFullYear(),mo=now.getMonth()+1,key=`lune_invoice_cloud_check_${y}_${mo}`;
+  if(localStorage.getItem(key))return;
+  const fy=document.getElementById('financeYear'); if(fy)fy.value=String(y); fillMonthSelect(); if(monthSelect())monthSelect().value=String(mo);
+  setTimeout(()=>window.checkMonthlyInvoiceCloud({silent:true}),1200);
+}
+const oldRender=window.renderFinance;
+if(typeof oldRender==='function')window.renderFinance=function(){const r=oldRender.apply(this,arguments);fillMonthSelect();return r;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{fillMonthSelect();endOfMonthAutoCheck();},{once:true});else{fillMonthSelect();endOfMonthAutoCheck();}
+})();
+</script>
 
 </body>
 </html>
