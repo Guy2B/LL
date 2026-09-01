@@ -3846,30 +3846,41 @@ body{min-height:100vh}
         activity("booking_confirmed",booking.name||"Kundin","booking",id);
         overlay.ok(0);
 
-        overlay.active(1);await sleep(250);overlay.ok(1);
-        overlay.active(2);
-        if(!booking.email){
-          overlay.bad(2,"E-Mail nicht gesendet · E-Mail-Adresse fehlt");
-        }else{
-          await sleep(250);
-        }
-
+        // V47: Status zuerst sicher in die Cloud schreiben.
+        // Code.gs versendet Bestätigungen absichtlich NICHT mehr beim saveState,
+        // daher muss der Versand hier explizit über sendBookingConfirmation erfolgen.
         overlay.active(3);
         const synced=await cloudPush();
-        if(synced){
+        if(!synced){
+          overlay.bad(3,"Cloud nicht konfiguriert oder nicht erreichbar");
+          overlay.bad(1,"Kalenderdatei konnte nicht erstellt werden");
+          if(booking.email)overlay.bad(2,"E-Mail nicht gesendet · Cloud-Verbindung fehlt");
+        }else{
           overlay.ok(3);
+          if(!booking.email){
+            overlay.bad(1,"Kalenderdatei nicht per E-Mail erstellt · E-Mail-Adresse fehlt");
+            overlay.bad(2,"E-Mail nicht gesendet · E-Mail-Adresse fehlt");
+          }else{
+            try{
+              overlay.active(1);
+              overlay.active(2);
+              const mailResult=await v40Post({action:'sendBookingConfirmation',bookingId:id});
+              if(mailResult&&mailResult.ok!==false){
+                overlay.ok(1);
+                overlay.ok(2,"Bestätigungs-E-Mail gesendet an "+(mailResult.emailSentTo||booking.email));
+              }else{
+                throw new Error((mailResult&&mailResult.error)||'Unbekannter Versandfehler');
+              }
+            }catch(mailError){
+              const msg=(mailError&&mailError.message)||String(mailError);
+              overlay.bad(1,"Kalender/E-Mail-Fehler: "+msg);
+              overlay.bad(2,"E-Mail-Versand fehlgeschlagen: "+msg);
+              console.error('V47 booking confirmation',mailError);
+            }
+          }
           if(window.LuneStaffCloudSync.pull){
             try{await window.LuneStaffCloudSync.pull();}catch(_){}
           }
-          const fresh=db.bookings.find(function(b){return String(b.id)===String(id);});
-          if(fresh&&fresh.confirmationSentAt){
-            overlay.ok(2);
-          }else if(booking.email){
-            overlay.bad(2,"E-Mail-Versand konnte nicht bestätigt werden");
-          }
-        }else{
-          overlay.bad(3,"Cloud nicht konfiguriert oder nicht erreichbar");
-          if(booking.email)overlay.bad(2,"E-Mail-Versand nicht bestätigt");
         }
       }catch(error){
         overlay.bad(3,"Cloud-Fehler: "+(error.message||error));
