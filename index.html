@@ -2832,6 +2832,84 @@
 <script async src="https://www.instagram.com/embed.js"></script>
 
 
+<script id="lune-booking-hours-v41">
+(function(){
+  'use strict';
+  var OPEN_MIN = 9*60;
+  var DEFAULT_DURATION = 60; // prestation sans durée: dernière réservation 1 h avant fermeture
+
+  function mins(v){
+    var m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);
+    return m ? Number(m[1])*60+Number(m[2]) : NaN;
+  }
+  function hhmm(n){
+    n=Math.max(0,Math.min(1439,Math.floor(n)));
+    return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+  }
+  function closeForDate(dateValue){
+    if(!dateValue)return null;
+    var p=dateValue.split('-').map(Number);
+    if(p.length!==3)return null;
+    var d=new Date(p[0],p[1]-1,p[2]);
+    var day=d.getDay();
+    if(day===0)return null;      // dimanche fermé
+    if(day===6)return 13*60;     // samedi 09:00–13:00
+    return 18*60;               // lundi–vendredi 09:00–18:00
+  }
+  function duration(){
+    var el=document.getElementById('booking-duration');
+    var n=Number(el&&el.value||0);
+    return n>0?n:DEFAULT_DURATION;
+  }
+  function updateLimits(){
+    var date=document.getElementById('booking-date');
+    var time=document.getElementById('booking-time');
+    if(!date||!time)return;
+    var close=closeForDate(date.value);
+    time.min='09:00';
+    time.step='900';
+    if(close===null){
+      time.removeAttribute('max');
+      return;
+    }
+    time.max=hhmm(close-duration());
+    if(time.value && !isValid(false)) time.value='';
+  }
+  function isValid(showMessage){
+    var date=document.getElementById('booking-date');
+    var time=document.getElementById('booking-time');
+    if(!date||!time||!date.value||!time.value)return true;
+    var close=closeForDate(date.value);
+    var start=mins(time.value);
+    var dur=duration();
+    var msg='';
+    if(close===null) msg='Sonntags sind keine Termine buchbar.';
+    else if(start<OPEN_MIN) msg='Der früheste buchbare Termin ist 09:00 Uhr.';
+    else if(start+dur>close){
+      msg='Dieser Termin endet nach Ladenschluss. Bitte wählen Sie eine frühere Uhrzeit.';
+    }
+    time.setCustomValidity(msg);
+    if(msg && showMessage) time.reportValidity();
+    return !msg;
+  }
+  window.LuneValidateBookingHours=function(showMessage){updateLimits();return isValid(showMessage!==false);};
+  window.LuneUpdateBookingTimeLimits=updateLimits;
+
+  function init(){
+    var date=document.getElementById('booking-date');
+    var time=document.getElementById('booking-time');
+    var service=document.getElementById('booking-service');
+    if(!date||!time)return;
+    date.addEventListener('change',function(){updateLimits();isValid(false);});
+    time.addEventListener('input',function(){isValid(false);});
+    time.addEventListener('change',function(){isValid(true);});
+    if(service)service.addEventListener('change',function(){setTimeout(function(){updateLimits();isValid(false);},0);});
+    updateLimits();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 <script id="lune-booking-hardfix-v40">
 (function(){
   'use strict';
@@ -2870,6 +2948,7 @@
     ev.preventDefault();
     ev.stopImmediatePropagation();
     if(!form.reportValidity())return;
+    if(window.LuneValidateBookingHours && !window.LuneValidateBookingHours(true))return;
 
     var meta=syncHidden()||{};
     var endpoint=String(window.LUNE_STAFF_CLOUD_API||'').trim();

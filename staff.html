@@ -8589,5 +8589,24 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- Lune Beauty V45b: booking communication policy (safe placement) -->
+<script id="lune-booking-policy-v45b">
+(function(){
+  'use strict';
+  const POLICY='Bei nicht rechtzeitig gemeldeter Absage oder Nichterscheinen innerhalb von 24 Stunden vor dem Termin werden gemäß unseren AGB 100 % des Behandlungspreises als Ausfallhonorar berechnet.';
+  function enrich(b){
+    if(!b)return b;
+    b.reminderHours=12;
+    b.cancellationNoticeHours=24;
+    b.cancellationFeePercent=100;
+    b.reminderPolicy=POLICY;
+    return b;
+  }
+  if(typeof window.addBooking==='function'){const old=window.addBooking;window.addBooking=function(){return enrich(old.apply(this,arguments));};}
+  if(typeof window.updateBooking==='function'){const old=window.updateBooking;window.updateBooking=function(){return enrich(old.apply(this,arguments));};}
+  try{(db.bookings||[]).forEach(enrich);}catch(_){}
+})();
+</script>
 </body>
 </html>
