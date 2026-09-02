@@ -1,352 +1,198 @@
-/* Lune Beauty — Staff Cloud Sync (Google Sheets + Apps Script)
-   Beta gratuite: synchronise l'objet complet `db` entre mobile/ordinateur.
-   - API URL + secret token sont stockés uniquement dans le navigateur staff.
-   - Les visiteurs du site peuvent seulement créer une demande RDV via publicBooking.
-*/
-(() => {
-  "use strict";
+/* Lune Beauty Staff Cloud Sync — Production 2026-09-02
+ * Drop-in replacement for assets/js/staff-cloud-sync.js
+ * Contract used by staff.html: isReady(), push(), pull(), clearOperationalData().
+ * Important: this module NEVER auto-pushes on load. A stale browser cannot overwrite Cloud just by opening Staff.
+ */
+(function(){
+  'use strict';
 
-  const CONFIG_KEY = "lune_staff_cloud_config_v1";
-  const PLACEHOLDER = "PASTE_GOOGLE_APPS_SCRIPT_STAFF_CLOUD_URL_HERE";
-  const CLIENT_ID_KEY = "lune_staff_cloud_client_id_v1";
-  const LAST_VERSION_KEY = "lune_staff_cloud_last_version_v1";
-  const LAST_PULL_KEY = "lune_staff_cloud_last_pull_v1";
-  const LAST_PUSH_KEY = "lune_staff_cloud_last_push_v1";
+  const CONFIG_KEY='lune_staff_cloud_config_v1';
+  const CLIENT_ID_KEY='lune_staff_cloud_client_id_v1';
+  const PLACEHOLDER='PASTE_GOOGLE_APPS_SCRIPT_STAFF_CLOUD_URL_HERE';
+  let busyPromise=null;
 
-  let uploadTimer = null;
-  let pullTimer = null;
-  let suppressAutoUpload = false;
-  let lastKnownCloudVersion = localStorage.getItem(LAST_VERSION_KEY) || "";
-
-  function byId(id) { return document.getElementById(id); }
-  function nowIso() { return new Date().toISOString(); }
-  function clientId() {
-    let id = localStorage.getItem(CLIENT_ID_KEY);
-    if (!id) {
-      id = "staff-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
-      localStorage.setItem(CLIENT_ID_KEY, id);
+  function storage(){
+    try{if(typeof safeStorage!=='undefined'&&safeStorage)return safeStorage;}catch(_){}
+    return window.localStorage;
+  }
+  function readConfig(){
+    try{return Object.assign({apiUrl:'',token:'',auto:false},JSON.parse(storage().getItem(CONFIG_KEY)||'{}'));}
+    catch(_){return {apiUrl:'',token:'',auto:false};}
+  }
+  function saveConfig(cfg){
+    const clean={
+      apiUrl:String(cfg&&cfg.apiUrl||'').trim(),
+      token:String(cfg&&cfg.token||'').trim(),
+      auto:!!(cfg&&cfg.auto)
+    };
+    storage().setItem(CONFIG_KEY,JSON.stringify(clean));
+    return clean;
+  }
+  function clientId(){
+    let id='';
+    try{id=storage().getItem(CLIENT_ID_KEY)||'';}catch(_){}
+    if(!id){
+      id='staff-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+      try{storage().setItem(CLIENT_ID_KEY,id);}catch(_){}
     }
     return id;
   }
-  function readConfig() {
-    try {
-      return Object.assign({ apiUrl: "", token: "", auto: false }, JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}"));
-    } catch (_) {
-      return { apiUrl: "", token: "", auto: false };
-    }
+  function isReady(){
+    const c=readConfig();
+    return !!(c.apiUrl&&c.apiUrl!==PLACEHOLDER&&c.token);
   }
-  function writeConfig(cfg) {
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(Object.assign(readConfig(), cfg || {})));
+  function assertReady(){
+    const c=readConfig();
+    if(!c.apiUrl||c.apiUrl===PLACEHOLDER)throw new Error('URL Apps Script manquante.');
+    if(!c.token)throw new Error('Token Staff manquant.');
+    return c;
   }
-  function apiReady() {
-    const cfg = readConfig();
-    return cfg.apiUrl && cfg.apiUrl !== PLACEHOLDER && cfg.token;
+  function withBusy(fn){
+    if(busyPromise)return busyPromise;
+    busyPromise=Promise.resolve().then(fn).finally(function(){busyPromise=null;});
+    return busyPromise;
   }
-  function setStatus(message, type = "info") {
-    const el = byId("cloudSyncStatus");
-    if (!el) return;
-    el.textContent = message;
-    el.dataset.type = type;
-    el.style.color = type === "error" ? "#b83227" : (type === "ok" ? "#166534" : "#777");
-  }
-  function esc(value) {
-    return String(value ?? "").replace(/[&<>"']/g, (m) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
-  }
-
-  function addCloudPanel() {
-    if (byId("cloudSyncPanel")) return;
-    const settings = byId("settings") || byId("dashboard") || document.querySelector("main");
-    if (!settings) return;
-
-    const cfg = readConfig();
-    const panel = document.createElement("div");
-    panel.id = "cloudSyncPanel";
-    panel.className = "card setupGate";
-    panel.innerHTML = `
-      <h2>Cloud Sync gratuit</h2>
-      <p class="small">Synchronisation Google Sheets / Apps Script pour RDV, clients, factures, paiements, stock et paramètres Staff.</p>
-      <div class="row">
-        <input id="cloudApiUrl" placeholder="URL Google Apps Script Web App" value="${esc(cfg.apiUrl || "")}">
-        <input id="cloudToken" type="password" placeholder="Token secret Staff" value="${esc(cfg.token || "")}">
-      </div>
-      <label class="checkRow" style="display:flex;align-items:center;gap:10px;margin:8px 0;">
-        <input id="cloudAuto" type="checkbox" style="width:auto" ${cfg.auto ? "checked" : ""}>
-        Synchronisation automatique sur cet appareil
-      </label>
-      <div class="backupGrid noPrint" style="display:flex;flex-wrap:wrap;gap:8px;">
-        <button class="gold" id="cloudSaveCfgBtn" type="button">Sauver connexion</button>
-        <button class="secondary" id="cloudPullBtn" type="button">Importer Cloud → cet appareil</button>
-        <button class="secondary" id="cloudPushBtn" type="button">Envoyer cet appareil → Cloud</button>
-        <button class="secondary" id="cloudCheckBtn" type="button">Tester connexion</button>
-      </div>
-      <p id="cloudSyncStatus" class="small">Cloud non configuré.</p>
-      <p class="small"><b>Important :</b> avant la première importation Cloud, un backup local automatique est sauvegardé dans ce navigateur.</p>
-    `;
-
-    settings.insertBefore(panel, settings.firstChild);
-
-    byId("cloudSaveCfgBtn")?.addEventListener("click", () => {
-      writeConfig({
-        apiUrl: String(byId("cloudApiUrl")?.value || "").trim(),
-        token: String(byId("cloudToken")?.value || "").trim(),
-        auto: !!byId("cloudAuto")?.checked
-      });
-      applyAutoSync();
-      setStatus("Connexion Cloud sauvegardée sur cet appareil.", "ok");
-    });
-    byId("cloudAuto")?.addEventListener("change", () => {
-      writeConfig({ auto: !!byId("cloudAuto")?.checked });
-      applyAutoSync();
-    });
-    byId("cloudCheckBtn")?.addEventListener("click", testCloud);
-    byId("cloudPullBtn")?.addEventListener("click", () => pullCloud(true));
-    byId("cloudPushBtn")?.addEventListener("click", () => pushCloud(true));
-
-    refreshStatusLine();
-  }
-
-  function refreshStatusLine() {
-    if (!byId("cloudSyncStatus")) return;
-    const lp = localStorage.getItem(LAST_PULL_KEY);
-    const lu = localStorage.getItem(LAST_PUSH_KEY);
-    if (!apiReady()) {
-      setStatus("Cloud non configuré : collez l'URL Apps Script et le token secret.", "info");
-      return;
-    }
-    setStatus(`Cloud configuré. Dernier import: ${lp || "—"}. Dernier envoi: ${lu || "—"}.`, "ok");
-  }
-
-  function jsonp(action, params = {}) {
-    const cfg = readConfig();
-    const url = cfg.apiUrl;
-    return new Promise((resolve, reject) => {
-      if (!apiReady()) return reject(new Error("Cloud non configuré"));
-      const cb = "luneStaffCloudCb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-      const query = new URLSearchParams(Object.assign({}, params, {
-        action,
-        token: cfg.token,
-        clientId: clientId(),
-        callback: cb,
-        _: Date.now()
+  function jsonp(action,params){
+    const cfg=assertReady();
+    return new Promise(function(resolve,reject){
+      const cb='luneCloudCb_'+Date.now()+'_'+Math.floor(Math.random()*1000000);
+      const q=new URLSearchParams(Object.assign({},params||{}, {
+        action:action,token:cfg.token,clientId:clientId(),callback:cb,_:Date.now()
       }));
-      const script = document.createElement("script");
-      const timer = setTimeout(() => {
-        cleanup();
-        reject(new Error("Timeout Cloud"));
-      }, 15000);
-      function cleanup() {
-        clearTimeout(timer);
-        delete window[cb];
-        script.remove();
+      const script=document.createElement('script');
+      let done=false;
+      const timer=setTimeout(function(){finish();reject(new Error('Timeout Cloud (20 s).'));},20000);
+      function finish(){
+        if(done)return;done=true;clearTimeout(timer);
+        try{delete window[cb];}catch(_){}
+        try{script.remove();}catch(_){}
       }
-      window[cb] = (data) => {
-        cleanup();
-        if (data && data.ok === false) reject(new Error(data.error || "Erreur Cloud"));
-        else resolve(data || {});
+      window[cb]=function(data){
+        finish();
+        if(!data||data.ok===false)return reject(new Error(data&&data.error||'Réponse Cloud invalide.'));
+        resolve(data);
       };
-      script.onerror = () => { cleanup(); reject(new Error("Cloud non joignable")); };
-      script.src = url + (url.includes("?") ? "&" : "?") + query.toString();
+      script.onerror=function(){finish();reject(new Error('Cloud non joignable.'));};
+      script.src=cfg.apiUrl+(cfg.apiUrl.indexOf('?')>=0?'&':'?')+q.toString();
       document.head.appendChild(script);
     });
   }
-
-  function hiddenPost(payload) {
-    const cfg = readConfig();
-    return new Promise((resolve) => {
-      const iframeName = "luneStaffCloudPost_" + Date.now();
-      const iframe = document.createElement("iframe");
-      iframe.name = iframeName;
-      iframe.style.display = "none";
-      document.body.appendChild(iframe);
-
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = cfg.apiUrl;
-      form.target = iframeName;
-      form.style.display = "none";
-
-      Object.entries(Object.assign({}, payload, { token: cfg.token, clientId: clientId() })).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = String(value ?? "");
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      iframe.addEventListener("load", () => setTimeout(resolve, 250), { once: true });
-      form.submit();
-      setTimeout(resolve, 1800);
-      setTimeout(() => { form.remove(); iframe.remove(); }, 7000);
+  async function post(payload){
+    const cfg=assertReady();
+    const body=new URLSearchParams(Object.assign({},payload||{}, {token:cfg.token,clientId:clientId()}));
+    const response=await fetch(cfg.apiUrl,{method:'POST',body:body,redirect:'follow'});
+    const text=await response.text();
+    let data;
+    try{data=JSON.parse(text);}catch(_){throw new Error('Réponse Apps Script non JSON. Vérifiez le déploiement Web App.');}
+    if(!data||data.ok===false)throw new Error(data&&data.error||'Erreur Cloud.');
+    return data;
+  }
+  function currentDb(){
+    try{return window.db||db;}catch(_){return null;}
+  }
+  function setDb(next){
+    try{db=next;window.db=next;return true;}catch(_){try{window.db=next;return true;}catch(__){return false;}}
+  }
+  function normalize(next){
+    try{return typeof window.normalizeDb==='function'?window.normalizeDb(next):next;}catch(_){return next;}
+  }
+  function savePrimaryLocal(next){
+    const st=storage();
+    try{
+      if(typeof KEY!=='undefined')st.setItem(KEY,JSON.stringify(next));
+    }catch(e){console.warn('Primary local cache write skipped; Cloud state remains loaded in memory.',e);}
+    try{
+      if(typeof FINANCE_EXPENSES_KEY!=='undefined'&&Array.isArray(next&&next.expenses)){
+        st.setItem(FINANCE_EXPENSES_KEY,JSON.stringify(next.expenses));
+      }
+    }catch(e){console.warn('Finance local cache write skipped.',e);}
+  }
+  function rerender(){
+    try{if(typeof window.renderAll==='function')window.renderAll();}catch(e){console.warn(e);}
+    try{if(typeof window.loadSettings==='function')window.loadSettings();}catch(_){}
+    try{window.dispatchEvent(new CustomEvent('lune:cloud-db-updated',{detail:{at:new Date().toISOString()}}));}catch(_){}
+  }
+  async function pull(){
+    return withBusy(async function(){
+      const data=await jsonp('state',{});
+      if(!data.state||typeof data.state!=='object')throw new Error('Le Cloud ne contient aucun état Staff exploitable.');
+      const next=normalize(data.state);
+      if(!setDb(next))throw new Error('Impossible de charger l’état Cloud dans Staff.');
+      savePrimaryLocal(next);
+      rerender();
+      return {ok:true,version:data.version||'',updatedAt:data.updatedAt||'',state:next};
     });
   }
-
-  async function testCloud() {
-    try {
-      if (!apiReady()) throw new Error("URL/token manquant");
-      setStatus("Test Cloud en cours…", "info");
-      const res = await jsonp("health");
-      setStatus(`Cloud OK · version: ${res.version || "—"}`, "ok");
-    } catch (err) {
-      setStatus("Erreur Cloud: " + err.message, "error");
-    }
-  }
-
-  function safeLocalBackup(label) {
-    try {
-      const key = (typeof KEY !== "undefined" ? KEY : "lune_staff") + "_before_cloud_" + label + "_" + new Date().toISOString().replace(/[:.]/g, "-");
-      localStorage.setItem(key, JSON.stringify(typeof db !== "undefined" ? db : {}));
-      return key;
-    } catch (_) {
-      return "";
-    }
-  }
-
-  async function pullCloud(manual = false) {
-    try {
-      if (!apiReady()) throw new Error("URL/token manquant");
-      setStatus("Import Cloud en cours…", "info");
-      const res = await jsonp("state");
-      if (!res.state) {
-        setStatus("Cloud vide. Utilise d'abord “Envoyer cet appareil → Cloud”.", "info");
-        return;
-      }
-      if (manual && !confirm("Importer le Cloud sur cet appareil ? Un backup local sera créé avant remplacement.")) return;
-      safeLocalBackup("pull");
-
-      suppressAutoUpload = true;
-      db = (typeof normalizeDb === "function") ? normalizeDb(res.state) : res.state;
-      if (typeof KEY !== "undefined") localStorage.setItem(KEY, JSON.stringify(db));
-      if (typeof renderAll === "function") renderAll();
-      if (typeof loadSettings === "function") loadSettings();
-      try { window.dispatchEvent(new CustomEvent('lune:cloud-db-updated', { detail: { source: 'pull', version: String(res.version || '') } })); } catch (_) {}
-      suppressAutoUpload = false;
-
-      lastKnownCloudVersion = String(res.version || "");
-      localStorage.setItem(LAST_VERSION_KEY, lastKnownCloudVersion);
-      localStorage.setItem(LAST_PULL_KEY, new Date().toLocaleString("fr-FR"));
-      setStatus("Import Cloud terminé.", "ok");
-    } catch (err) {
-      suppressAutoUpload = false;
-      setStatus("Erreur import Cloud: " + err.message, "error");
-    }
-  }
-
-  async function pushCloud(manual = false) {
-    try {
-      if (!apiReady()) throw new Error("URL/token manquant");
-      if (typeof db === "undefined") throw new Error("Base Staff introuvable");
-      if (manual && !confirm("Envoyer les données de cet appareil vers le Cloud ? Cela remplace le dernier état Cloud.")) return;
-      setStatus("Envoi Cloud en cours…", "info");
-      await hiddenPost({
-        action: "saveState",
-        baseVersion: lastKnownCloudVersion || "",
-        state: JSON.stringify(db),
-        updatedBy: clientId()
-      });
-      localStorage.setItem(LAST_PUSH_KEY, new Date().toLocaleString("fr-FR"));
-      // Read back metadata so we know the new version.
-      try {
-        const res = await jsonp("health");
-        lastKnownCloudVersion = String(res.version || lastKnownCloudVersion || "");
-        localStorage.setItem(LAST_VERSION_KEY, lastKnownCloudVersion);
-      } catch (_) {}
-      try { window.dispatchEvent(new CustomEvent('lune:cloud-db-updated', { detail: { source: 'push', version: lastKnownCloudVersion || '' } })); } catch (_) {}
-      setStatus("Envoi Cloud terminé.", "ok");
-    } catch (err) {
-      setStatus("Erreur envoi Cloud: " + err.message, "error");
-    }
-  }
-
-
-  async function clearOperationalDataCloud(options = {}) {
-    if (!apiReady()) throw new Error("URL/token manquant");
-    setStatus("Suppression Cloud en cours…", "info");
-    const res = await jsonp("clearOperationalData", {
-      clearLogs: options.clearLogs === false ? "no" : "yes"
+  async function push(){
+    return withBusy(async function(){
+      const state=currentDb();
+      if(!state||typeof state!=='object')throw new Error('Aucun état Staff local à synchroniser.');
+      const data=await post({action:'saveState',state:JSON.stringify(state),updatedBy:clientId()});
+      return {ok:true,version:data.version||''};
     });
-    if (!res || res.ok === false) throw new Error((res && res.error) || "Suppression Cloud impossible");
-    if (res.version) {
-      lastKnownCloudVersion = String(res.version || "");
-      localStorage.setItem(LAST_VERSION_KEY, lastKnownCloudVersion);
-    }
-    localStorage.setItem(LAST_PUSH_KEY, new Date().toLocaleString("fr-FR"));
-    setStatus("Cloud nettoyé.", "ok");
-    try { window.dispatchEvent(new CustomEvent('lune:cloud-db-updated', { detail: { source: 'clear', version: lastKnownCloudVersion || '' } })); } catch (_) {}
-    return res;
+  }
+  async function clearOperationalData(options){
+    return withBusy(async function(){
+      const p=Object.assign({action:'clearOperationalData',clearLogs:'yes'},options||{});
+      if(typeof p.clearLogs==='boolean')p.clearLogs=p.clearLogs?'yes':'no';
+      return await post(p);
+    });
+  }
+  async function health(){
+    return await jsonp('health',{});
   }
 
-  async function pullIfNewer() {
-    if (!apiReady() || suppressAutoUpload) return;
-    try {
-      const res = await jsonp("health");
-      const v = String(res.version || "");
-      if (v && v !== lastKnownCloudVersion) {
-        await pullCloud(false);
-      }
-    } catch (_) {}
-  }
-
-  function queueUpload() {
-    const cfg = readConfig();
-    if (!cfg.auto || !apiReady() || suppressAutoUpload) return;
-    clearTimeout(uploadTimer);
-    uploadTimer = setTimeout(() => pushCloud(false), 1600);
-  }
-
-  function wrapPersist() {
-    if (typeof persist !== "function" || persist.__cloudWrapped) return;
-    const original = persist;
-    const wrapped = function cloudPersistWrapper() {
-      const result = original.apply(this, arguments);
-      queueUpload();
-      return result;
+  function mountConfigUi(){
+    if(document.getElementById('luneCloudProductionCard'))return;
+    const admin=document.getElementById('admin');
+    if(!admin)return;
+    const cfg=readConfig();
+    const card=document.createElement('div');
+    card.id='luneCloudProductionCard';
+    card.className='card';
+    card.innerHTML='\
+      <h2>Cloud Lune Beauty · Production</h2>\
+      <p class="small">Cette connexion charge d’abord le Cloud. Aucun envoi automatique n’est fait à l’ouverture.</p>\
+      <label>URL Web App Apps Script</label>\
+      <input id="luneCloudProdUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec">\
+      <label>Token Staff</label>\
+      <input id="luneCloudProdToken" type="password" autocomplete="off">\
+      <div class="bookingActions" style="margin-top:10px">\
+        <button class="gold" type="button" id="luneCloudProdSave">Speichern & testen</button>\
+        <button class="secondary" type="button" id="luneCloudProdPull">Cloud importieren</button>\
+        <button class="secondary" type="button" id="luneCloudProdPush">Aktuellen Stand sichern</button>\
+      </div>\
+      <div id="luneCloudProdStatus" class="statusNote small"></div>';
+    const first=admin.querySelector('.card');
+    if(first)admin.insertBefore(card,first);else admin.prepend(card);
+    const u=card.querySelector('#luneCloudProdUrl'),t=card.querySelector('#luneCloudProdToken'),s=card.querySelector('#luneCloudProdStatus');
+    u.value=cfg.apiUrl||'';t.value=cfg.token||'';
+    function status(msg,bad){s.textContent=msg;s.style.color=bad?'#b83227':'#166534';}
+    card.querySelector('#luneCloudProdSave').onclick=async function(){
+      saveConfig({apiUrl:u.value,token:t.value,auto:false});
+      try{const h=await health();status('✓ Cloud connecté · '+(h.apiVersion||'API OK')+' · '+(h.updatedAt||''),false);}
+      catch(e){status('Connexion échouée : '+(e.message||e),true);}
     };
-    wrapped.__cloudWrapped = true;
-    try { persist = wrapped; } catch (_) {}
+    card.querySelector('#luneCloudProdPull').onclick=async function(){
+      try{status('Import Cloud…',false);const r=await pull();const d=currentDb()||{};status('✓ Importé · '+((d.customers||[]).length)+' clientes · '+((d.bookings||[]).length)+' RDV',false);}
+      catch(e){status('Import échoué : '+(e.message||e),true);}
+    };
+    card.querySelector('#luneCloudProdPush').onclick=async function(){
+      if(!confirm('Envoyer maintenant l’état affiché de ce Staff vers le Cloud ?'))return;
+      try{status('Sauvegarde Cloud…',false);await push();status('✓ Sauvegarde Cloud terminée.',false);}
+      catch(e){status('Sauvegarde refusée/échouée : '+(e.message||e),true);}
+    };
   }
 
-  function applyAutoSync() {
-    clearInterval(pullTimer);
-    const cfg = readConfig();
-    if (cfg.auto && apiReady()) {
-      pullTimer = setInterval(pullIfNewer, 30000);
-      setTimeout(pullIfNewer, 2000);
-    }
-    refreshStatusLine();
-  }
-
-  function init() {
-    try { window.LuneStaffCloudSync = {
-      isReady: apiReady,
-      pull: () => pullCloud(false),
-      push: () => pushCloud(false),
-      test: testCloud,
-      refreshStatus: refreshStatusLine,
-      clearOperationalData: clearOperationalDataCloud,
-      config: readConfig
-    }; } catch (_) {}
-    addCloudPanel();
-    wrapPersist();
-    applyAutoSync();
-    // Re-add panel after staff render cycles if needed.
-    setInterval(() => {
-      if (!byId("cloudSyncPanel")) addCloudPanel();
-    }, 3000);
-  }
-
-  window.addEventListener('lune:staff-login', () => {
-    setTimeout(async () => {
-      addCloudPanel();
-      wrapPersist();
-      applyAutoSync();
-      if (apiReady()) {
-        await pullCloud(false);
-        try { window.dispatchEvent(new CustomEvent('lune:cloud-db-updated', { detail: { source: 'login-pull' } })); } catch (_) {}
-      }
-    }, 350);
-  });
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  window.LuneStaffCloudSync={
+    version:'2026-09-02-production-v1',
+    isReady:isReady,
+    readConfig:readConfig,
+    saveConfig:saveConfig,
+    health:health,
+    pull:pull,
+    push:push,
+    clearOperationalData:clearOperationalData
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountConfigUi,{once:true});else setTimeout(mountConfigUi,0);
 })();
