@@ -702,6 +702,22 @@ body.cloud-v1 button[onclick="exportAllCSVs()"]{display:none!important}
     <p id="setupError" class="small" style="color:#b83227"></p>
   </div>
   <div id="protectedSettings" class="hidden">
+    <div class="card" id="cloudSyncPanel">
+      <div class="cleanSectionHead"><div><div class="brandEyebrow">CLOUD · GOOGLE SHEETS</div><h2>Cloud Sync</h2><p class="small">Deployment Apps Script und Token für dieses Gerät. Die Verbindung bleibt im Browser gespeichert.</p></div><span id="cloudSettingsBadge" class="badge warn">Nicht geprüft</span></div>
+      <label for="cloudSettingsUrl">Deployment URL</label>
+      <input id="cloudSettingsUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+      <label for="cloudSettingsToken">Token</label>
+      <input id="cloudSettingsToken" type="password" placeholder="Token" autocomplete="off">
+      <label class="checkRow"><input id="cloudSettingsAuto" type="checkbox"> Synchronisation automatique sur cet appareil</label>
+      <div class="bookingActions noPrint">
+        <button class="gold" type="button" onclick="luneCloudSettingsSave()">Sauver connexion</button>
+        <button class="secondary" type="button" onclick="luneCloudSettingsTest()">Tester connexion</button>
+        <button class="secondary" type="button" onclick="luneCloudSettingsPull()">Importer Cloud → cet appareil</button>
+        <button class="secondary" type="button" onclick="luneCloudSettingsPush()">Envoyer cet appareil → Cloud</button>
+      </div>
+      <div id="cloudSettingsStatus" class="statusNote small" style="margin-top:10px">Aucune modification des données tant que vous ne cliquez pas sur Importer ou Envoyer.</div>
+    </div>
+
     <div class="card"><h2>Einstellungen</h2>
       <div class="row"><input id="sBusiness" placeholder="Unternehmen"><input id="sWebsite" placeholder="Website"></div>
       <textarea id="sAddress" placeholder="Adresse"></textarea>
@@ -767,7 +783,7 @@ const CLEAN_START_FLAG=KEY+"_clean_start_v40_20260628";
 const LOGO_SRC="asset/img/logo";
 function absUrl(path){try{return new URL(path, location.href).href}catch(e){return path}}
 function resolvedLogoSrc(){let img=document.querySelector('.brandLogo');return (img&&(img.currentSrc||img.src))||absUrl(LOGO_SRC);}
-const seedServices=[{"id":"S1","name":"Basisbehandlung Gesicht","price":69},{"id":"S2","name":"Gesicht + Hals + Dekolleté","price":85},{"id":"S3","name":"Hydro Boost Gesicht","price":89},{"id":"S4","name":"Hydro Boost Gesicht & Dekolleté","price":99},{"id":"S5","name":"Relax & Glow Behandlung","price":110},{"id":"S6","name":"Hydra Glow Facial (Aquafacial)","price":130},{"id":"S7","name":"Aknebehandlung","price":89},{"id":"S8","name":"Anti-Aging Behandlung","price":120},{"id":"S9","name":"Sensi Treatment","price":89},{"id":"S10","name":"LED Maske","price":10},{"id":"S11","name":"Radiofrequenz","price":10},{"id":"S12","name":"Wimpernfärben","price":20},{"id":"S13","name":"Augenbrauen färben","price":15},{"id":"S14","name":"Augenbrauenkorrektur","price":15},{"id":"S15","name":"Basis Fußpflege","price":50},{"id":"S16","name":"Spa Fußpflege","price":65}];
+const seedServices=[{"id":"S1","name":"Basisbehandlung Gesicht","price":69},{"id":"S2","name":"Gesicht + Hals + Dekolleté","price":85},{"id":"S3","name":"Hydro Boost Gesicht","price":89},{"id":"S4","name":"Hydro Boost Gesicht & Dekolleté","price":99},{"id":"S5","name":"Relax & Glow Behandlung","price":110},{"id":"S6","name":"Hydra Glow Facial (Aquafacial)","price":130},{"id":"S7","name":"Aknebehandlung","price":89},{"id":"S8","name":"Anti-Aging Behandlung","price":120},{"id":"S9","name":"Sensi Treatment","price":89},{"id":"S10","name":"LED Maske","price":10},{"id":"S11","name":"Radiofrequenz","price":10},{"id":"S12","name":"Wimpernfärben","price":20},{"id":"S13","name":"Augenbrauen färben","price":15},{"id":"S14","name":"Augenbrauenkorrektur","price":15},{"id":"S15","name":"Basis Fußpflege","price":50},{"id":"S16","name":"Spa Fußpflege","price":65},{"id":"S17","name":"Klassische Maniküre","price":33},{"id":"S18","name":"Spa Maniküre","price":52},{"id":"S19","name":"Oberlippe Waxing","price":15},{"id":"S20","name":"Kinn Waxing","price":15},{"id":"S21","name":"Gesichtswaxing komplett","price":30},{"id":"S22","name":"Farbe","price":10},{"id":"S23","name":"Farbe entfernen (Füße)","price":20},{"id":"S24","name":"Farbe entfernen (Hände)","price":10},{"id":"S25","name":"Kombi Augenbehandlung","price":45}];
 
 /* Lune Beauty — dépenses synchronisées depuis la feuille Excel "Ausgaben".
    64 lignes source, références uniques; merge sans doublons avec les données CRM existantes. */
@@ -905,7 +921,15 @@ function nextId(a,p){return p+(a.length?Math.max(...a.map(x=>Number(String(x.id|
 function normalizeDb(d){
   d.settings=Object.assign(defaultDb().settings,d.settings||{});
   if(!String(d.settings.paypal||"").trim()) d.settings.paypal="barosdedjilla@yahoo.fr";
-  d.services=Array.isArray(d.services)&&d.services.length?d.services:structuredClone(seedServices);
+  // Keep the Staff treatment catalogue canonical. Cloud/local backups may contain
+  // translated or corrupted labels; IDs S1-S16 always use the German master name/price.
+  const incomingServices=Array.isArray(d.services)?d.services:[];
+  const incomingById=new Map(incomingServices.map(s=>[String(s&&s.id||""),s]));
+  d.services=seedServices.map(master=>{
+    const old=incomingById.get(String(master.id))||{};
+    const duration=Number(old.durationMinutes||old.duration||old.minutes||0);
+    return Object.assign({},old,master,duration>0?{durationMinutes:duration}:{});
+  });
   d.products=Array.isArray(d.products)?d.products:[];
   d.bookings=Array.isArray(d.bookings)?d.bookings:[];
   d.customers=Array.isArray(d.customers)?d.customers:[];
@@ -937,7 +961,22 @@ function normalizeDb(d){
     p.startQty=Number(rawStart); if(!Number.isFinite(p.startQty)||p.startQty<=0)p.startQty=Number(seedStart||0); if(!Number.isFinite(p.startQty)||p.startQty<=0)p.startQty=Number(p.stockLager||0)+Number(p.stockInstitut||0); if(!Number.isFinite(p.startQty)||p.startQty<=0)p.startQty=Number(p.min||0);
   });
   d.customers.forEach(c=>{c.name=c.name||"Kunde";c.phone=c.phone||"";c.email=c.email||"";c.address=c.address||"";c.notes=c.notes||"";c.anamnesis=Object.assign({skin:"",allergies:"",contra:"",medication:"",lastReaction:""},c.anamnesis||{});});
-  d.bookings.forEach(b=>{b.status=b.status||"angefragt";b.notes=b.notes||"";b.cancelledAt=b.cancelledAt||"";b.cancellationReason=b.cancellationReason||"";b.cancellationFee=!!b.cancellationFee;});
+  d.bookings.forEach(b=>{
+    b.status=b.status||"angefragt";b.notes=b.notes||"";b.cancelledAt=b.cancelledAt||"";b.cancellationReason=b.cancellationReason||"";b.cancellationFee=!!b.cancellationFee;
+    const masterById=id=>d.services.find(s=>String(s.id)===String(id));
+    if(Array.isArray(b.services)&&b.services.length){
+      b.services=b.services.map(item=>{
+        const master=masterById(item&& (item.id||item.serviceId));
+        if(!master)return item;
+        return Object.assign({},item,{id:master.id,name:master.name,price:Number(master.price||0),durationMinutes:Number(item.durationMinutes||item.duration||master.durationMinutes||60)});
+      });
+      const first=masterById(b.services[0]&&b.services[0].id);
+      if(first){b.serviceId=first.id;b.service=b.services.map(x=>x.name||'').filter(Boolean).join(' + ');b.plannedTotal=b.services.reduce((n,x)=>n+Number(x.price||0),0);}
+    }else{
+      const master=masterById(b.serviceId);
+      if(master){b.service=master.name;if(!(Number(b.plannedTotal)>0))b.plannedTotal=Number(master.price||0);}
+    }
+  });
   d.invoices.forEach(i=>{i.status=i.status||"erstellt";i.items=Array.isArray(i.items)?i.items:[];i.bookingId=i.bookingId||"";i.internalNote=i.internalNote||"";});
   d.expenses.forEach((e,idx)=>{e.id=e.id||("E"+(idx+1));e.date=e.date||TODAY();e.category=e.category||"Sonstiges";e.description=e.description||"Ausgabe";e.supplier=e.supplier||"";e.net=Number(e.net||0);e.tax=Number(e.tax||0);if(e.tax>1)e.tax=e.tax/100;e.taxAmount=Number(e.taxAmount||e.net*e.tax||0);e.gross=Number(e.gross||e.net+e.taxAmount||0);e.method=e.method||"bar";e.status=e.status||"bezahlt";e.paidDate=e.status==="bezahlt"?(e.paidDate||e.date):"";e.reference=e.reference||"";e.notes=e.notes||"";});
   return d;
@@ -3138,7 +3177,7 @@ body{min-height:100vh}
     const box=document.getElementById('bookingTreatmentRows');if(!box)return;
     const service=(db.services||[]).find(s=>String(s.id)===String(selectedId))||(db.services||[])[0];
     const row=document.createElement('div');row.className='bookingTreatmentRow';
-    row.innerHTML=`<div class="treatmentSelectWrap"><label>Behandlung</label><select class="bookingTreatmentSelect" onchange="syncBookingTreatmentRow(this)">${treatmentOptions(service&&service.id)}</select></div><div><label>Dauer (Min.)</label><input class="bookingTreatmentDuration" type="number" min="0" step="5" value="${customDuration!==''?Number(customDuration):durationOf(service)||60}" oninput="refreshBookingTreatmentSummary()"></div><div><label>Preis (€)</label><input class="bookingTreatmentPrice" type="number" min="0" step="0.01" value="${customPrice!==''?Number(customPrice):priceOf(service)}" oninput="refreshBookingTreatmentSummary()"></div><button type="button" class="bad" title="Behandlung entfernen" onclick="removeBookingTreatmentRow(this)">×</button>`;
+    row.innerHTML=`<div class="treatmentSelectWrap"><label>Behandlung</label><select class="bookingTreatmentSelect" onchange="syncBookingTreatmentRow(this)">${treatmentOptions(service&&service.id)}</select></div><div><label>Dauer (Min.)</label><input class="bookingTreatmentDuration" type="number" min="0" step="5" value="${customDuration!==''?Number(customDuration):durationOf(service)||60}" oninput="refreshBookingTreatmentSummary()"></div><div><label>Preis (€)</label><input class="bookingTreatmentPrice" type="number" min="0" step="0.01" value="${customPrice!==''&&Number(customPrice)>0?Number(customPrice):priceOf(service)}" oninput="refreshBookingTreatmentSummary()"></div><button type="button" class="bad" title="Behandlung entfernen" onclick="removeBookingTreatmentRow(this)">×</button>`;
     box.appendChild(row);refreshBookingTreatmentSummary();
   };
   window.syncBookingTreatmentRow=function(select){const row=select.closest('.bookingTreatmentRow'),s=(db.services||[]).find(x=>String(x.id)===String(select.value));if(!row||!s)return;row.querySelector('.bookingTreatmentDuration').value=durationOf(s)||60;row.querySelector('.bookingTreatmentPrice').value=priceOf(s);refreshBookingTreatmentSummary();};
@@ -3823,30 +3862,41 @@ body{min-height:100vh}
         activity("booking_confirmed",booking.name||"Kundin","booking",id);
         overlay.ok(0);
 
-        overlay.active(1);await sleep(250);overlay.ok(1);
-        overlay.active(2);
-        if(!booking.email){
-          overlay.bad(2,"E-Mail nicht gesendet · E-Mail-Adresse fehlt");
-        }else{
-          await sleep(250);
-        }
-
+        // V47: Status zuerst sicher in die Cloud schreiben.
+        // Code.gs versendet Bestätigungen absichtlich NICHT mehr beim saveState,
+        // daher muss der Versand hier explizit über sendBookingConfirmation erfolgen.
         overlay.active(3);
         const synced=await cloudPush();
-        if(synced){
+        if(!synced){
+          overlay.bad(3,"Cloud nicht konfiguriert oder nicht erreichbar");
+          overlay.bad(1,"Kalenderdatei konnte nicht erstellt werden");
+          if(booking.email)overlay.bad(2,"E-Mail nicht gesendet · Cloud-Verbindung fehlt");
+        }else{
           overlay.ok(3);
+          if(!booking.email){
+            overlay.bad(1,"Kalenderdatei nicht per E-Mail erstellt · E-Mail-Adresse fehlt");
+            overlay.bad(2,"E-Mail nicht gesendet · E-Mail-Adresse fehlt");
+          }else{
+            try{
+              overlay.active(1);
+              overlay.active(2);
+              const mailResult=await window.v40Post({action:'sendBookingConfirmation',bookingId:id});
+              if(mailResult&&mailResult.ok!==false){
+                overlay.ok(1);
+                overlay.ok(2,"Bestätigungs-E-Mail gesendet an "+(mailResult.emailSentTo||booking.email));
+              }else{
+                throw new Error((mailResult&&mailResult.error)||'Unbekannter Versandfehler');
+              }
+            }catch(mailError){
+              const msg=(mailError&&mailError.message)||String(mailError);
+              overlay.bad(1,"Kalender/E-Mail-Fehler: "+msg);
+              overlay.bad(2,"E-Mail-Versand fehlgeschlagen: "+msg);
+              console.error('V47 booking confirmation',mailError);
+            }
+          }
           if(window.LuneStaffCloudSync.pull){
             try{await window.LuneStaffCloudSync.pull();}catch(_){}
           }
-          const fresh=db.bookings.find(function(b){return String(b.id)===String(id);});
-          if(fresh&&fresh.confirmationSentAt){
-            overlay.ok(2);
-          }else if(booking.email){
-            overlay.bad(2,"E-Mail-Versand konnte nicht bestätigt werden");
-          }
-        }else{
-          overlay.bad(3,"Cloud nicht konfiguriert oder nicht erreichbar");
-          if(booking.email)overlay.bad(2,"E-Mail-Versand nicht bestätigt");
         }
       }catch(error){
         overlay.bad(3,"Cloud-Fehler: "+(error.message||error));
@@ -6646,6 +6696,7 @@ async function v40Post(payload){
   if(!data||data.ok===false)throw new Error((data&&data.error)||'E-Mail konnte nicht gesendet werden.');
   return data;
 }
+window.v40Post=v40Post;
 
 function v40EmailBtnState(){
   const btn=document.getElementById('bookingEmailBtn');
@@ -6703,12 +6754,22 @@ window.sendCurrentBookingConfirmationEmail=async function(){
     return;
   }
 
+  const confirmationDuration=Number(booking.totalDurationMinutes||booking.durationMinutes||0)||
+    (Array.isArray(booking.services)?booking.services.reduce((sum,x)=>sum+Number(x.durationMinutes||x.duration||0),0):0);
+  const confirmationPrice=Number(booking.plannedTotal||0)||
+    (Array.isArray(booking.services)?booking.services.reduce((sum,x)=>sum+Number(x.price||0),0):0);
+  const confirmationPriceLabel=Number.isFinite(confirmationPrice)&&confirmationPrice>0
+    ? confirmationPrice.toFixed(2).replace('.',',')+' €'
+    : '—';
+
   if(!confirm(
     'Terminbestätigung jetzt senden?\n\n'+
     (booking.name||'Kundin')+'\n'+
     (booking.email||'')+'\n'+
     (booking.date||'')+' · '+(booking.time||'')+'\n'+
-    (booking.service||'')
+    (booking.service||'')+'\n'+
+    'Dauer: '+(confirmationDuration>0?confirmationDuration+' Min.':'—')+'\n'+
+    'Preis: '+confirmationPriceLabel
   ))return;
 
   const btn=document.getElementById('bookingEmailBtn');
@@ -8589,5 +8650,98 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- Lune Beauty V45b: booking communication policy (safe placement) -->
+<script id="lune-booking-policy-v45b">
+(function(){
+  'use strict';
+  const POLICY='Bei nicht rechtzeitig gemeldeter Absage oder Nichterscheinen innerhalb von 24 Stunden vor dem Termin werden gemäß unseren AGB 100 % des Behandlungspreises als Ausfallhonorar berechnet.';
+  function enrich(b){
+    if(!b)return b;
+    b.reminderHours=12;
+    b.cancellationNoticeHours=24;
+    b.cancellationFeePercent=100;
+    b.reminderPolicy=POLICY;
+    return b;
+  }
+  if(typeof window.addBooking==='function'){const old=window.addBooking;window.addBooking=function(){return enrich(old.apply(this,arguments));};}
+  if(typeof window.updateBooking==='function'){const old=window.updateBooking;window.updateBooking=function(){return enrich(old.apply(this,arguments));};}
+  try{(db.bookings||[]).forEach(enrich);}catch(_){}
+})();
+</script>
+<!-- Lune Beauty 2026-09-02 production bridge: confirmation on status-save + diagnostics -->
+<script id="lune-production-bridge-20260902">
+(function(){
+  'use strict';
+  function currentBookingId(){return String(document.getElementById('bookingEditId')?.value||'');}
+  function bookingById(id){return (db.bookings||[]).find(function(b){return String(b&&b.id||'')===String(id||'');})||null;}
+  async function sendIfNewlyConfirmed(id,beforeStatus){
+    const b=bookingById(id);if(!b)return;
+    if(String(beforeStatus||'').toLowerCase()==='bestätigt')return;
+    if(String(b.status||'').toLowerCase()!=='bestätigt')return;
+    if(b.confirmationEmailOptOut||b.confirmationSentAt||!String(b.email||'').trim())return;
+    if(typeof window.v40Post!=='function')throw new Error('E-Mail-Brücke v40Post nicht verfügbar.');
+    const result=await window.v40Post({action:'sendBookingConfirmation',bookingId:b.id});
+    b.confirmationSentAt=result.confirmationSentAt||result.sentAt||new Date().toISOString();
+    b.confirmationMessageId=result.messageId||b.confirmationMessageId||'';
+    b.confirmationSendCount=Number(result.sendCount||b.confirmationSendCount||1);
+    b.confirmationLastSentTo=result.emailSentTo||b.email;
+    try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+    if(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.pull==='function'){
+      try{await window.LuneStaffCloudSync.pull();}catch(_){}
+    }
+    try{if(typeof v40MailState==='function')v40MailState('✓ E-Mail gesendet an '+(result.emailSentTo||b.email),'ok');}catch(_){}
+  }
+  if(typeof window.saveBooking==='function'){
+    const previous=window.saveBooking;
+    window.saveBooking=async function(){
+      const beforeId=currentBookingId();
+      const before=bookingById(beforeId);
+      const beforeStatus=before?String(before.status||''):'';
+      const r=await Promise.resolve(previous.apply(this,arguments));
+      const afterId=currentBookingId()||beforeId||String((db.bookings||[]).slice(-1)[0]?.id||'');
+      try{await sendIfNewlyConfirmed(afterId,beforeStatus);}catch(err){
+        console.error('Lune production confirmation after save',err);
+        try{if(typeof v40MailState==='function')v40MailState('Termin gespeichert, aber E-Mail-Versand fehlgeschlagen: '+(err.message||err),'bad');}catch(_){}
+      }
+      return r;
+    };
+  }
+  window.LuneProductionDiagnostics=function(){
+    const cfg=(()=>{try{return JSON.parse(safeStorage.getItem('lune_staff_cloud_config_v1')||'{}')}catch(_){return{}}})();
+    return {
+      version:'2026-09-02-production-v1',
+      customers:(db.customers||[]).length,
+      bookings:(db.bookings||[]).length,
+      invoices:(db.invoices||[]).length,
+      services:(db.services||[]).length,
+      cloudConfigured:!!(cfg.apiUrl&&cfg.token),
+      cloudReady:!!(window.LuneStaffCloudSync&&window.LuneStaffCloudSync.isReady&&window.LuneStaffCloudSync.isReady()),
+      mailBridge:typeof window.v40Post==='function'
+    };
+  };
+})();
+</script>
+
+<script id="lune-cloud-settings-ui-20260902">
+(function(){
+  'use strict';
+  const KEY='lune_staff_cloud_config_v1';
+  function el(id){return document.getElementById(id);}
+  function read(){try{return Object.assign({apiUrl:'',token:'',auto:false},JSON.parse((window.safeStorage||localStorage).getItem(KEY)||'{}'));}catch(_){return {apiUrl:'',token:'',auto:false};}}
+  function write(c){(window.safeStorage||localStorage).setItem(KEY,JSON.stringify(c));}
+  function status(msg,kind){const x=el('cloudSettingsStatus'),b=el('cloudSettingsBadge');if(x)x.textContent=msg;if(b){b.textContent=kind==='ok'?'Cloud actif':kind==='bad'?'Erreur':'À vérifier';b.className='badge '+(kind==='ok'?'ok':kind==='bad'?'bad':'warn');}}
+  function values(){return {apiUrl:String(el('cloudSettingsUrl')?.value||'').trim(),token:String(el('cloudSettingsToken')?.value||'').trim(),auto:!!el('cloudSettingsAuto')?.checked};}
+  function valid(c){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:[?#].*)?$/.test(c.apiUrl)&&!!c.token;}
+  function fill(){const c=read();if(el('cloudSettingsUrl'))el('cloudSettingsUrl').value=c.apiUrl||'';if(el('cloudSettingsToken'))el('cloudSettingsToken').value=c.token||'';if(el('cloudSettingsAuto'))el('cloudSettingsAuto').checked=!!c.auto;status(valid(c)?'Configuration Cloud enregistrée. Cliquez sur « Tester connexion » pour vérifier le Deployment.':'Entrez le Deployment /exec et le token.','warn');}
+  window.luneCloudSettingsSave=function(){const c=values();if(!valid(c)){status('URL Deployment ou token manquant / invalide. L’URL doit finir par /exec.','bad');return false;}write(c);try{window.dispatchEvent(new StorageEvent('storage',{key:KEY,newValue:JSON.stringify(c)}));}catch(_){window.dispatchEvent(new Event('lune:cloud-config-changed'));}status('Connexion enregistrée sur cet appareil.','ok');return true;};
+  function jsonpState(c){return new Promise((resolve,reject)=>{const cb='luneCloudSettingsCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6);const sc=document.createElement('script');const timer=setTimeout(()=>done(new Error('Timeout Cloud')),15000);function done(err,data){clearTimeout(timer);try{delete window[cb];}catch(_){}try{sc.remove();}catch(_){}err?reject(err):resolve(data);}window[cb]=d=>{if(d&&d.ok===false)done(new Error(d.error||'Apps Script error'));else done(null,d||{});};sc.onerror=()=>done(new Error('Deployment inaccessible'));const q=new URLSearchParams({action:'state',token:c.token,clientId:'staff-settings-test',callback:cb,_:Date.now()});sc.src=c.apiUrl+(c.apiUrl.includes('?')?'&':'?')+q.toString();document.head.appendChild(sc);});}
+  window.luneCloudSettingsTest=async function(){if(!window.luneCloudSettingsSave())return;const c=read();status('Test de connexion…','warn');try{const r=await jsonpState(c);const st=r.state||r.data||r;const n=Array.isArray(st&&st.customers)?st.customers.length:null;status('Connexion OK'+(n!==null?' · '+n+' clientes dans le Cloud':'')+'.','ok');}catch(e){status('Échec connexion: '+(e.message||e),'bad');}};
+  window.luneCloudSettingsPull=async function(){if(!confirm('Importer les données Cloud sur cet appareil maintenant ?'))return;if(!window.luneCloudSettingsSave())return;status('Import Cloud en cours…','warn');try{if(!(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.pull==='function'))throw new Error('staff-cloud-sync.js non chargé');await window.LuneStaffCloudSync.pull();status('Import Cloud terminé.','ok');}catch(e){status('Erreur import Cloud: '+(e.message||e),'bad');}};
+  window.luneCloudSettingsPush=async function(){if(!confirm('Envoyer les données de CET appareil vers le Cloud ? N’utilisez ceci que si cet appareil contient bien les données de référence.'))return;if(!window.luneCloudSettingsSave())return;status('Envoi vers Cloud en cours…','warn');try{if(!(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.push==='function'))throw new Error('staff-cloud-sync.js non chargé');await window.LuneStaffCloudSync.push();status('Envoi vers Cloud terminé.','ok');}catch(e){status('Erreur envoi Cloud: '+(e.message||e),'bad');}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fill);else fill();
+  const old=window.unlockSettings;if(typeof old==='function')window.unlockSettings=function(){const r=old.apply(this,arguments);setTimeout(fill,0);return r;};
+})();
+</script>
 </body>
 </html>
