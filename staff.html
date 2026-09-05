@@ -8670,47 +8670,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Lune Beauty 2026-09-02 production bridge: confirmation on status-save + diagnostics -->
-<script id="lune-production-bridge-20260902">
+<script id="lune-production-bridge-20260905">
+/* 2026-09-05: confirmation is handled only by the main status-confirmation flow.
+   This intentionally removes the second saveBooking hook that could send a duplicate email. */
 (function(){
   'use strict';
-  function currentBookingId(){return String(document.getElementById('bookingEditId')?.value||'');}
-  function bookingById(id){return (db.bookings||[]).find(function(b){return String(b&&b.id||'')===String(id||'');})||null;}
-  async function sendIfNewlyConfirmed(id,beforeStatus){
-    const b=bookingById(id);if(!b)return;
-    if(String(beforeStatus||'').toLowerCase()==='bestätigt')return;
-    if(String(b.status||'').toLowerCase()!=='bestätigt')return;
-    if(b.confirmationEmailOptOut||b.confirmationSentAt||!String(b.email||'').trim())return;
-    if(typeof window.v40Post!=='function')throw new Error('E-Mail-Brücke v40Post nicht verfügbar.');
-    const result=await window.v40Post({action:'sendBookingConfirmation',bookingId:b.id});
-    b.confirmationSentAt=result.confirmationSentAt||result.sentAt||new Date().toISOString();
-    b.confirmationMessageId=result.messageId||b.confirmationMessageId||'';
-    b.confirmationSendCount=Number(result.sendCount||b.confirmationSendCount||1);
-    b.confirmationLastSentTo=result.emailSentTo||b.email;
-    try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
-    if(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.pull==='function'){
-      try{await window.LuneStaffCloudSync.pull();}catch(_){}
-    }
-    try{if(typeof v40MailState==='function')v40MailState('✓ E-Mail gesendet an '+(result.emailSentTo||b.email),'ok');}catch(_){}
-  }
-  if(typeof window.saveBooking==='function'){
-    const previous=window.saveBooking;
-    window.saveBooking=async function(){
-      const beforeId=currentBookingId();
-      const before=bookingById(beforeId);
-      const beforeStatus=before?String(before.status||''):'';
-      const r=await Promise.resolve(previous.apply(this,arguments));
-      const afterId=currentBookingId()||beforeId||String((db.bookings||[]).slice(-1)[0]?.id||'');
-      try{await sendIfNewlyConfirmed(afterId,beforeStatus);}catch(err){
-        console.error('Lune production confirmation after save',err);
-        try{if(typeof v40MailState==='function')v40MailState('Termin gespeichert, aber E-Mail-Versand fehlgeschlagen: '+(err.message||err),'bad');}catch(_){}
-      }
-      return r;
-    };
-  }
   window.LuneProductionDiagnostics=function(){
-    const cfg=(()=>{try{return JSON.parse(safeStorage.getItem('lune_staff_cloud_config_v1')||'{}')}catch(_){return{}}})();
+    const cfg=(()=>{try{return JSON.parse((window.safeStorage||localStorage).getItem('lune_staff_cloud_config_v1')||'{}')}catch(_){return{}}})();
     return {
-      version:'2026-09-02-production-v1',
+      version:'2026-09-05-production-v2',
       customers:(db.customers||[]).length,
       bookings:(db.bookings||[]).length,
       invoices:(db.invoices||[]).length,
