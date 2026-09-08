@@ -8359,14 +8359,21 @@ function summaryHtml(c){
 }
 function bookingLaunch(){
   let d=E('bookingDetail');if(!d||d.querySelector('.lb-consult-launch'))return;
-  let id=E('bookingId')?.value||'',b=(db.bookings||[]).find(x=>x.id===id);if(!b||!b.customerId)return;let c=(db.customers||[]).find(x=>x.id===b.customerId);
-  let q=document.createElement('div');q.className='lb-consult-launch';q.innerHTML='<b>Beauty Consultation</b><p>'+(b.consultationCompletedAt?'✓ Von der Kundin ausgefüllt':'Anamnese und Wünsche direkt auf dem Tablet erfassen.')+'</p>'+summaryHtml(c);
-  let btn=document.createElement('button');btn.className='gold';btn.textContent=b.consultationCompletedAt?'Consultation aktualisieren':'Kundenformular öffnen';btn.onclick=()=>startLbConsult(b.customerId,b.id);q.appendChild(btn);d.insertBefore(q,d.firstChild)
+  let id=E('bookingId')?.value||'',b=(db.bookings||[]).find(x=>x.id===id);if(!b||!b.customerId)return;let c=(db.customers||[]).find(x=>x.id===b.customerId);if(!c)return;
+  let forms=c.consultationForms||[],has=forms.length>0;
+  let q=document.createElement('div');q.className='lb-consult-launch';
+  q.innerHTML='<b>Beauty Consultation</b><p>'+(has?'✓ '+forms.length+' Consultation'+(forms.length>1?'en':'')+' in der Kundenakte gespeichert':'Noch keine Beauty Consultation in dieser Kundenakte gespeichert.')+'</p>'+summaryHtml(c);
+  if(has){let view=document.createElement('button');view.className='gold';view.textContent='Consultation ansehen';view.onclick=()=>openLbsv(c.id);q.appendChild(view)}
+  let btn=document.createElement('button');btn.className='gold';btn.style.marginLeft='8px';btn.textContent=has?'Consultation aktualisieren':'Kundenformular öffnen';btn.onclick=()=>startLbConsult(b.customerId,b.id);q.appendChild(btn);
+  d.insertBefore(q,d.firstChild)
 }
 function customerLaunch(id){
   let d=E('customerDetail');if(!d||d.querySelector('.lb-consult-launch'))return;let c=(db.customers||[]).find(x=>x.id===id);if(!c)return;
-  let q=document.createElement('div');q.className='lb-consult-launch';q.innerHTML='<b>Digitaler Kunden-Check-in</b><p>Direkt mit der bestehenden Kundenakte und Anamnese verbunden.</p>'+summaryHtml(c);
-  let btn=document.createElement('button');btn.className='gold';btn.textContent=lastConsult(c)?'Consultation aktualisieren':'Beauty Consultation starten';btn.onclick=()=>startLbConsult(id,'');q.appendChild(btn);
+  let forms=c.consultationForms||[],has=forms.length>0;
+  let q=document.createElement('div');q.className='lb-consult-launch';
+  q.innerHTML='<b>Digitaler Kunden-Check-in · Beauty Consultation</b><p>'+(has?'✓ '+forms.length+' Consultation'+(forms.length>1?'en':'')+' gespeichert':'Noch keine Beauty Consultation gespeichert.')+'</p>'+summaryHtml(c);
+  if(has){let view=document.createElement('button');view.className='gold';view.textContent='Consultation ansehen';view.onclick=()=>openLbsv(c.id);q.appendChild(view)}
+  let btn=document.createElement('button');btn.className='gold';btn.style.marginLeft='8px';btn.textContent=has?'Consultation aktualisieren':'Beauty Consultation starten';btn.onclick=()=>startLbConsult(id,'');q.appendChild(btn);
   let n=d.querySelector('.crmDossierNav');n?n.insertAdjacentElement('afterend',q):d.insertBefore(q,d.firstChild)
 }
 let ob=window.openBooking;window.openBooking=function(){let r=ob.apply(this,arguments);setTimeout(bookingLaunch,0);return r};
