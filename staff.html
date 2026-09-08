@@ -8327,7 +8327,7 @@ window.lbConsultExit=function(){
   E('lbConsult').classList.add('hidden');document.body.style.overflow='';
   try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{})}catch(_){}
 };
-window.lbConsultSubmit=function(){
+window.lbConsultSubmit=async function(){
   cap();if(!E('lbcConsent')?.checked){alert('Bitte bestätigen Sie die Einwilligung.');return}
   let sign=V('lbcSign');if(!sign){alert('Bitte geben Sie Ihren Namen ein.');return}
   let c=cu(),b=bk(),now=new Date().toISOString();
@@ -8349,8 +8349,40 @@ window.lbConsultSubmit=function(){
   c.consultationForms.push(entry);
   if(b){b.consultationCompletedAt=now;b.consultationFormId=entry.id}
   persist();
+
   E('lbcProgress').style.width='100%';
-  E('lbcBody').innerHTML=`<div class="lbc-card lbc-success"><div class="lbc-check">✓</div><h2>Vielen Dank${c.name?', '+X(String(c.name).split(' ')[0]):''}.</h2><p class="lbc-lead">Ihre Angaben wurden in Ihrer Lune Beauty Kundenakte gespeichert.</p><p><b>Bitte geben Sie das Tablet jetzt an Ihre Beauty Expertin zurück.</b></p><div class="lbc-actions"><button class="lbc-primary" onclick="lbConsultExit()">An Staff übergeben</button></div></div>`;
+  E('lbcBody').innerHTML=`<div class="lbc-card lbc-success"><div class="lbc-check">✓</div><h2>Speicherung läuft…</h2><p class="lbc-lead">Die Beauty Consultation wurde lokal gespeichert und wird jetzt mit dem Cloud synchronisiert.</p><p id="lbcCloudSaveStatus"><b>Cloud wird synchronisiert…</b></p></div>`;
+
+  let cloudOk=false,verified=false,cloudError='';
+  try{
+    if(!(window.LuneStaffCloudSync&&typeof window.LuneStaffCloudSync.isReady==='function'&&window.LuneStaffCloudSync.isReady()&&typeof window.LuneStaffCloudSync.push==='function')){
+      throw new Error('Cloud ist nicht verbunden. URL und Staff-Token prüfen.');
+    }
+    await window.LuneStaffCloudSync.push();
+    cloudOk=true;
+    if(typeof window.LuneStaffCloudSync.pull==='function'){
+      await window.LuneStaffCloudSync.pull();
+      let cloudCustomer=(db.customers||[]).find(x=>String(x.id||'')===String(c.id||'')) ||
+        (db.customers||[]).find(x=>(c.email&&String(x.email||'').toLowerCase()===String(c.email||'').toLowerCase())||(c.phone&&String(x.phone||'')===String(c.phone||'')));
+      verified=!!(cloudCustomer&&Array.isArray(cloudCustomer.consultationForms)&&cloudCustomer.consultationForms.some(f=>String(f.id||'')===String(entry.id)));
+      if(b){
+        let cloudBooking=(db.bookings||[]).find(x=>String(x.id||'')===String(b.id||''));
+        verified=verified&&!!(cloudBooking&&String(cloudBooking.consultationFormId||'')===String(entry.id));
+      }
+    }else{
+      verified=true;
+    }
+  }catch(err){
+    cloudError=(err&&err.message)||String(err);
+    console.error('Beauty Consultation Cloud Sync',err);
+  }
+
+  let firstName=c.name?', '+X(String(c.name).split(' ')[0]):'';
+  if(cloudOk&&verified){
+    E('lbcBody').innerHTML=`<div class="lbc-card lbc-success"><div class="lbc-check">✓</div><h2>Vielen Dank${firstName}.</h2><p class="lbc-lead">Ihre Beauty Consultation wurde in Ihrer Kundenakte und im Cloud gespeichert.</p><p><b>✓ Cloud-Speicherung geprüft.</b></p><p><b>Bitte geben Sie das Tablet jetzt an Ihre Beauty Expertin zurück.</b></p><div class="lbc-actions"><button class="lbc-primary" onclick="lbConsultExit()">An Staff übergeben</button></div></div>`;
+  }else{
+    E('lbcBody').innerHTML=`<div class="lbc-card lbc-success"><div class="lbc-check">!</div><h2>Lokal gespeichert${firstName}.</h2><p class="lbc-lead">Die Beauty Consultation ist auf diesem Gerät gespeichert, aber die Cloud-Speicherung konnte nicht bestätigt werden.</p><p><b>Cloud-Fehler:</b> ${X(cloudError||'Cloud-Verifizierung fehlgeschlagen.')}</p><p>Bitte das Tablet an Staff übergeben. Die Angaben bleiben lokal erhalten und können nach Wiederherstellung der Cloud-Verbindung synchronisiert werden.</p><div class="lbc-actions"><button class="lbc-primary" onclick="lbConsultExit()">An Staff übergeben</button></div></div>`;
+  }
 };
 function summaryHtml(c){
   let l=lastConsult(c);if(!l)return '';
@@ -8718,5 +8750,160 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const old=window.unlockSettings;if(typeof old==='function')window.unlockSettings=function(){const r=old.apply(this,arguments);setTimeout(fill,0);return r;};
 })();
 </script>
+
+<script id="lune-beauty-consultation-recovery-v1">
+(function(){
+  function norm(v){return String(v==null?'':v).trim().toLowerCase();}
+  function customerKey(c){
+    if(!c)return '';
+    if(c.id)return 'id:'+String(c.id);
+    if(c.email)return 'email:'+norm(c.email);
+    if(c.phone)return 'phone:'+norm(c.phone).replace(/\s+/g,'');
+    return 'name:'+norm(c.name);
+  }
+  function formFingerprint(f){
+    if(!f)return '';
+    if(f.id)return 'id:'+String(f.id);
+    var a=f.answers||{};
+    return [
+      'fp',
+      String(f.bookingId||''),
+      String(f.submittedAt||'').slice(0,19),
+      norm(f.signature||''),
+      JSON.stringify(a)
+    ].join('|');
+  }
+  function clone(v){return JSON.parse(JSON.stringify(v));}
+
+  async function recoverLocalConsultationsToCloud(){
+    if(!(window.LuneStaffCloudSync &&
+         typeof window.LuneStaffCloudSync.isReady==='function' &&
+         window.LuneStaffCloudSync.isReady() &&
+         typeof window.LuneStaffCloudSync.pull==='function' &&
+         typeof window.LuneStaffCloudSync.push==='function')){
+      alert('Cloud Sync ist nicht verbunden. Bitte zuerst URL + Token testen.');
+      return;
+    }
+
+    // Snapshot local consultations BEFORE pulling cloud.
+    var localCustomers=clone((window.db&&db.customers)||[]);
+    var localConsults=[];
+    localCustomers.forEach(function(c){
+      (Array.isArray(c.consultationForms)?c.consultationForms:[]).forEach(function(f){
+        localConsults.push({customer:clone(c), form:clone(f)});
+      });
+    });
+
+    if(!localConsults.length){
+      alert('Auf diesem Gerät wurden keine lokalen Beauty Consultations gefunden.');
+      return;
+    }
+
+    if(!confirm(
+      localConsults.length+' lokale Beauty Consultation(s) gefunden.\n\n'+
+      'Cloud wird zuerst geladen. Danach werden nur fehlende Consultations ergänzt. '+ 
+      'Bereits vorhandene Consultations werden NICHT dupliziert.\n\nFortfahren?'
+    )) return;
+
+    try{
+      // Fresh cloud becomes the base: prevents overwriting newer cloud data with an old tablet db.
+      await window.LuneStaffCloudSync.pull();
+
+      var added=0, skipped=0, unmatched=0;
+      var cloudCustomers=(window.db&&db.customers)||[];
+
+      localConsults.forEach(function(item){
+        var lc=item.customer, f=item.form;
+        var cc=null;
+
+        if(lc.id) cc=cloudCustomers.find(function(x){return String(x.id||'')===String(lc.id);});
+        if(!cc && lc.email) cc=cloudCustomers.find(function(x){return norm(x.email)===norm(lc.email);});
+        if(!cc && lc.phone){
+          var p=norm(lc.phone).replace(/\s+/g,'');
+          cc=cloudCustomers.find(function(x){return norm(x.phone).replace(/\s+/g,'')===p;});
+        }
+        if(!cc){ unmatched++; return; }
+
+        cc.consultationForms=Array.isArray(cc.consultationForms)?cc.consultationForms:[];
+        var fp=formFingerprint(f);
+        var exists=cc.consultationForms.some(function(existing){
+          return formFingerprint(existing)===fp ||
+                 (f.id && existing.id && String(existing.id)===String(f.id));
+        });
+
+        if(exists){ skipped++; return; }
+
+        cc.consultationForms.push(clone(f));
+
+        // Restore the useful profile/anamnesis fields only when the recovered form is newer
+        // or cloud fields are empty. The form itself remains the source of truth.
+        var a=f.answers||{};
+        cc.beautyProfile=Object.assign({},cc.beautyProfile||{});
+        cc.beautyPreferences=Object.assign({},cc.beautyPreferences||{});
+        if(a.skin && (!cc.beautyProfile.skin || !cc.beautyProfile.skin.length)) cc.beautyProfile.skin=clone(a.skin);
+        if(a.routine && (!cc.beautyProfile.routine || !cc.beautyProfile.routine.length)) cc.beautyProfile.routine=clone(a.routine);
+        if(a.wishes && (!cc.beautyPreferences.wishes || !cc.beautyPreferences.wishes.length)) cc.beautyPreferences.wishes=clone(a.wishes);
+
+        if(f.bookingId){
+          var b=((window.db&&db.bookings)||[]).find(function(x){return String(x.id||'')===String(f.bookingId);});
+          if(b && !b.consultationFormId){
+            b.consultationFormId=f.id||'';
+            b.consultationCompletedAt=f.submittedAt||new Date().toISOString();
+          }
+        }
+        added++;
+      });
+
+      // Save local merged state and push only if something was added.
+      if(typeof window.persist==='function') window.persist();
+      else {
+        try{safeStorage.setItem(KEY,JSON.stringify(db));}catch(_){}
+        if(typeof window.renderAll==='function')window.renderAll();
+      }
+
+      if(added>0){
+        await window.LuneStaffCloudSync.push();
+        // Verify by re-pulling.
+        await window.LuneStaffCloudSync.pull();
+      }
+
+      alert(
+        'Beauty Consultation Recovery abgeschlossen.\n\n'+
+        'Neu in Cloud: '+added+'\n'+
+        'Bereits vorhanden (kein Duplikat): '+skipped+'\n'+
+        'Kundin nicht eindeutig gefunden: '+unmatched
+      );
+    }catch(err){
+      console.error('Beauty Consultation Recovery',err);
+      alert('Recovery fehlgeschlagen: '+(err&&err.message?err.message:String(err))+
+            '\n\nDie lokalen Daten wurden vor dem Cloud-Import nur gelesen; es wurde kein absichtlicher Massen-Upload durchgeführt.');
+    }
+  }
+
+  window.recoverLocalBeautyConsultationsToCloud=recoverLocalConsultationsToCloud;
+
+  function addRecoveryButton(){
+    if(document.getElementById('lbConsultRecoveryBtn'))return;
+    var settings=document.getElementById('settings');
+    if(!settings)return;
+    var box=document.createElement('div');
+    box.className='card adminAdvanced';
+    box.style.marginTop='16px';
+    box.innerHTML=
+      '<h3>Beauty Consultation · Tablet Recovery</h3>'+
+      '<p class="small">Récupère uniquement les Beauty Consultations présentes localement sur cet appareil. '+
+      'Le Cloud est chargé avant la fusion et les consultations déjà présentes sont ignorées.</p>'+
+      '<button id="lbConsultRecoveryBtn" type="button" class="gold">Lokale Beauty Consultations → Cloud</button>'+
+      '<p class="small"><b>Anti-Doublon :</b> ID de consultation, puis empreinte date/RDV/signature/réponses.</p>';
+    settings.appendChild(box);
+    document.getElementById('lbConsultRecoveryBtn').onclick=recoverLocalConsultationsToCloud;
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addRecoveryButton);
+  else addRecoveryButton();
+  setTimeout(addRecoveryButton,1200);
+})();
+</script>
+
 </body>
 </html>
