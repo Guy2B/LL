@@ -2974,6 +2974,7 @@
       var success=document.getElementById('booking-success');
       if(success){success.textContent='Vielen Dank. Ihre Anfrage wurde sicher übermittelt.';success.classList.remove('hidden');}
       form.reset(); syncHidden();
+      try{window.dispatchEvent(new Event("lune:booking-sent"));}catch(_){}
     }catch(err){
       console.error('Booking hardfix V40',err);
       alert('Die Terminanfrage konnte nicht gesendet werden: '+(err.message||err));
@@ -2986,5 +2987,6 @@
 })();
 </script>
 
+<script src="assets/js/lune-stats.js" defer></script>
 </body>
 </html>
