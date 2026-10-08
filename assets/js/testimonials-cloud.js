@@ -423,7 +423,7 @@
       const publishName = publicName(name);
       const consentAt = new Date().toISOString();
 
-      setStatus(`Kundenstimme wird als ${publishName} veröffentlicht…`, "info");
+      setStatus("Kundenstimme wird gesendet…", "info");
 
       await submitViaHiddenForm({
         action: "publicTestimonial",
@@ -433,13 +433,14 @@
         consent: consent && consent.checked ? "yes" : "no",
         consentAt,
         consentText: CONSENT_TEXT,
-        source: location.hostname || "lunebeauty.de"
+        source: location.hostname || "lunebeauty.de",
+        website: "" // honeypot, must stay empty
       });
 
       form.reset();
       selectedRating = 5;
       setupRating();
-      setStatus(`Danke! Die Kundenstimme wurde gespeichert und erscheint gleich als ${publishName} auf der Webseite.`, "success");
+      setStatus(`Danke! Ihre Bewertung wurde gesendet und erscheint nach kurzer Prüfung als ${publishName} auf der Webseite.`, "success");
 
       // Recharge depuis le serveur pour que la publication soit visible.
       setTimeout(loadTestimonials, 1200);
