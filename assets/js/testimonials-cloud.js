@@ -606,10 +606,9 @@
   try {
     injectStyles();
     if (new URLSearchParams(location.search).get("bewertung") === "1") {
-      setTimeout(() => {
-        const formEl = $("testimonialForm");
-        if (formEl) { formEl.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => $("tName")?.focus(), 600); }
-      }, 700);
+      const goToForm = () => { const formEl = $("testimonialForm"); if (formEl) formEl.scrollIntoView({ block: "center" }); };
+      setTimeout(goToForm, 700);
+      window.addEventListener("load", () => setTimeout(() => { goToForm(); $("tName")?.focus({ preventScroll: true }); }, 400), { once: true });
     }
   } catch (_) {}
 })();
