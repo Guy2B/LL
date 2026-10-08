@@ -38,6 +38,64 @@
   let currentIndex = 0;
   let autoplayId = null;
   let renderedSignature = "";
+  let googleInfo = null; // {reviewUrl, rating, count, mapsUrl} from the CRM
+
+  function injectStyles() {
+    if (document.getElementById("luneReviewExtras")) return;
+    const s = document.createElement("style");
+    s.id = "luneReviewExtras";
+    s.textContent = `
+      .tGoogle{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#4285f4;margin-left:8px;text-decoration:none;vertical-align:middle}
+      .tGoogle i{width:16px;height:16px;border-radius:50%;display:inline-grid;place-items:center;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:conic-gradient(from -45deg,#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0)}
+      .tGoogleSummary{display:flex;justify-content:center;align-items:center;gap:8px;margin:14px auto 0;font-size:14px;color:inherit;text-decoration:none;opacity:.85}
+      .tGoogleSummary:hover{opacity:1}
+      .tShare{margin-top:14px;padding:16px;border-radius:16px;border:1px solid rgba(199,167,91,.45);background:rgba(255,250,240,.9);text-align:center}
+      .tShare p{margin:0 0 10px}
+      .tShare button{margin:4px;cursor:pointer}
+      .tShare .tShareGoogle{background:#1d1a16;color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:600}
+      .tShare .tShareNo{background:transparent;border:1px solid rgba(0,0,0,.15);border-radius:999px;padding:10px 16px}
+    `;
+    document.head.appendChild(s);
+  }
+
+  function renderGoogleSummary() {
+    const track = $("testimonialTrack");
+    if (!track || !googleInfo || !googleInfo.rating || !googleInfo.mapsUrl) return;
+    let el = document.getElementById("tGoogleSummary");
+    if (!el) {
+      el = document.createElement("a");
+      el.id = "tGoogleSummary";
+      el.className = "tGoogleSummary";
+      el.target = "_blank";
+      el.rel = "noopener";
+      const host = track.closest(".testimonial-slider, .testimonials-slider") || track.parentElement;
+      host.parentElement.insertBefore(el, host.nextSibling);
+    }
+    el.href = googleInfo.mapsUrl;
+    el.innerHTML = `<span class="tGoogle" style="margin:0"><i>G</i></span> <strong>${String(googleInfo.rating).replace(".", ",")} ★</strong> auf Google · ${googleInfo.count || 0} Bewertungen`;
+  }
+
+  // After a review on the website, offer to share the same text on Google (optional, for every rating).
+  function offerGoogleShare(message) {
+    const reviewUrl = googleInfo && googleInfo.reviewUrl;
+    const form = $("testimonialForm");
+    if (!reviewUrl || !form) return;
+    document.getElementById("tShare")?.remove();
+    const box = document.createElement("div");
+    box.id = "tShare";
+    box.className = "tShare";
+    box.innerHTML = `<p><strong>Möchten Sie Ihre Bewertung auch auf Google teilen?</strong><br>
+      Ihr Text wird kopiert – auf Google nur noch einfügen und Sterne wählen.</p>
+      <button type="button" class="tShareGoogle">Text kopieren &amp; Google öffnen</button>
+      <button type="button" class="tShareNo">Nein, danke</button>`;
+    form.parentElement.insertBefore(box, form.nextSibling);
+    box.querySelector(".tShareGoogle").onclick = async () => {
+      try { await navigator.clipboard.writeText(message); } catch (_) {}
+      window.open(reviewUrl, "_blank", "noopener");
+      box.innerHTML = "<p>Danke! Text ist kopiert – auf Google einfach einfügen.</p>";
+    };
+    box.querySelector(".tShareNo").onclick = () => box.remove();
+  }
 
   const $ = (id) => document.getElementById(id);
 
@@ -89,7 +147,9 @@
         name: String(item.name || "Kundin").slice(0, 60),
         rating: Math.max(1, Math.min(5, Number(item.rating) || 5)),
         message: String(item.message || "").slice(0, 700),
-        createdAt: item.createdAt || ""
+        createdAt: item.createdAt || "",
+        source: item.source === "google" ? "google" : "website",
+        authorUrl: /^https:///.test(String(item.authorUrl || "")) ? String(item.authorUrl) : ""
       }))
       .filter((item) => item.message.trim().length > 0);
   }
@@ -234,7 +294,7 @@
         <article class="testimonial-card cloud-testimonial-card ${index === currentIndex ? "active" : ""}" aria-hidden="${index === currentIndex ? "false" : "true"}">
           <div class="testimonial-stars" aria-label="${esc(item.rating)} von 5 Sternen">${starsHtml(item.rating)}</div>
           <p>“${esc(item.message)}”</p>
-          <strong>${esc(item.name)}</strong>
+          <strong>${item.authorUrl ? `<a href="${esc(item.authorUrl)}" target="_blank" rel="noopener" style="color:inherit">${esc(item.name)}</a>` : esc(item.name)}${item.source === "google" ? `<a class="tGoogle" href="${esc(item.authorUrl || (googleInfo && googleInfo.mapsUrl) || "#")}" target="_blank" rel="noopener"><i>G</i>Google</a>` : ""}</strong>
         </article>
       `).join("");
       renderedSignature = signature;
@@ -317,6 +377,7 @@
 
     try {
       const data = await jsonp(API_URL);
+      googleInfo = data.google || (data.reviewUrl ? { reviewUrl: data.reviewUrl } : null);
       const liveItems = dedupeItems(data.items || data.testimonials || data);
 
       if (liveItems.length) {
@@ -328,6 +389,7 @@
 
       currentIndex = Math.min(currentIndex, Math.max(0, visibleItems().length - 1));
       render();
+      renderGoogleSummary();
       setStatus("", "info");
     } catch (err) {
       testimonials = readBackupTestimonials();
@@ -437,6 +499,7 @@
         website: "" // honeypot, must stay empty
       });
 
+      offerGoogleShare(message);
       form.reset();
       selectedRating = 5;
       setupRating();
@@ -534,4 +597,15 @@
     // Actualisation douce: les visiteurs voient les nouveaux avis sans vider le cache.
     setInterval(loadTestimonials, 30000);
   });
+
+  // ?bewertung=1 (link sent after a visit) opens the review form directly
+  try {
+    injectStyles();
+    if (new URLSearchParams(location.search).get("bewertung") === "1") {
+      setTimeout(() => {
+        const formEl = $("testimonialForm");
+        if (formEl) { formEl.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => $("tName")?.focus(), 600); }
+      }, 700);
+    }
+  } catch (_) {}
 })();
