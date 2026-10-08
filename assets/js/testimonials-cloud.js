@@ -39,6 +39,7 @@
   let autoplayId = null;
   let renderedSignature = "";
   let googleInfo = null; // {reviewUrl, rating, count, mapsUrl} from the CRM
+  let liveFromServer = false;
 
   function injectStyles() {
     if (document.getElementById("luneReviewExtras")) return;
@@ -263,6 +264,8 @@
     const live = dedupeItems(testimonials);
     const backup = readBackupTestimonials();
 
+    // The CRM is the source of truth: only approved reviews, no hard-coded extras.
+    if (liveFromServer) return live;
     if (!live.length) return backup;
 
     const liveNames = new Set(
@@ -378,6 +381,7 @@
     try {
       const data = await jsonp(API_URL);
       googleInfo = data.google || (data.reviewUrl ? { reviewUrl: data.reviewUrl } : null);
+      liveFromServer = data.ok === true;
       const liveItems = dedupeItems(data.items || data.testimonials || data);
 
       if (liveItems.length) {
