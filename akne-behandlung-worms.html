@@ -6,9 +6,10 @@
   <title>Aknebehandlung in Worms | Pflege bei unreiner Haut – Lune Beauty</title>
   <meta name="description" content="Kosmetische Aknebehandlung in Worms: Tiefenreinigung, Fruchtsäure und professionelle Ausreinigung bei unreiner Haut. 70 Minuten, 89 €. Lune Beauty, Mittelstraße 1." />
   <link rel="canonical" href="https://www.lunebeauty.de/akne-behandlung-worms.html" />
+  
   <meta property="og:title" content="Kosmetische Aknebehandlung in Worms – Lune Beauty" />
   <meta property="og:description" content="Kosmetische Aknebehandlung in Worms: Tiefenreinigung, Fruchtsäure und professionelle Ausreinigung bei unreiner Haut. 70 Minuten, 89 €. Lune Beauty, Mittelstraße 1." />
-  <meta property="og:image" content="https://www.lunebeauty.de/assets/img/og-cover.webp" />
+  <meta property="og:image" content="https://www.lunebeauty.de/assets/img/lune/hero-akne.webp" />
   <meta property="og:url" content="https://www.lunebeauty.de/akne-behandlung-worms.html" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="de_DE" />
@@ -16,495 +17,125 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/lune-premium.css">
-
-  <style>
-    :root{
-      --lb-bg:#fffaf3;
-      --lb-ink:#2f2a24;
-      --lb-muted:#746653;
-      --lb-gold:#c3a063;
-      --lb-border:rgba(195,160,99,.28);
-      --lb-soft:#fff8ee;
-      --lb-shadow:0 24px 70px rgba(47,42,36,.10);
-    }
-    body{
-      margin:0;
-      background:radial-gradient(circle at 50% 0%, rgba(234,223,203,.60), transparent 42%), var(--lb-bg);
-      color:var(--lb-ink);
-      font-family:'Inter', system-ui, sans-serif;
-    }
-    .breadcrumb{
-      width:min(1080px, calc(100% - 32px));
-      margin:24px auto -44px;
-      color:var(--lb-muted);
-      font-size:.9rem;
-    }
-    .breadcrumb a{color:var(--lb-muted);text-decoration:none}
-    .service-hero{
-      min-height:58vh;
-      margin-top:80px;
-      display:grid;
-      place-items:center;
-      text-align:center;
-      color:#fff;
-      background:
-        linear-gradient(rgba(29,22,15,.28), rgba(29,22,15,.62)),
-        url('assets/img/studio-2.webp') center/cover no-repeat;
-      position:relative;
-      overflow:hidden;
-    }
-    .service-hero-inner{
-      width:min(900px, calc(100% - 32px));
-      padding:54px 22px;
-    }
-    .service-kicker{
-      display:inline-flex;
-      margin-bottom:18px;
-      padding:8px 16px;
-      border:1px solid rgba(255,255,255,.45);
-      border-radius:999px;
-      background:rgba(255,255,255,.14);
-      backdrop-filter:blur(10px);
-      font-size:.74rem;
-      font-weight:800;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-    .service-hero h1{
-      margin:0 auto;
-      max-width:900px;
-      font-family:'Playfair Display', serif;
-      font-size:clamp(2.25rem, 5.4vw, 4.7rem);
-      line-height:1;
-      font-weight:600;
-      letter-spacing:-.045em;
-      text-wrap:balance;
-    }
-    .service-hero p{
-      max-width:690px;
-      margin:20px auto 0;
-      color:rgba(255,255,255,.9);
-      font-size:clamp(1rem, 2vw, 1.18rem);
-      line-height:1.7;
-    }
-    .service-actions{
-      margin-top:30px;
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .service-btn{
-      min-height:48px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:14px 22px;
-      border-radius:999px;
-      text-decoration:none;
-      font-weight:800;
-    }
-    .service-btn.primary{
-      color:#fff;
-      background:linear-gradient(135deg, #2f2a24, #735527);
-      box-shadow:0 16px 42px rgba(0,0,0,.18);
-    }
-    .service-btn.secondary{
-      color:#2f2a24;
-      background:rgba(255,250,243,.9);
-      border:1px solid rgba(255,255,255,.35);
-    }
-
-    .section-smart{
-      width:min(1120px, calc(100% - 32px));
-      margin:86px auto;
-    }
-    .smart-grid{
-      display:grid;
-      grid-template-columns:.78fr 1.22fr;
-      gap:22px;
-      align-items:stretch;
-    }
-    .smart-card{
-      border:1px solid var(--lb-border);
-      border-radius:30px;
-      background:rgba(255,255,255,.68);
-      box-shadow:var(--lb-shadow);
-      padding:clamp(24px, 4vw, 42px);
-    }
-    .smart-card small,
-    .process-card small,
-    .price-row small{
-      display:block;
-      margin-bottom:12px;
-      color:var(--lb-gold);
-      font-size:.68rem;
-      font-weight:900;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-    .smart-card h2,
-    .process-head h2,
-    .faq-head h2,
-    .cta-box h2{
-      margin:0;
-      font-family:'Playfair Display', serif;
-      font-weight:600;
-      line-height:1.06;
-      letter-spacing:-.04em;
-      text-wrap:balance;
-    }
-    .smart-card h2{font-size:clamp(1.85rem, 4vw, 3rem)}
-    .smart-card p{
-      color:var(--lb-muted);
-      line-height:1.78;
-      margin:18px 0 0;
-      font-size:1rem;
-    }
-    .smart-highlight{
-      margin-top:24px;
-      padding:18px;
-      border:1px solid var(--lb-border);
-      border-radius:22px;
-      background:var(--lb-soft);
-      color:#5f4b33;
-      line-height:1.65;
-    }
-    .smart-highlight strong{color:var(--lb-ink)}
-    .price-list{
-      display:grid;
-      gap:12px;
-    }
-    .price-row{
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:18px;
-      align-items:center;
-      padding:18px 20px;
-      border:1px solid var(--lb-border);
-      border-radius:22px;
-      background:#fffaf3;
-    }
-    .price-row strong{
-      display:block;
-      font-family:'Playfair Display', serif;
-      font-size:1.24rem;
-      line-height:1.12;
-      letter-spacing:-.02em;
-    }
-    .price-row span{
-      display:block;
-      margin-top:7px;
-      color:var(--lb-muted);
-      line-height:1.5;
-      font-size:.94rem;
-    }
-
-    .price-side{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:10px;
-      min-width:132px;
-    }
-    .price-side b{
-      white-space:nowrap;
-      color:#5f431d;
-      font-size:1.08rem;
-    }
-    .price-book{
-      min-height:36px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 13px;
-      border-radius:999px;
-      background:linear-gradient(135deg,#2f2a24,#735527);
-      color:#fff;
-      text-decoration:none;
-      font-weight:800;
-      font-size:.86rem;
-      box-shadow:0 12px 28px rgba(47,42,36,.12);
-      white-space:nowrap;
-    }
-    .price-book:hover{
-      filter:brightness(1.04);
-      transform:translateY(-1px);
-    }
-    @media(max-width:620px){
-      .price-side{
-        align-items:flex-start;
-      }
-    }
-
-    .mini-note{
-      margin-top:16px;
-      color:var(--lb-muted);
-      line-height:1.65;
-      font-size:.95rem;
-      text-align:center;
-    }
-
-    .process-head{
-      max-width:780px;
-      margin:0 auto 24px;
-      text-align:center;
-    }
-    .process-head h2{font-size:clamp(1.9rem, 4vw, 3rem)}
-    .process-head p{
-      margin:14px auto 0;
-      color:var(--lb-muted);
-      line-height:1.75;
-    }
-    .process-grid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0, 1fr));
-      gap:16px;
-    }
-    .process-card{
-      padding:24px;
-      border:1px solid var(--lb-border);
-      border-radius:24px;
-      background:rgba(255,255,255,.66);
-      box-shadow:0 16px 42px rgba(47,42,36,.06);
-    }
-    .process-card h3{
-      margin:0 0 10px;
-      font-family:'Playfair Display', serif;
-      font-size:1.36rem;
-      line-height:1.15;
-    }
-    .process-card p{
-      margin:0;
-      color:var(--lb-muted);
-      line-height:1.65;
-    }
-
-    .faq-head{
-      text-align:center;
-      margin-bottom:22px;
-    }
-    .faq-head h2{font-size:clamp(1.9rem, 4vw, 3rem)}
-    .faq-grid{
-      display:grid;
-      gap:14px;
-    }
-    .faq-grid details{
-      border:1px solid var(--lb-border);
-      border-radius:22px;
-      background:rgba(255,255,255,.72);
-      padding:18px 20px;
-    }
-    .faq-grid summary{
-      cursor:pointer;
-      font-weight:900;
-      color:var(--lb-ink);
-    }
-    .faq-grid p{
-      margin:12px 0 0;
-      color:var(--lb-muted);
-      line-height:1.7;
-    }
-
-    .cta-box{
-      text-align:center;
-      border:1px solid var(--lb-border);
-      border-radius:36px;
-      background:radial-gradient(circle at 50% 0%, rgba(195,160,99,.18), transparent 44%), rgba(255,255,255,.72);
-      box-shadow:var(--lb-shadow);
-      padding:clamp(34px, 5vw, 64px);
-    }
-    .cta-box h2{font-size:clamp(2rem, 5vw, 3.5rem)}
-    .cta-box p{
-      max-width:680px;
-      margin:16px auto 0;
-      color:var(--lb-muted);
-      line-height:1.75;
-    }
-
-    .footer-links,.footer-local-links{
-      max-width:1120px;
-      margin:8px auto 0;
-      padding:0 16px;
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      align-items:center;
-      gap:6px 10px;
-      line-height:1.8;
-    }
-    .footer-local-links{margin-top:4px}
-    .footer-links a,.footer-local-links a{
-      color:inherit;
-      text-decoration:none;
-      border-bottom:1px solid rgba(195,160,99,.45);
-    }
-    .footer-links span,.footer-local-links span{color:rgba(47,42,36,.45)}
-
-    @media(max-width:900px){
-      .smart-grid{grid-template-columns:1fr}
-      .process-grid{grid-template-columns:1fr}
-    }
-    @media(max-width:620px){
-      .service-hero{min-height:56vh;margin-top:72px}
-      .section-smart{margin:64px auto}
-      .smart-card{border-radius:26px}
-      .price-row{grid-template-columns:1fr;gap:10px}
-      .price-row b{justify-self:start}
-    }
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/lune-premium.css?v=2">
+  <link rel="stylesheet" href="assets/css/lune-pages.css?v=1">
   
-    .smart-service-photo{
-      margin:24px 0 0;
-      border-radius:26px;
-      overflow:hidden;
-      border:1px solid rgba(195,160,99,.24);
-      background:#fff8ee;
-      box-shadow:0 18px 46px rgba(47,42,36,.08);
-    }
-    .smart-service-photo img{
-      width:100%;
-      aspect-ratio:4/3;
-      object-fit:cover;
-      display:block;
-    }
-    .smart-service-photo figcaption{
-      padding:12px 14px;
-      color:#746653;
-      font-size:.88rem;
-      line-height:1.45;
-      text-align:center;
-    }
-
-  </style>
-  <style>
-    .price-group{margin:30px 0 12px;font-family:'Playfair Display', serif;font-size:1.5rem;font-weight:600;letter-spacing:-.02em}
-    .price-group:first-child{margin-top:0}
-    .price-row em{font-style:normal;color:var(--lb-muted);font-size:.86rem}
-    .related-links{margin-top:14px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
-    .related-links a{padding:8px 14px;border:1px solid var(--lb-border);border-radius:999px;color:#5f431d;text-decoration:none;font-weight:700;font-size:.88rem;background:#fffaf3}
-    .related-links a:hover{border-color:var(--lb-gold)}
-    .text-card{max-width:820px;margin:0 auto}
-    .text-card h2{font-size:clamp(1.7rem,3.6vw,2.6rem)}
-    .text-card h3{margin:26px 0 0;font-family:'Playfair Display', serif;font-size:1.3rem;font-weight:600}
-    .text-card ul{margin:14px 0 0;padding-left:1.1em;color:var(--lb-muted);line-height:1.8}
-    .single-col{grid-template-columns:1fr}
-    .mini-note a{color:#8a6429;text-decoration:none;border-bottom:1px solid rgba(195,160,99,.5)}
-  </style>
-
   <script type="application/ld+json">
-[
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "@id": "https://www.lunebeauty.de/akne-behandlung-worms.html#service",
-    "name": "Kosmetische Aknebehandlung in Worms",
-    "description": "Kosmetische Aknebehandlung in Worms: Tiefenreinigung, Fruchtsäure und professionelle Ausreinigung bei unreiner Haut. 70 Minuten, 89 €. Lune Beauty, Mittelstraße 1.",
-    "provider": {
-      "@type": "BeautySalon",
-      "name": "Lune Beauty",
-      "url": "https://www.lunebeauty.de/",
-      "telephone": "+49 179 1544002",
-      "image": "https://www.lunebeauty.de/assets/img/og-cover.webp",
-      "priceRange": "€€",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Mittelstraße 1",
-        "addressLocality": "Worms",
-        "postalCode": "67547",
-        "addressCountry": "DE"
-      }
-    },
-    "areaServed": {
-      "@type": "City",
-      "name": "Worms"
-    },
-    "serviceType": "Kosmetische Aknebehandlung in Worms",
-    "offers": [
-      {
-        "@type": "Offer",
-        "name": "Aknebehandlung",
-        "price": "89",
-        "priceCurrency": "EUR"
-      },
-      {
-        "@type": "Offer",
-        "name": "Basisbehandlung Gesicht",
-        "price": "69",
-        "priceCurrency": "EUR"
-      },
-      {
-        "@type": "Offer",
-        "name": "Hydra Glow Facial (Aquafacial)",
-        "price": "130",
-        "priceCurrency": "EUR"
-      },
-      {
-        "@type": "Offer",
-        "name": "Sensi Treatment",
-        "price": "89",
-        "priceCurrency": "EUR"
-      }
-    ]
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://www.lunebeauty.de/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Aknebehandlung Worms",
-        "item": "https://www.lunebeauty.de/akne-behandlung-worms.html"
-      }
-    ]
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Ist die Aknebehandlung eine medizinische Behandlung?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Nein. Wir bieten eine kosmetische Pflege bei unreiner Haut an. Bei stark entzündlicher Akne empfehlen wir zusätzlich die Abklärung bei einer Hautärztin oder einem Hautarzt – unsere Pflege kann eine ärztliche Therapie gut begleiten."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Wie oft sollte ich zur Aknebehandlung kommen?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Zu Beginn sind 3 bis 4 Wochen Abstand ideal – das entspricht etwa dem Erneuerungszyklus der Haut. Danach reichen meist regelmäßige Pflegetermine."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Ist die Ausreinigung schmerzhaft?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Die Ausreinigung kann kurz unangenehm sein. Wir arbeiten vorsichtig und machen gerne Pausen – die Haut wird vorher mit Dampf vorbereitet."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Ist die Behandlung auch für Jugendliche geeignet?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Ja, die Aknebehandlung ist auch für Jugendliche geeignet. Bei Minderjährigen bitten wir um die Zustimmung eines Elternteils."
-        }
-      }
-    ]
+{
+ "@context": "https://schema.org",
+ "@type": "Service",
+ "@id": "https://www.lunebeauty.de/akne-behandlung-worms.html#service",
+ "name": "Kosmetische Aknebehandlung in Worms",
+ "description": "Kosmetische Aknebehandlung in Worms: Tiefenreinigung, Fruchtsäure und professionelle Ausreinigung bei unreiner Haut. 70 Minuten, 89 €. Lune Beauty, Mittelstraße 1.",
+ "provider": {
+  "@type": "BeautySalon",
+  "@id": "https://www.lunebeauty.de/#salon",
+  "name": "Lune Beauty",
+  "url": "https://www.lunebeauty.de/",
+  "telephone": "+49 179 1544002",
+  "image": "https://www.lunebeauty.de/assets/img/og-cover.webp",
+  "priceRange": "€€",
+  "address": {
+   "@type": "PostalAddress",
+   "streetAddress": "Mittelstraße 1",
+   "addressLocality": "Worms",
+   "postalCode": "67547",
+   "addressCountry": "DE"
   }
-]
+ },
+ "areaServed": {
+  "@type": "City",
+  "name": "Worms"
+ },
+ "serviceType": "Kosmetische Aknebehandlung in Worms",
+ "offers": [
+  {
+   "@type": "Offer",
+   "name": "Aknebehandlung",
+   "price": "89",
+   "priceCurrency": "EUR"
+  },
+  {
+   "@type": "Offer",
+   "name": "Basisbehandlung Gesicht",
+   "price": "69",
+   "priceCurrency": "EUR"
+  },
+  {
+   "@type": "Offer",
+   "name": "Hydra Glow Facial (Aquafacial)",
+   "price": "130",
+   "priceCurrency": "EUR"
+  },
+  {
+   "@type": "Offer",
+   "name": "Sensi Treatment",
+   "price": "89",
+   "priceCurrency": "EUR"
+  }
+ ]
+}
+  </script>
+  <script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Home",
+   "item": "https://www.lunebeauty.de/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Aknebehandlung Worms",
+   "item": "https://www.lunebeauty.de/akne-behandlung-worms.html"
+  }
+ ]
+}
+  </script>
+  <script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Ist die Aknebehandlung eine medizinische Behandlung?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Nein. Wir bieten eine kosmetische Pflege bei unreiner Haut an. Bei stark entzündlicher Akne empfehlen wir zusätzlich die Abklärung bei einer Hautärztin oder einem Hautarzt – unsere Pflege kann eine ärztliche Therapie gut begleiten."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Wie oft sollte ich zur Aknebehandlung kommen?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Zu Beginn sind 3 bis 4 Wochen Abstand ideal – das entspricht etwa dem Erneuerungszyklus der Haut. Danach reichen meist regelmäßige Pflegetermine."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Ist die Ausreinigung schmerzhaft?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Die Ausreinigung kann kurz unangenehm sein. Wir arbeiten vorsichtig und machen gerne Pausen – die Haut wird vorher mit Dampf vorbereitet."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Ist die Behandlung auch für Jugendliche geeignet?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Ja, die Aknebehandlung ist auch für Jugendliche geeignet. Bei Minderjährigen bitten wir um die Zustimmung eines Elternteils."
+   }
+  }
+ ]
+}
   </script>
 </head>
 <body>
@@ -514,14 +145,15 @@
       <img src="assets/img/logo.png" class="brand-logo" alt="Lune Beauty" />
     </a>
     <ul class="nav-links">
-      <li><a href="index.html#hero">Home</a></li>
       <li><a href="index.html#services">Behandlungen</a></li>
       <li><a href="preise.html">Preise</a></li>
-      <li><a href="index.html#booking">Termin anfragen</a></li>
-      <li><a href="index.html#contact">Kontakt</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="kosmetik-ausbildung-worms.html">Ausbildung</a></li>
       <li><a href="skin-ai.html">Skin Check</a></li>
       <li><a href="studio.html">Studio</a></li>
+      <li><a href="index.html#booking">Termin anfragen</a></li>
     </ul>
+    
     <button class="nav-toggle" aria-label="Navigation öffnen">
       <span></span><span></span><span></span>
     </button>
@@ -529,17 +161,23 @@
 </nav>
 <div class="nav-divider"></div>
 
-<div class="breadcrumb"><a href="index.html">Home</a> · Aknebehandlung Worms</div>
-
-<header class="service-hero">
-  <div class="service-hero-inner">
-    <span class="service-kicker">Unreine Haut · Worms</span>
-    <h1>Aknebehandlung in Worms – für ein klareres, ruhigeres Hautbild.</h1>
-    <p>Professionelle kosmetische Pflege bei unreiner Haut, Mitessern und Pickeln – gründlich, schonend und ohne zu bewerten.</p>
-    <div class="service-actions">
-      <a href="index.html?service=Aknebehandlung#booking" class="service-btn primary">Aknebehandlung anfragen →</a>
-      <a href="preise.html" class="service-btn secondary">Alle Preise ansehen</a>
+<header class="lx-hero">
+  <div class="lx-crumb"><a href="index.html">Home</a> · Aknebehandlung Worms</div>
+  <div class="lx-hero-inner">
+    <div>
+      <span class="lx-kicker">Unreine Haut · Worms</span>
+      <h1>Aknebehandlung in Worms – für ein klareres, ruhigeres Hautbild.</h1>
+      <p class="lx-lead">Professionelle kosmetische Pflege bei unreiner Haut, Mitessern und Pickeln – gründlich, schonend und ohne zu bewerten.</p>
+      <div class="lx-actions">
+        <a href="index.html?service=Aknebehandlung#booking" class="service-btn primary">Aknebehandlung anfragen →</a>
+        <a href="preise.html" class="service-btn secondary">Alle Preise ansehen</a>
+      </div>
+      <ul class="lx-trust"><li>Mittelstraße 1, Worms</li><li>Persönliche Beratung</li><li>5,0 ★ auf Google</li></ul>
     </div>
+    <figure class="lx-photo">
+      <img src="assets/img/lune/hero-akne.webp" alt="Kosmetische Aknebehandlung bei Lune Beauty in Worms" width="900" height="1125" fetchpriority="high">
+      <figcaption><b>70 Minuten</b>Aknebehandlung · 89 €</figcaption>
+    </figure>
   </div>
 </header>
 
@@ -552,7 +190,7 @@
         <p>Unreine Haut ist kein Makel, sondern braucht die richtige Pflege. In unserer Aknebehandlung reinigen wir die Haut in der Tiefe, lösen Verhornungen mit Fruchtsäure und reinigen Mitesser und Unreinheiten professionell und hygienisch aus.</p>
         <p>Eine klärende Maske und eine abgestimmte Pflege beruhigen die Haut im Anschluss. Gemeinsam besprechen wir, welche Pflege zu Hause Ihr Hautbild langfristig unterstützt.</p>
         <figure class="smart-service-photo">
-          <img src="assets/img/gesichtsbehandlung.png" alt="Kosmetische Aknebehandlung bei Lune Beauty in Worms" loading="lazy" />
+          <img src="assets/img/lune/card-akne.webp" alt="Kosmetische Aknebehandlung bei Lune Beauty in Worms" loading="lazy" />
           <figcaption>Pflege bei unreiner Haut · Lune Beauty Worms</figcaption>
         </figure>
         <div class="smart-highlight"><strong>Ideal, wenn:</strong> Sie zu Mitessern, Pickeln oder vergrößerten Poren neigen, Ihre Haut ölig oder unruhig ist – in der Pubertät ebenso wie im Erwachsenenalter.</div>
@@ -623,7 +261,6 @@
     </div>
   </section>
 
-
   <section class="section-smart">
     <div class="faq-head">
       <h2>Häufige Fragen</h2>
@@ -664,11 +301,15 @@
 <footer class="footer">
   <p>© <span id="year"></span> Lune Beauty · Kosmetikstudio in Worms · Mittelstraße 1, 67547 Worms · <a href="tel:+491791544002" style="color:inherit">0179 1544002</a></p>
   <nav class="footer-links" aria-label="Rechtliches">
-    <a href="/impressum.html">Impressum</a>
+    <a href="impressum.html">Impressum</a>
     <span>·</span>
     <a href="agb.html">AGB</a>
     <span>·</span>
-    <a href="/datenschutz.html">Datenschutz</a>
+    <a href="datenschutz.html">Datenschutz</a>
+    <span>·</span>
+    <a href="versand-zahlung.html">Versand &amp; Zahlung</a>
+    <span>·</span>
+    <a href="widerruf.html">Widerruf</a>
   </nav>
   <nav class="footer-local-links" aria-label="Lokale Seiten">
     <a href="studio.html">Kosmetikstudio Worms</a>
@@ -686,11 +327,16 @@
     <a href="augenpflege-worms.html">Augenpflege Worms</a>
     <span>·</span>
     <a href="preise.html">Preise</a>
+    <span>·</span>
+    <a href="shop.html">Braukmann Shop</a>
+    <span>·</span>
+    <a href="kosmetik-ausbildung-worms.html">Kosmetik-Ausbildung Worms</a>
   </nav>
 </footer>
 <script src="assets/js/header-scroll.js"></script>
 <script src="assets/js/nav-mobile.js"></script>
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+
 <script src="assets/js/lune-stats.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,1432 @@
+{
+ "updated": "2026-10-08",
+ "items": [
+  {
+   "id": "P24",
+   "sku": "07730",
+   "slug": "braukmann-institute-derma-structure-pure-24h-aqua-plus-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Derma Structure Pure 24h Aqua plus",
+   "title": "Institute Derma Structure Pure 24h Aqua plus",
+   "size": "50 ml",
+   "price": 44,
+   "unitPrice": "880,00 € / 1 l",
+   "category": "24h-Pflege",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083077309",
+   "description": "Für sensible, feuchtigkeitsarme Haut. 24 Stunden\nFeuchtigkeitsanreicherung. Durch den erhöhten Anteil an hydroaktiven\nWirkstoffen und hautähnlichen Membranlipiden besonders geeignet für\nfeuchtigkeitsarme, regenerationsbedürftige, beanspruchte und zu\nAllergien neigende Haut. Hautähnliche Membranlipide aktivieren und\nstärken lang anhaltend die Barriereschutzfunktion. Der Extrakt aus dem\nindischen Weihrauchharz wirkt gegen Rötungen und Reizungen der sensiblen\nHaut. Vitamin E und Seefenchel beugen intensiv frühzeitiger\nHautalterung vor. Sehr gut verträglich und nachhaltig wirksam für eine\ngeschmeidige Haut. Geeignet zur unterstützenden Pflege bei\nNeurodermitis, Schuppenflechte und Diabetes. Frei von synthetischen\nDuftstoffen.",
+   "application": "Morgens und abends auf die gereinigte Haut auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Sensible Haut"
+   ],
+   "images": [
+    "assets/shop/img/07730-1.webp",
+    "assets/shop/img/07730-2.webp"
+   ]
+  },
+  {
+   "id": "P35",
+   "sku": "07743",
+   "slug": "braukmann-institute-hydro-aktiv-frische-gel-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Hydro Aktiv Frische Gel",
+   "title": "Institute Hydro Aktiv Frische Gel",
+   "size": "50 ml",
+   "price": 23.5,
+   "unitPrice": "470,00 € / 1 l",
+   "category": "24h-Pflege",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077439",
+   "description": "Angenehm kühlendes, erfrischendes, glättendes Pflegegel als aktiver Feuchtigkeitsspender. Hyaluronsäure und Mandelproteine spenden viel Feuchtigkeit und schenken ein samtiges Hautgefühl. Enthält vitalisierende Auszüge aus Hamamelis und Efeu . Besonders wohltuend nach dem Sonnenbaden oder dem Solarium.",
+   "application": "Täglich – auch mehrmals – auf die feuchtigkeitsarme Haut unter der Pflegecreme auftragen. Bei öliger Haut als alleinige Pflege verwenden.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07743-1.webp",
+    "assets/shop/img/07743-2.webp"
+   ]
+  },
+  {
+   "id": "P96",
+   "sku": "07938",
+   "slug": "braukmann-professional-24h-balance-creme-fluid-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "24h Balance Creme Fluid",
+   "title": "Professional 24h Balance Creme Fluid",
+   "size": "50 ml",
+   "price": 15,
+   "unitPrice": "300,00 € / 1 l",
+   "category": "24h-Pflege",
+   "concerns": [
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083079389",
+   "description": "Regulierende 24h-Gesichtspflege für Mischhaut. Das 24h Balance Creme Fluid hilft, die Mischhaut mit ihren trockenen und öligen Partien wieder auszubalancieren. Ein liposomaler Aktivkomplex aus sich optimal ergänzenden Pflanzen-Extrakten bringt die Sebumproduktion der Haut wieder in ihr natürliches Gleichgewicht zurück. Der Entstehung von Unreinheiten wird vorgebeugt. Gleichzeitig spendet Hyaluronsäure lang anhaltend Feuchtigkeit und sorgt für einen glatten geschmeidigen Teint. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens und abends nach der Reinigung auf Gesicht und Hals auftragen und sanft einmassieren.",
+   "skin": [
+    "Mischhaut"
+   ],
+   "images": [
+    "assets/shop/img/07938-1.webp",
+    "assets/shop/img/07938-2.webp"
+   ]
+  },
+  {
+   "id": "P93",
+   "sku": "07934",
+   "slug": "braukmann-professional-24h-couperose-relax-intensiv-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "24h Couperose Relax intensiv",
+   "title": "Professional 24h Couperose Relax intensiv",
+   "size": "50 ml",
+   "price": 30,
+   "unitPrice": "600,00 € / 1 l",
+   "category": "24h-Pflege",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079341",
+   "description": "24h-Spezialpflege bei geröteter, entzündlicher und sensibler Haut. Softe 24h-Spezialpflege mit intensiver Feuchtigkeitsanreicherung auf Basis hautähnlicher Membranlipide . Der innovative Wirkstoff aus der Purpuralge wirkt gezielt gegen Rötungen, indem er die Gefäßspannkraft stärkt. Magnolien-Extrakt wirkt stark entzündungshemmend und antioxidativ. Beta-Glucan regt die Regeneration in der Haut an. Rötungen und Reizungen werden gemildert. Als therapiebegleitende Pflege bei Rosazea geeignet. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung. Emulgatorfrei. Parfümfrei.",
+   "application": "Morgens und/oder abends nach der Reinigung mit Reinigungsgelee sensitiv und Mizellar Tonic sanft auf das ganze Gesicht oder gezielt auf die Rötungen auftragen.",
+   "skin": [
+    "Gerötete Haut (Couperose/Rosazea)"
+   ],
+   "images": [
+    "assets/shop/img/07934-1.webp",
+    "assets/shop/img/07934-2.webp"
+   ]
+  },
+  {
+   "id": "P92",
+   "sku": "07932",
+   "slug": "braukmann-professional-24h-melissen-hautkur-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "24h Melissen Hautkur",
+   "title": "Professional 24h Melissen Hautkur",
+   "size": "50 ml",
+   "price": 26,
+   "unitPrice": "520,00 € / 1 l",
+   "category": "24h-Pflege",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079327",
+   "description": "Wohltuende 24h-Intensivpflege, hautberuhigend und reizmildernd – für sensible Haut. Rund-um-die-Uhr-Pflege für die strapazierte Haut: angenehm als Tagespflege, wohltuend als Nachtpflege. Wirkt beruhigend und reizmildernd durch die Kombination von Melissen-Extrakt mit Panthenol und Bisabolol sowie wertvollen lang anhaltenden Feuchthaltefaktoren. Medilan – hochreines pharmazeutisches Lanolin – hat einen Repair-Effekt und stärkt die Hautbarriere. Die Haut gewinnt wieder an Geschmeidigkeit und Spannkraft. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens und abends nach der Reinigung mit Reinigungsgelee sensitiv und Mizellar Tonic sanft auf das Gesicht auftragen.",
+   "skin": [
+    "Sensible Haut"
+   ],
+   "images": [
+    "assets/shop/img/07932-1.webp",
+    "assets/shop/img/07932-2.webp"
+   ]
+  },
+  {
+   "id": "P34",
+   "sku": "07742",
+   "slug": "braukmann-institute-anti-falten-hals-creme-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Anti Falten Hals Creme",
+   "title": "Institute Anti Falten Hals Creme",
+   "size": "50 ml",
+   "price": 29,
+   "unitPrice": "580,00 € / 1 l",
+   "category": "Augen, Lippen & Hals",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077422",
+   "description": "Straffende Pflegecreme für die zarte Halspartie. Mildert Fältchen durch die besondere Verbindung von Korkeichen-Extrakt und Sheabutter . Die hautglättende Wirkung wird nachhaltig unterstützt durch Hyaluronsäure als Feuchtigkeitsspender, Ceramide mit Anti-Aging-Effekt und pflanzliche Polysaccharide, die auf der Haut einen seidigen hautstraffenden Film bilden. Die Haut wird wieder geschmeidig und samtweich.",
+   "application": "Morgens und abends gleichmäßig über den Hals verteilen und in sanften Aufwärtsstrichen einmassieren.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07742-1.webp",
+    "assets/shop/img/07742-2.webp"
+   ]
+  },
+  {
+   "id": "P30",
+   "sku": "07737",
+   "slug": "braukmann-institute-pro-lift-lippen-pflege-spf-10-10-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Pro Lift Lippen Pflege SPF 10",
+   "title": "Institute Pro Lift Lippen Pflege SPF 10",
+   "size": "10 ml",
+   "price": 17,
+   "unitPrice": "1700,00 € / 1 l",
+   "category": "Augen, Lippen & Hals",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077378",
+   "description": "Spezial-Anti-Age-Pflege mit Gloss-Effekt für unwiderstehlich weiche und vollere Lippen. Extrakte aus Alpenrose und Portulak pflegen und schützen die zarte, empfindliche Lippenhaut und spenden effektiv Feuchtigkeit. Pro Lift Lippen Pflege SPF 10 wirkt so der Bildung von Mikrofalten entgegen. Ein Aufpolsterungseffekt sorgt für Erhöhung des Volumens und Verschönerung der Lippenkontur. Kribbeln und Spannungen werden gemildert. Auch bei Neigung zu Lippenbläschen und Reizungen. Minzöl schenkt einen sanft frischen Duft und wirkt bakteriostatisch.",
+   "application": "Mehrmals täglich auf die Lippen auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07737-1.webp",
+    "assets/shop/img/07737-2.webp"
+   ]
+  },
+  {
+   "id": "P91",
+   "sku": "07931",
+   "slug": "braukmann-professional-augen-balsam-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Augen Balsam",
+   "title": "Professional Augen Balsam",
+   "size": "30 ml",
+   "price": 18.5,
+   "unitPrice": "616,67 € / 1 l",
+   "category": "Augen, Lippen & Hals",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083079310",
+   "description": "Angenehm kühlendes Cremegel mit Hyaluronsäure und hautglättenden Liposomen . Der Augen Balsam mit innovativer Feuchtigkeitsdepot-Technologie und hautglättenden Liposomen wirkt sanft als Falten-Filler. Hyaluronsäure und natürlicher Efeu -Extrakt wirken intensiv hydratisierend und belebend. Für sensible Augen und Kontaktlinsenträger geeignet. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens eine kleine Menge mit dem Ringfinger um die Augenpartie auftragen. Abends PROFESSIONAL Augen Creme verwenden.",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Anti-Age",
+    "Gerötete Haut (Couperose/Rosazea)",
+    "Mischhaut",
+    "Normale Haut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07931-1.webp",
+    "assets/shop/img/07931-2.webp"
+   ]
+  },
+  {
+   "id": "P90",
+   "sku": "07930",
+   "slug": "braukmann-professional-augen-creme-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Augen Creme",
+   "title": "Professional Augen Creme",
+   "size": "30 ml",
+   "price": 20,
+   "unitPrice": "666,67 € / 1 l",
+   "category": "Augen, Lippen & Hals",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083079303",
+   "description": "Pflegt die zarte Haut der Augenpartie mit wertvollen Ölen und Hyaluronsäure. Die Augen Creme enthält wertvolle Öle – Macadamianussöl , Sesamöl und Phytosqualan aus Olivenöl – sowie als Feuchtigkeitsspender die hochwirksame Hyaluronsäure. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens und abends eine kleine Menge mit dem Ringfinger um die Augenpartie mit Abstand zum Wimpernrand auftragen.",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Anti-Age",
+    "Gerötete Haut (Couperose/Rosazea)",
+    "Mischhaut",
+    "Normale Haut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07930-1.webp",
+    "assets/shop/img/07930-2.webp"
+   ]
+  },
+  {
+   "id": "P4",
+   "sku": "00358",
+   "slug": "braukmann-beauty-for-hands-handcreme-nacht-intensiv-75-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "BEAUTY FOR HANDS",
+   "name": "Handcreme Nacht intensiv",
+   "title": "Handcreme Nacht intensiv",
+   "size": "75 ml",
+   "price": 13,
+   "unitPrice": "173,33 € / 1 l",
+   "category": "Hände & Füße",
+   "concerns": [],
+   "ean": "4016083003582",
+   "description": "Wohlduftende, reichhaltige Intensivkur für beanspruchte, trockene Hände und Nägel. Die regenerierende Handpflege für die Nacht enthält eine ausgesuchte Kombination von natürlichen Pflanzenölen mit aktiven Wirkstoffen, die die Barrierestruktur der Haut stärken und den Feuchtigkeitsgehalt stabilisieren. Moringabutter und Sheabutter hüllen strapazierte Hände samtig ein. Ballonrebe und Echiumöl mildern Trockenheitsgefühl und Juckreiz. Der Extrakt der afrikanischen Teufelskralle wirkt wohltuend bei beanspruchten Gelenken. Angenehm duftend mit natürlichen ätherischen Ölen.",
+   "application": "Am Abend nach der Reinigung mit Hand Waschcreme auf Hände/Nägel und Gelenke auftragen und sanft einmassieren.",
+   "skin": [
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/00358-1.webp",
+    "assets/shop/img/00358-2.webp"
+   ]
+  },
+  {
+   "id": "P3",
+   "sku": "00357",
+   "slug": "braukmann-beauty-for-hands-handcreme-tag-spf-20-75-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "BEAUTY FOR HANDS",
+   "name": "Handcreme Tag SPF 20",
+   "title": "Handcreme Tag SPF 20",
+   "size": "75 ml",
+   "price": 13,
+   "unitPrice": "173,33 € / 1 l",
+   "category": "Hände & Füße",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083003575",
+   "description": "Zart duftende Anti-Age-Pflege für beanspruchte, sensible Hände. Beugt Pigmentflecken vor. Die feuchtigkeitsspendende Handpflege mit UVA- und UVB-Filtern beugt lichtbedingter Hautalterung vor. Liposomal verkapselte Zitrusflavonoide lassen die Haut gleichmäßiger erscheinen und mildern Pigmentflecken. Hyaluronsäure wirkt als Falten-Filler und polstert auf. Beta-Glucan stimuliert die Kollagensynthese und fördert die Regeneration der Hautbarriere. Sanddorn-Lipide glätten und pflegen die Haut wieder angenehm weich. Zart duftend mit natürlichen ätherischen Ölen.",
+   "application": "Nach der Reinigung mit Hand Waschcreme auf die Hände auftragen und sanft einmassieren. Bei Bedarf mehrmals täglich anwenden.",
+   "skin": [
+    "Sensible Haut"
+   ],
+   "images": [
+    "assets/shop/img/00357-1.webp",
+    "assets/shop/img/00357-2.webp"
+   ]
+  },
+  {
+   "id": "P5",
+   "sku": "03280",
+   "slug": "braukmann-body-lift-handcreme-anti-age-100-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "BODY LIFT",
+   "name": "Handcreme Anti-Age",
+   "title": "Handcreme Anti-Age",
+   "size": "100 ml",
+   "price": 16.5,
+   "unitPrice": "165,00 € / 1 l",
+   "category": "Hände & Füße",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083032803",
+   "description": "Pflegt die Hände wohltuend geschmeidig und beugt Pigmentflecken vor. Die zart duftende, reichhaltige Anti-Age-Formel wirkt wie ein schützender „Seidenhandschuh“ für strapazierte, raue Hände. Sesamöl und Mimosenbutter pflegen und regenerieren. Calendula-Auszüge wirken reizmildernd und beruhigend. Zitrusflavonoide und Vitamin C beugen Pigmentflecken vor und lassen das Hautbild gleichmäßiger erscheinen. Hyaluronsäure spendet dringend benötigte Feuchtigkeit. Das Konzentrat aus Chlorellaalgen unterstützt das natürliche Gleichgewicht der Haut und stärkt die hauteigenen Repair-Funktionen.",
+   "application": "Nach dem Händewaschen auftragen und sanft einmassieren.",
+   "skin": [
+    "Alle Hauttypen"
+   ],
+   "images": [
+    "assets/shop/img/03280-1.webp",
+    "assets/shop/img/03280-2.webp"
+   ]
+  },
+  {
+   "id": "P6",
+   "sku": "03283",
+   "slug": "braukmann-body-lift-moringa-fussbutter-100-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "BODY LIFT",
+   "name": "Moringa Fußbutter",
+   "title": "Moringa Fußbutter",
+   "size": "100 ml",
+   "price": 19.5,
+   "unitPrice": "195,00 € / 1 l",
+   "category": "Hände & Füße",
+   "concerns": [],
+   "ean": "4016083032834",
+   "description": "Intensiv pflegende und bezaubernd duftende Fußbutter. Samtig weiche Intensivpflege bei stark strapazierten Füßen, Hornhaut und Schrunden. Die besonders reichhaltige Rezeptur pflegt selbst rissige und sehr trockene Füße samtig weich und beugt gleichzeitig der Neubildung von Hornhaut vor. Wirkt desodorierend und bakteriostatisch. Auch ideal zur Prophylaxe im Sportbereich geeignet.",
+   "application": "Täglich nach dem Duschen mit BODY LIFT Meeres Duschcreme oder Baden auftragen und sanft einmassieren.",
+   "skin": [
+    "Alle Hauttypen"
+   ],
+   "images": [
+    "assets/shop/img/03283-1.webp",
+    "assets/shop/img/03283-2.webp"
+   ]
+  },
+  {
+   "id": "P29",
+   "sku": "07736",
+   "slug": "braukmann-institute-pro-lift-nacht-creme-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Pro Lift Nacht Creme",
+   "title": "Institute Pro Lift Nacht Creme",
+   "size": "50 ml",
+   "price": 52,
+   "unitPrice": "1040,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083077361",
+   "description": "Ausgewählte Anti-Aging-Wirkstoffe unterstützen während des Schlafs effektiv die Repair-Mechanismen der Haut. Magnolien-Extrakt reduziert Rötungen und wirkt gegen das sogenannte „Inflamm-Aging“, die Hautalterung durch chronische Mikroentzündungen der reifen Haut. Die „ Anti-Glycation-Formel “ mit Carnosin stoppt die Verzuckerung der Kollagen - und Elastinfasern. Das Polyphenol „Silymarin“, gewonnen aus der Mariendistel schützt als Hochleistungsantioxidans vor Zellschädigungen. Gerstengras-Extrakt und Hyaluronsäure straffen die Haut, optimieren den Feuchtigkeitslevel und wirken porenverfeinernd. Durch die sogenannte „Feuchtigkeitsdepot-Technologie“ wird Wasser gebunden und für bis zu 24 Stunden in der Haut eingeschlossen. Matrikine (Mikroproteine) stimulieren die Neubildung von Kollagen in der Haut. Falten werden effektiv reduziert, die Haut wirkt glatter.",
+   "application": "Abends nach der Reinigung und Tonisierung sanft auf Gesicht, Hals und Dekolleté verstreichen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv"
+   ],
+   "images": [
+    "assets/shop/img/07736-1.webp",
+    "assets/shop/img/07736-2.webp"
+   ]
+  },
+  {
+   "id": "P19",
+   "sku": "07725",
+   "slug": "braukmann-institute-regenerierende-nacht-creme-soft-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Regenerierende Nacht Creme soft",
+   "title": "Institute Regenerierende Nacht Creme soft",
+   "size": "50 ml",
+   "price": 33,
+   "unitPrice": "660,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083077255",
+   "description": "Angenehm leichte multiaktive Creme zur Stimulierung der natürlichen Hautregeneration während der Nacht. Intensive Zellregeneration. Wertvolle Pflanzenwirkstoffe – gewonnen aus Mandelproteinen und dem Zellgewebe junger Buchen – in Kombination mit den Vitaminen A und E sowie Liposomen , vitalisieren die Haut, pflegen sie nachhaltig und mildern Fältchen und feine Linien. Ein hochwirksames hautidentisches Sphingolipid-Derivat glättet das Erscheinungsbild der Haut, indem es die altersbedingt geschwächte Regeneration der Hautstruktur wieder neu aktiviert und optimiert.",
+   "application": "Am Abend auf das gereinigte Gesicht auftragen. Enthält Vitamin A. Berücksichtigen Sie Ihre tägliche Aufnahme vor der Anwendung.",
+   "skin": [
+    "Anti-Age",
+    "Feuchtigkeitsarme Haut"
+   ],
+   "images": [
+    "assets/shop/img/07725-1.webp",
+    "assets/shop/img/07725-2.webp"
+   ]
+  },
+  {
+   "id": "P87",
+   "sku": "07922",
+   "slug": "braukmann-professional-aufbau-creme-nacht-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Aufbau Creme Nacht",
+   "title": "Professional Aufbau Creme Nacht",
+   "size": "50 ml",
+   "price": 15,
+   "unitPrice": "300,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083079228",
+   "description": "Ausgleichende Nachtcreme für trockene Haut. Die reichhaltige Pflegecreme stimuliert die Zellaktivität und schwächt die Folgen der langsameren Zellregeneration ab. Baut den gerade für die reife Haut wichtigen Lipidfilm auf und wirkt dem Wasserverlust entgegen. Extrakte aus Aloe Vera sowie aus Avocado- und Olivenöl geben müden Epidermiszellen, unterstützt von den hautaktiven Vitaminen A und E, neuen Schwung und Spannkraft. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Abends nach der Reinigung auf Gesicht und Hals auftragen und leicht einmassieren. Enthält Vitamin A. Berücksichtigen Sie Ihre tägliche Aufnahme vor der Anwendung. Ergänzende Pflege für den Tag: Weizenkeim Creme Tag",
+   "skin": [
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07922-1.webp",
+    "assets/shop/img/07922-2.webp"
+   ]
+  },
+  {
+   "id": "P95",
+   "sku": "07937",
+   "slug": "braukmann-professional-couperose-relax-nacht-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Couperose Relax Nacht",
+   "title": "Professional Couperose Relax Nacht",
+   "size": "50 ml",
+   "price": 22.5,
+   "unitPrice": "450,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079372",
+   "description": "Spezialnachtpflege bei Rötungsneigung und sehr sensibler Haut. Spezielle reichhaltige Nachtpflege für die trockene, anspruchsvolle Haut, die zu Teleangiektasien (Couperose) neigt. Auszüge aus Salbei und grünem Tee sowie Panthenol wirken einhüllend, abschirmend und mild adstringierend. Wirkt sofort beruhigend auf die besonders sensible, irritierte Haut. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Abends nach der Reinigung mit Reinigungsgelee sensitiv und Mizellar Tonic sanft auf das ganze Gesicht oder gezielt auf die Rötungen auftragen. Ergänzende Pflege für den Tag: Couperose Relax Tag SPF 10",
+   "skin": [
+    "Gerötete Haut (Couperose/Rosazea)"
+   ],
+   "images": [
+    "assets/shop/img/07937-1.webp",
+    "assets/shop/img/07937-2.webp"
+   ]
+  },
+  {
+   "id": "P89",
+   "sku": "07924",
+   "slug": "braukmann-professional-creme-bleue-nacht-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Crème Bleue Nacht",
+   "title": "Professional Crème Bleue Nacht",
+   "size": "50 ml",
+   "price": 26,
+   "unitPrice": "520,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079242",
+   "description": "Beruhigt und stärkt sensible und anspruchsvolle Haut mit Azulen und Süßholzwurzel . Crème Bleue Nacht stärkt die Widerstands- und Regenerationskraft der sensiblen Haut in der Nacht. Enthält Rosen-Extrakt, Kamillenöl und reines Azulen . Die entzündungshemmende und reparative Wirkung wird unterstützt durch einen Wirkstoff der Süßholzwurzel . Sheabutter pflegt und schützt die anspruchsvolle Haut. Phytosqualan , gewonnen aus Olivenöl , beschleunigt den Wirkstofftransport. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Abends nach der Reinigung auf Gesicht und Hals auftragen und leicht einmassieren. Ergänzende Pflege für den Tag: Collagen Creme Tag/Feuchtigkeits Creme sensitiv Tag",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Sensible Haut"
+   ],
+   "images": [
+    "assets/shop/img/07924-1.webp",
+    "assets/shop/img/07924-2.webp"
+   ]
+  },
+  {
+   "id": "P88",
+   "sku": "07923",
+   "slug": "braukmann-professional-creme-rosee-vitale-nacht-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Crème Rosée Vitale Nacht",
+   "title": "Professional Crème Rosée Vitale Nacht",
+   "size": "50 ml",
+   "price": 26,
+   "unitPrice": "520,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083079235",
+   "description": "Intensiv pflegend und regenerierend mit Ginseng und hochwertigen Pflanzenölen – für anspruchsvolle Haut. Crème Rosée Vitale Nacht, mit natürlichem Rosenöl , aktiviert effektiv die Regeneration der anspruchsvollen, trockenen Haut durch die Kombination von Ginseng mit Borretschsamenöl und Macadamianussöl . Borretschsamenöl ist reich an Gamma- Linolensäure , die besonders der trockenen Haut hilft, ihre natürliche Barrierefunktion zu erfüllen. Die Haut gewinnt an Energie und Vitalität zurück. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Abends nach der Reinigung auf Gesicht und Hals auftragen und leicht einmassieren. Enthält Vitamin A. Berücksichtigen Sie Ihre tägliche Aufnahme vor der Anwendung. Ergänzende Pflege für den Tag: Collagen Creme Tag",
+   "skin": [
+    "Anspruchsvolle Haut"
+   ],
+   "images": [
+    "assets/shop/img/07923-1.webp",
+    "assets/shop/img/07923-2.webp"
+   ]
+  },
+  {
+   "id": "P86",
+   "sku": "07921",
+   "slug": "braukmann-professional-hyaluron-repair-creme-nacht-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Hyaluron Repair Creme Nacht",
+   "title": "Professional Hyaluron Repair Creme Nacht",
+   "size": "50 ml",
+   "price": 28.5,
+   "unitPrice": "570,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083079211",
+   "description": "Anti-Age-Nachtpflege mit Hyaluronsäure und hochwertigem Repair-Komplex. Anti-Stress- und Anti-Falten-Nachtpflege mit dem Repair-Komplex aus Vitaminen, Liposomen und Hyaluronsäure. Die Haut wird gestrafft und gefestigt. Die Hyaluron Repair Creme Nacht mildert Fältchen und speichert Feuchtigkeit länger – für spürbar zartere Haut. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Abends nach der Reinigung auf Gesicht und Hals verteilen und leicht einmassieren. Ergänzende Pflege für den Tag: Hyaluron Energie Creme Tag",
+   "skin": [
+    "Anti-Age"
+   ],
+   "images": [
+    "assets/shop/img/07921-1.webp",
+    "assets/shop/img/07921-2.webp"
+   ]
+  },
+  {
+   "id": "P85",
+   "sku": "07920",
+   "slug": "braukmann-professional-vitamin-creme-nacht-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Vitamin Creme Nacht",
+   "title": "Professional Vitamin Creme Nacht",
+   "size": "50 ml",
+   "price": 15,
+   "unitPrice": "300,00 € / 1 l",
+   "category": "Nachtpflege",
+   "concerns": [],
+   "ean": "4016083079204",
+   "description": "Regenerierende Nachtcreme für alle Hauttypen. Kakaobutter und essenzielle Fettsäuren aus dem wertvollen Öl der Färberdistel sowie die hautaktiven Vitamine A, C und E regulieren den Feuchtigkeitsgehalt der Haut und machen sie zart und geschmeidig. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Abends nach der Reinigung auf Gesicht und Hals auftragen und leicht einmassieren. Enthält Vitamin A. Berücksichtigen Sie Ihre tägliche Aufnahme vor der Anwendung. Ergänzende Pflege für den Tag: Vitamin Feuchtigkeits Creme Tag",
+   "skin": [
+    "Normale Haut"
+   ],
+   "images": [
+    "assets/shop/img/07920-1.webp",
+    "assets/shop/img/07920-2.webp"
+   ]
+  },
+  {
+   "id": "P14",
+   "sku": "07714",
+   "slug": "braukmann-institute-detox-maske-100-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Detox Maske",
+   "title": "Institute Detox Maske",
+   "size": "100 ml",
+   "price": 18,
+   "unitPrice": "180,00 € / 1 l",
+   "category": "Peelings & Masken",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077149",
+   "description": "Befreit die Haut von Schadstoffen. Für einen verfeinerten, klaren Teint. Die cremige Detox Maske befreit die Haut von Schadstoffen und sorgt für ein ausgeglichenes Aussehen. Das Hautbild wird sichtbar verbessert, verfeinert und erhält so seine gesunde, rosige Ausstrahlung zurück.",
+   "application": "Auf das gereinigte Gesicht und die Hals- und Dekolletépartie auftragen und 10–15 Min. einwirken lassen. Augenpartie aussparen. Danach gründlich mit lauwarmem Wasser abwaschen. Anschließend Gesichtstonic verwenden und Pflege auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07714-1.webp",
+    "assets/shop/img/07714-2.webp"
+   ]
+  },
+  {
+   "id": "P12",
+   "sku": "07712",
+   "slug": "braukmann-institute-enzym-peeling-maske-125-g",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Enzym Peeling Maske",
+   "title": "Institute Enzym Peeling Maske",
+   "size": "125 g",
+   "price": 18.5,
+   "unitPrice": "148,00 € / 1 kg",
+   "category": "Peelings & Masken",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077125",
+   "description": "Biologisches Peeling mit Thermoeffekt. Befreit die Haut mild von trockenen Hautschüppchen und überschüssigem Sebum. Regt gleichzeitig die Zellerneuerung an. Die Enzym Peeling Maske erzeugt ein angenehmes Gefühl von Wärme auf der Haut und öffnet so die Poren. Aufschäumen mit Wasser aktiviert die reinigenden Enzyme. Die Haut fühlt sich nach der Anwendung seidenweich an, der Teint erhält eine frisch erholte Ausstrahlung. Für jeden Hauttyp. Auch für die sensible Haut und bei Couperose geeignet. Ohne mechanische Peelingpartikel.",
+   "application": "Zwei- bis dreimal pro Woche. Nach der Reinigung gleichmäßig 1 mm stark auftragen. Augenpartie aussparen. 1 Min. einwirken lassen, dann mit warmem Wasser massierend aufschäumen. Nach 2 Min. mit Wasser entfernen. Anschließend Gesichtstonic verwenden und Pflege auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07712-1.webp",
+    "assets/shop/img/07712-2.webp"
+   ]
+  },
+  {
+   "id": "P38",
+   "sku": "07752",
+   "slug": "braukmann-institute-pro-lift-aha-lyocell-maske-20-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Pro Lift AHA Lyocell Maske",
+   "title": "Institute Pro Lift AHA Lyocell Maske",
+   "size": "20 ml",
+   "price": 9,
+   "unitPrice": "450,00 € / 1 l",
+   "category": "Peelings & Masken",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077521",
+   "description": "Intensiv straffende Gesichtsmaske. Die transparente, seidenweiche Lyocell Maske ist getränkt mit einem hochkonzentrierten Wirkstoffserum zur Straffung der feuchtigkeitsarmen Haut. Milde Fruchtsäuren aus Zitrusfrüchten, Zuckerrohr und Ahorn unterstützen die Abschilferung der devitalen Hautzellen und stimulieren die Hauterneuerung. AHAs zaubern einen verfeinerten und rosigen Teint. Niedrigmolekulare Hyaluronsäure dringt tief in die Haut und polstert Fältchen von innen auf. Die mehrfach ungesättigten essenziellen Fettsäuren Linolen- und Linolsäure stärken die Barrierefunktion und damit die Widerstandskraft der Haut. Einfache Anwendung. Für jeden Hauttyp geeignet. Bei Lyocell handelt es sich um eine sehr feine, hochreine und optimal hautverträgliche Faser. Sie wird aus Eukalyptusholz hergestellt. Lyocell Masken können bis zu 50 % mehr Feuchtigkeit absorbieren als Baumwolle und passen sich besonders angenehm der individuellen Gesichtsform an.",
+   "application": "Gesicht reinigen. Sachet öffnen und den Inhalt entnehmen. Maske auseinander falten und vom Trägernetzmaterial abziehen. Die Maske gemäß den Aussparungen auf das Gesicht auflegen und glatt streichen. 10–20 Min. wirken lassen. Maske von unten nach oben abziehen. Überschüssiges Konzentrat sanft mit den Fingerspitzen einmassieren. Die Anwendung ein- bis zweimal pro Woche wiederholen. Im Anschluss Pro Lift Mandelic Glow Serum verwenden.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07752-1.webp"
+   ]
+  },
+  {
+   "id": "P36",
+   "sku": "07750",
+   "slug": "braukmann-institute-rich-und-pure-creme-maske-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Rich & Pure Creme Maske",
+   "title": "Institute Rich & Pure Creme Maske",
+   "size": "50 ml",
+   "price": 28,
+   "unitPrice": "560,00 € / 1 l",
+   "category": "Peelings & Masken",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077507",
+   "description": "Reichhaltige, cremige Luxuspackung für die sehr anspruchsvolle und trockene Haut. Die hochwertige Gesichtsmaske mit hautähnlichen Membranlipiden stärkt nachhaltig die Barrierefunktion der Haut. Sie enthält außerdem pflanzliche Wirkstoffe mit Haut-Entknitterungs-Effekt (Auszüge aus Quittensamen und Gersten-Extrakt), bewährte Feuchtigkeitsspender, wie mittelkettige Hyaluronsäure und Panthenol sowie marokkanisches Arganöl zur Pflege der trockenen Haut. Diese wird spürbar glatter, frischer, samtiger. Feine Linien werden sichtbar aufgepolstert, der Teint erscheint verfeinert und erholt.",
+   "application": "Zweimal pro Woche nach der Reinigung auf Gesicht und Hals auftragen. Augenpartie dabei aussparen. Nach 10–15 Min. abnehmen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07750-1.webp",
+    "assets/shop/img/07750-2.webp"
+   ]
+  },
+  {
+   "id": "P98",
+   "sku": "07942",
+   "slug": "braukmann-professional-couperose-relax-packung-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Couperose Relax Packung",
+   "title": "Professional Couperose Relax Packung",
+   "size": "30 ml",
+   "price": 12.5,
+   "unitPrice": "416,67 € / 1 l",
+   "category": "Peelings & Masken",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079426",
+   "description": "Intensivpflegepackung bei Rötungsneigung und sehr sensibler Haut. Wohltuend hautberuhigende Intensivpflege für die gefäßlabile, zu Rötungen neigende sensible Haut. Extrakte aus grünem Tee und Salbei wirken leicht adstringierend und hautstärkend. Saponine aus der Feigwurz reduzieren die Durchlässigkeit der Kapillargefäße und mildern so Hautrötungen (Couperose). Panthenol und Mandelöl wirken reizlindernd und pflegen die strapazierte Haut. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Nach der Reinigung gleichmäßig auf Gesicht und Hals auftragen. Nach 10–15 Min. sanft einstreichen oder abnehmen.",
+   "skin": [
+    "Gerötete Haut (Couperose/Rosazea)",
+    "Sensible Haut"
+   ],
+   "images": [
+    "assets/shop/img/07942-1.webp"
+   ]
+  },
+  {
+   "id": "P76",
+   "sku": "07904",
+   "slug": "braukmann-professional-jojoba-peeling-100-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Jojoba Peeling",
+   "title": "Professional Jojoba Peeling",
+   "size": "100 ml",
+   "price": 15.5,
+   "unitPrice": "155,00 € / 1 l",
+   "category": "Peelings & Masken",
+   "concerns": [
+    "Anti-Aging",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083079044",
+   "description": "Sanftes Peeling mit mikrofeinen Perlen aus Jojobawachs . Besonders mildes Peeling. Mikrofeine Perlen aus Jojobawachs entfernen sanft und schonend Unreinheiten und Hornschüppchen. Pflegt mit Betain und Sesamöl . Die Haut wird weich, zart und glatt. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Zwei- bis dreimal wöchentlich nach der Reinigung anwenden. Augenpartie aussparen. Mit feuchten Händen leicht massieren, mit Wasser sorgfältig abspülen. Anschließend Gesichtstonic verwenden und Pflege auftragen.",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Anti-Age",
+    "Mischhaut",
+    "Normale Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07904-1.webp",
+    "assets/shop/img/07904-2.webp"
+   ]
+  },
+  {
+   "id": "P15",
+   "sku": "07715",
+   "slug": "braukmann-institute-aha-frucht-tonic-200-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "AHA Frucht Tonic",
+   "title": "Institute AHA Frucht Tonic",
+   "size": "200 ml",
+   "price": 18,
+   "unitPrice": "90,00 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Anti-Aging",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077156",
+   "description": "Erfrischendes Gesichtswasser für eine klare und straffe Haut. Vollendet die Reinigung der zu Unreinheiten neigenden Haut wie bei der Spätakne. Enthält Fruchtsäuren (AHAs) aus fünf verschiedenen Pflanzen und eine besonders aktive Zinkverbindung. Wirkt wie ein ultramildes Peeling und ist die ideale Vorbereitung für die anschließende Pflege.",
+   "application": "Morgens und abends als Abschluss der Gesichtsreinigung oder bei sensibler Haut zwei- bis dreimal in der Woche als leichtes Peeling. Augenpartie aussparen.",
+   "skin": [
+    "Anti-Age",
+    "Mischhaut"
+   ],
+   "images": [
+    "assets/shop/img/07715-1.webp",
+    "assets/shop/img/07715-2.webp"
+   ]
+  },
+  {
+   "id": "P13",
+   "sku": "07713",
+   "slug": "braukmann-institute-gesichts-reinigungs-creme-schaeumend-100-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Gesichts Reinigungs Creme schäumend",
+   "title": "Institute Gesichts Reinigungs Creme schäumend",
+   "size": "100 ml",
+   "price": 17,
+   "unitPrice": "170,00 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077132",
+   "description": "Sanft schäumende Creme für die milde Reinigung des Gesichts. Löst schonend auch intensives Make-up und hinterlässt ein besonderes Gefühl von Klarheit und Frische auf der Haut.",
+   "application": "Eine kleine Menge Gesichts Reinigungs Creme schäumend auf die angefeuchtete Haut auftragen, mit lauwarmem Wasser anschäumen und leicht massierend reinigen. Sorgfältig abspülen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut"
+   ],
+   "images": [
+    "assets/shop/img/07713-1.webp",
+    "assets/shop/img/07713-2.webp"
+   ]
+  },
+  {
+   "id": "P11",
+   "sku": "07711",
+   "slug": "braukmann-institute-gesichts-tonic-mild-200-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Gesichts Tonic mild",
+   "title": "Institute Gesichts Tonic mild",
+   "size": "200 ml",
+   "price": 17,
+   "unitPrice": "85,00 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083077118",
+   "description": "Klärt sanft und erfrischt angenehm die anspruchsvolle und sensible Haut. Enthält natürliches Betain mit feuchtigkeitsbindender Wirkung für ein samtiges Hautgefühl. Hamamelisdestillat aus den Zweigen und Blättern der Zaubernuss wirkt mild adstringierend, hautschützend und tonisierend. Ohne Alkohol . Für jeden Hauttyp geeignet. Hautneutraler pH-Wert.",
+   "application": "Nach der Gesichtsreinigung auf ein Wattepad geben und sanft auf Gesicht, Hals und Dekolleté auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07711-1.webp",
+    "assets/shop/img/07711-2.webp"
+   ]
+  },
+  {
+   "id": "P10",
+   "sku": "07710",
+   "slug": "braukmann-institute-reinigungs-milch-sanft-200-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Reinigungs Milch sanft",
+   "title": "Institute Reinigungs Milch sanft",
+   "size": "200 ml",
+   "price": 21,
+   "unitPrice": "105,00 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083077101",
+   "description": "Milde Reinigung und ein samtiges Hautgefühl. Schmeichelnd sahnige Emulsion auf pflanzlicher Lecithin Basis für eine schonende und doch effektive Reinigung. Hautähnliche Membranlipide stärken in Kombination mit Jojobaöl die Barrierefunktion der Haut und wirken dem Feuchtigkeitsverlust entgegen. Der Auszug aus Quittensamen wirkt zusammen mit Malachit-Extrakt feuchtigkeitsbindend, kühlend und beruhigend auf gereizte Hautpartien.",
+   "application": "Flasche vor Gebrauch schütteln. Morgens und abends auf Gesicht, Hals und Dekolleté verteilen, mit feuchten Händen sanft aufmassieren und wieder abnehmen. Anschließend mit Gesichtswasser tonisieren.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07710-1.webp",
+    "assets/shop/img/07710-2.webp"
+   ]
+  },
+  {
+   "id": "P75",
+   "sku": "07903",
+   "slug": "braukmann-professional-mizellar-tonic-200-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Mizellar Tonic",
+   "title": "Professional Mizellar Tonic",
+   "size": "200 ml",
+   "price": 15.5,
+   "unitPrice": "77,50 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Sensible Haut",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083079037",
+   "description": "Ultramildes Gesichtswasser mit Intensivfeuchthaltefaktoren für gereizte, sensible Haut. Das alkoholfreie Gesichtswasser auf innovativer Mizellen Basis ist besonders geeignet für die gereizte und sensible Haut. Enthalten sind Auszüge aus den Blättern des weißen Tees und pflanzliche Feuchtigkeitsspender, die dem Natural Moisturizing Faktor (NMF) der Haut nachempfunden sind. Die Mizellen aus natürlichem Lecithin entfernen sanft Make-up-Rückstände und hinterlassen ein weiches, gepflegtes Hautgefühl ohne Spannungsempfinden. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens und abends nach der Reinigung mit Reinigungsgelee sensitiv auf ein Wattepad geben und sanft auf Gesicht, Hals und Dekolleté auftragen.",
+   "skin": [
+    "Gerötete Haut (Couperose/Rosazea)",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07903-1.webp",
+    "assets/shop/img/07903-2.webp"
+   ]
+  },
+  {
+   "id": "P72",
+   "sku": "07900",
+   "slug": "braukmann-professional-reinigungsmilch-200-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Reinigungsmilch",
+   "title": "Professional Reinigungsmilch",
+   "size": "200 ml",
+   "price": 15.5,
+   "unitPrice": "77,50 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083079006",
+   "description": "Reinigt schonend und verwöhnt die Haut mit natürlichem Rosenöl . Für alle Hauttypen, besonders für die anspruchsvolle Haut. Reinigungsmilch mit natürlichen Essenzen aus der Damaszener Rose reinigt intensiv und schonend auch die zu Rötungen und Reizungen neigenden Hautpartien. DayMoist CLR® aus Maisstärke und Zuckerrüben-Extrakt verhütet Feuchtigkeitsverlust und bewahrt zusammen mit Avocadoöl den natürlichen Schutzfilm der Haut. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Sanft massierend auf Gesicht, Hals und Dekolleté verteilen und mit Wasser wieder abnehmen. Anschließend mit Tonic klären.",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Anti-Age",
+    "Normale Haut"
+   ],
+   "images": [
+    "assets/shop/img/07900-1.webp",
+    "assets/shop/img/07900-2.webp"
+   ]
+  },
+  {
+   "id": "P74",
+   "sku": "07902",
+   "slug": "braukmann-professional-tonic-200-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Tonic",
+   "title": "Professional Tonic",
+   "size": "200 ml",
+   "price": 15.5,
+   "unitPrice": "77,50 € / 1 l",
+   "category": "Reinigung & Tonic",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083079020",
+   "description": "Sanft verfeinerndes Tonic – erfrischt und stärkt die Haut mit Allantoin und Hamamelis . DayMoist CLR® , ein 24h-Feuchtigkeitsspender, erhält – in wirkungsvoller Kombination mit der Essenz aus der Damaszener Rose – die Elastizität der Haut. Das Tonic schenkt ein angenehmes Frischegefühl und macht die Haut aufnahmebereit für die weiteren Pflegepräparate. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens und abends nach der Reinigung Gesicht, Hals und Dekolleté mit einem Tonic-durchtränkten Wattepad sanft ausstreichen. Auch zur Erfrischung zwischendurch geeignet.",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Anti-Age",
+    "Normale Haut"
+   ],
+   "images": [
+    "assets/shop/img/07902-1.webp",
+    "assets/shop/img/07902-2.webp"
+   ]
+  },
+  {
+   "id": "P21",
+   "sku": "07727",
+   "slug": "braukmann-institute-energie-repair-konzentrat-nacht-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Energie Repair Konzentrat Nacht",
+   "title": "Institute Energie Repair Konzentrat Nacht",
+   "size": "30 ml",
+   "price": 37,
+   "unitPrice": "1233,33 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077279",
+   "description": "Wirkstoffkonzentrat zur Aktivierung der natürlichen Hauterneuerung und Restrukturierung während der Nacht. AHA-Liposomen stimulieren die Energie der Haut, unterstützen die Zellerneuerung und die Neubildung von Kollagen . Ein wertvoller Peptid-Wirkstoffkomplex der Buche verleiht der Haut bessere Elastizität. Hautglättende Mandelproteine mildern die sichtbaren Zeichen der Hautalterung. Hochkonzentrierte Hyaluronsäure sorgt zusätzlich für eine optimale Feuchtigkeitsversorgung der Haut.",
+   "application": "Täglich abends nach der Reinigung auf Gesicht, Hals und Dekolleté auftragen und einmassieren. Anschließend Pflegecreme auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07727-1.webp",
+    "assets/shop/img/07727-2.webp"
+   ]
+  },
+  {
+   "id": "P22",
+   "sku": "07728",
+   "slug": "braukmann-institute-high-multi-ceramid-serum-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "High Multi Ceramid Serum",
+   "title": "Institute High Multi Ceramid Serum",
+   "size": "30 ml",
+   "price": 51,
+   "unitPrice": "1700,00 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077286",
+   "description": "Anti-Aging für sensible Haut. Sorgt für eine verjüngte Hautbarriere. Enthält die Ceramide AP, EOP, NP, Phytosphingosin, Liposomen , Cholesterol sowie Salicyloyl-Phytosphingosin . Die Regeneration der Hautstruktur wird aktiviert und optimiert. Ideal für trockene, sensible, anspruchsvolle Haut in der Menopause. Echiumöl wirkt entzündungshemmend und schützt die Hautbarriere. Der Extrakt aus der Ballonrebe beruhigt juckende und irritierte Haut. Tens’Up™ sorgt für eine optische Sofortwirkung: Die Haut wird geliftet und Falten sichtbar geglättet. Parfümfrei.",
+   "application": "Morgens und abends auf der gereinigten Haut verteilen. Kurz einwirken lassen, dann Pflegecreme auftragen.",
+   "skin": [
+    "Anspruchsvolle Haut",
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07728-1.webp",
+    "assets/shop/img/07728-2.webp"
+   ]
+  },
+  {
+   "id": "P23",
+   "sku": "07729",
+   "slug": "braukmann-institute-make-over-relift-serum-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Make Over Relift Serum",
+   "title": "Institute Make Over Relift Serum",
+   "size": "30 ml",
+   "price": 51,
+   "unitPrice": "1700,00 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077293",
+   "description": "Anti-Aging für sensible Haut. Mit Sofort-Lifting-Effekt. Lässt Mimikfalten verschwinden. Enthält den Neurowirkstoff Acetyl Hexapeptide-1 , der sowohl auf prä- als auch auf postsynaptischem Signalweg die Muskelkontraktion verringert und so Ausdrucksfalten reduziert. Heterophyllin B , ein cyclisches Peptid, gewonnen aus dem Prince Ginseng boostet die hauteigene Kollagen - und Elastinproduktion. Innovative Fullspectrum-Hyaluronsäure wirkt als Feuchtigkeitsspender in der Menopause und polstert Falten von innen auf. Parfümfrei.",
+   "application": "Morgens und abends auf der gereinigten Haut verteilen. Kurz einwirken lassen, dann Pflegecreme auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07729-1.webp",
+    "assets/shop/img/07729-2.webp"
+   ]
+  },
+  {
+   "id": "P39",
+   "sku": "07753",
+   "slug": "braukmann-institute-pro-lift-mandelic-glow-serum-25-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Pro Lift Mandelic Glow Serum",
+   "title": "Institute Pro Lift Mandelic Glow Serum",
+   "size": "25 ml",
+   "price": 51,
+   "unitPrice": "2040,00 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077538",
+   "description": "Wirkt gegen Photo-Aging, vergrößerte Poren, unreine Haut sowie Hyperpigmentation. Sorgt für ein glattes, feines und gefestigtes Hautprofil. Die hochwirksame Formel enthält Mandelsäure und Milchsäure . Aufgrund seiner speziellen Inhaltsstoffe werden abgestorbene Hautschüppchen ganz sanft entfernt und die Regeneration der Haut stimuliert. Der Teint erscheint bei regelmäßiger Anwendung heller und ebenmäßiger, feine Linien werden gemildert.",
+   "application": "Morgens und/oder abends auf das gereinigte Gesicht auftragen. Augenpartie aussparen. Anschließend Ihre Pflegecreme verwenden.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07753-1.webp",
+    "assets/shop/img/07753-2.webp"
+   ]
+  },
+  {
+   "id": "P31",
+   "sku": "07738",
+   "slug": "braukmann-institute-pro-lift-serum-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Pro Lift Serum",
+   "title": "Institute Pro Lift Serum",
+   "size": "30 ml",
+   "price": 51,
+   "unitPrice": "1700,00 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Anti-Aging",
+    "Sensible Haut",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077385",
+   "description": "Hochleistungskonzentrat für einen schnell sichtbaren Beauty-Wow-Effekt. Zur sichtbaren Straffung – der Teint erscheint glatter und feiner. Das INSTITUTE Pro Lift Serum versorgt intensiv mit Feuchtigkeit und polstert Linien und Falten durch Hyaluronsäure auf. Die muskelentspannende Parakresse wirkt mit der Aminosäure GABA gegen „Knitterfältchen“. GABA fördert die hauteigene Synthese von Hyaluronsäure und die Kollagenneubildung. Liposome transportieren Wirkstoffe effizient in die Haut und Arganöl pflegt sie angenehm weich. Das apricotfarbene Pigment verleiht jugendliche Frische und kaschiert optisch Fältchen.",
+   "application": "Morgens und abends nach der Reinigung auftragen und sorgfältig einmassieren, bis das Serum vollständig von der Haut aufgenommen ist. Augenpartie aussparen. Direkt anschließend Pro Lift Tages Creme bzw. Pro Lift Nacht Creme auftragen. Sie spüren ggf. ein leichtes Kribbeln bei den ersten Anwendungen. Das ist ein Zeichen der hohen Wirksamkeit. Mit der Dosierung und Häufigkeit der Anwendung bestimmen Sie die Intensität.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Sensible Haut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07738-1.webp",
+    "assets/shop/img/07738-2.webp"
+   ]
+  },
+  {
+   "id": "P18",
+   "sku": "07722",
+   "slug": "braukmann-institute-vital-anti-falten-konzentrat-tag-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Vital Anti Falten Konzentrat Tag",
+   "title": "Institute Vital Anti Falten Konzentrat Tag",
+   "size": "30 ml",
+   "price": 37,
+   "unitPrice": "1233,33 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit",
+    "Unreine Haut & Glow"
+   ],
+   "ean": "4016083077224",
+   "description": "Wirkstoffkonzentrat als Basispflege zur Aktivierung der natürlichen Hauterneuerung. Mit dem natürlichen Wirkstoff AquaPront® , der das Hautprofil sofort ebnet und Fältchen sichtbar reduziert. AHA-Liposomen stimulieren in der Haut aktiv die Zellerneuerung. Hochkonzentrierte Hyaluronsäure sorgt zusätzlich für eine optimale Feuchtigkeitsversorgung der Haut. Ihre Haut wirkt glatter, ebenmäßiger und die Poren werden verfeinert.",
+   "application": "Täglich morgens nach der Reinigung auf Gesicht, Hals und Dekolleté auftragen und einmassieren. Anschließend Pflegecreme auftragen.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv",
+    "Feuchtigkeitsarme Haut",
+    "Mischhaut",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07722-1.webp",
+    "assets/shop/img/07722-2.webp"
+   ]
+  },
+  {
+   "id": "P97",
+   "sku": "07939",
+   "slug": "braukmann-professional-couperose-relax-serum-30-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Couperose Relax Serum",
+   "title": "Professional Couperose Relax Serum",
+   "size": "30 ml",
+   "price": 35.5,
+   "unitPrice": "1183,33 € / 1 l",
+   "category": "Seren & Konzentrate",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079396",
+   "description": "Wirkstoffkonzentrat bei entzündlichen Hautrötungen und als therapiebegleitende Pflege bei Teleangiektasien/Couperose/Rosazea. Tigergras und Magnolien-Extrakt wirken stark antioxidativ. Entzündungsreaktionen und übermäßige Gefäßerweiterungen werden gemindert. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens und abends nach der Reinigung gleichmäßig auf dem Gesicht verteilen oder gezielt auf die Rötungen auftragen. Anschließend Couperose Relax Pflegecreme verwenden.",
+   "skin": [
+    "Gerötete Haut (Couperose/Rosazea)"
+   ],
+   "images": [
+    "assets/shop/img/07939-1.webp",
+    "assets/shop/img/07939-2.webp"
+   ]
+  },
+  {
+   "id": "P17",
+   "sku": "07721",
+   "slug": "braukmann-institute-aktivierende-tages-creme-rich-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Aktivierende Tages Creme rich",
+   "title": "Institute Aktivierende Tages Creme rich",
+   "size": "50 ml",
+   "price": 30.5,
+   "unitPrice": "610,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083077217",
+   "description": "Besonders reichhaltige Creme mit multiaktiver Wirkung. Vitalisierend, hautglättend, feuchtigkeitsspeichernd – für stets samtige und zarte Haut. Durch eine spezielle Kombination von pflanzlichen Wirkstoffen aus dem Zellgewebe junger Buchen und Liposomen . Borretschsamenöl mit hohem Anteil Gamma- Linolensäure stärkt Barrierefunktion und Wasserbindungskapazität der Haut. Ein hochwirksames hautidentisches Sphingolipid-Derivat glättet das Erscheinungsbild der Haut, indem es die altersbedingt geschwächte Regeneration der Hautstruktur wieder neu aktiviert und optimiert.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und gleichmäßig verteilen.",
+   "skin": [
+    "Anti-Age",
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07721-1.webp",
+    "assets/shop/img/07721-2.webp"
+   ]
+  },
+  {
+   "id": "P16",
+   "sku": "07720",
+   "slug": "braukmann-institute-aktivierende-tages-creme-soft-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Aktivierende Tages Creme soft",
+   "title": "Institute Aktivierende Tages Creme soft",
+   "size": "50 ml",
+   "price": 30.5,
+   "unitPrice": "610,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083077200",
+   "description": "Angenehm leichte Creme mit multiaktiver Wirkung. Vitalisierend, glättend, feuchtigkeitsspendend. Die besondere Wirksamkeit wird erreicht durch die Kombination von pflanzlichen Wirkstoffen aus dem Zellgewebe junger Buchen und Liposomen . Borretschsamenöl mit hohem Anteil an Gamma- Linolensäure stärkt die Barrierefunktion und die Wasserbindungskapazität der Haut. Ein hochwirksames hautidentisches Sphingolipid-Derivat glättet das Erscheinungsbild der Haut, indem es die altersbedingt geschwächte Regeneration der Hautstruktur wieder neu aktiviert und optimiert.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und gleichmäßig verteilen.",
+   "skin": [
+    "Anti-Age",
+    "Feuchtigkeitsarme Haut"
+   ],
+   "images": [
+    "assets/shop/img/07720-1.webp",
+    "assets/shop/img/07720-2.webp"
+   ]
+  },
+  {
+   "id": "P28",
+   "sku": "07735",
+   "slug": "braukmann-institute-pro-lift-tages-creme-pur-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "INSTITUTE",
+   "name": "Pro Lift Tages Creme pur",
+   "title": "Institute Pro Lift Tages Creme pur",
+   "size": "50 ml",
+   "price": 48.5,
+   "unitPrice": "970,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083077354",
+   "description": "High-End-Tagespflege, die die Vorteile von Feuchtigkeitscreme, Primer, Anti-Pigment-Konzentraten und Faltenfiller vereint. Pro Lift Tages Creme pur hydratisiert, strafft, wirkt Falten und Pigmentflecken entgegen und perfektioniert den Teint dank porenverfeinernder Eigenschaften. Für jeden Hauttyp geeignet.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und gleichmäßig verteilen. Auch als Basis unter dem Make-up geeignet.",
+   "skin": [
+    "Anti-Age",
+    "Anti-Age-Intensiv"
+   ],
+   "images": [
+    "assets/shop/img/07735-1.webp",
+    "assets/shop/img/07735-2.webp"
+   ]
+  },
+  {
+   "id": "P81",
+   "sku": "07914",
+   "slug": "braukmann-professional-collagen-creme-tag-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Collagen Creme Tag",
+   "title": "Professional Collagen Creme Tag",
+   "size": "50 ml",
+   "price": 18,
+   "unitPrice": "360,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Anti-Aging"
+   ],
+   "ean": "4016083079143",
+   "description": "Glättend, ausgleichend und vitalisierend mit hochreinem Kollagen und Calendulaöl – für anspruchsvolle Haut. Collagen Creme Tag steigert das Feuchtigkeitsbindevermögen und festigt die Haut. Die sahnige Emulsion mit hohem Gehalt an nativem löslichem Kollagen von pharmazeutischer Qualität enthält außerdem hautberuhigendes Calendulaöl , Sesamöl als wichtigen Vitaminträger sowie natürliche Feuchthaltefaktoren. Das Hautbild wird sichtbar verbessert. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und sanft einmassieren. Ergänzende Pflege für die Nacht: Crème Bleue Nacht/Crème Rosée Vitale Nacht",
+   "skin": [
+    "Anspruchsvolle Haut"
+   ],
+   "images": [
+    "assets/shop/img/07914-1.webp",
+    "assets/shop/img/07914-2.webp"
+   ]
+  },
+  {
+   "id": "P94",
+   "sku": "07935",
+   "slug": "braukmann-professional-couperose-relax-tag-spf-10-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Couperose Relax Tag SPF 10",
+   "title": "Professional Couperose Relax Tag SPF 10",
+   "size": "50 ml",
+   "price": 22.5,
+   "unitPrice": "450,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Sensible Haut"
+   ],
+   "ean": "4016083079358",
+   "description": "Spezialtagespflege mit Lichtschutz bei Rötungsneigung und sehr sensibler Haut. Die Kapillaren werden gestärkt, der Lymphfluss gefördert und so Schwellungen und Ödeme gemindert. Rötungen klingen ab. Der Extrakt aus grünem Tee wirkt leicht adstringierend und hautstärkend. Ein grünes Interferenzpigment mildert Rötungen zusätzlich auf optische Weise. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens nach der Reinigung mit Reinigungsgelee sensitiv und Mizellar Tonic sanft auf das ganze Gesicht oder gezielt auf die Rötungen auftragen. Ergänzende Pflege für die Nacht: Couperose Relax Nacht",
+   "skin": [
+    "Gerötete Haut (Couperose/Rosazea)"
+   ],
+   "images": [
+    "assets/shop/img/07935-1.webp",
+    "assets/shop/img/07935-2.webp"
+   ]
+  },
+  {
+   "id": "P77",
+   "sku": "07910",
+   "slug": "braukmann-professional-hyaluron-energie-creme-tag-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Hyaluron Energie Creme Tag",
+   "title": "Professional Hyaluron Energie Creme Tag",
+   "size": "50 ml",
+   "price": 28,
+   "unitPrice": "560,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Anti-Aging",
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083079105",
+   "description": "Auffüllende Anti-Age-Pflege mit hochwirksamem Energiekomplex. Leichte Tagespflege mit dem Energiekomplex aus Hyaluronsäure, Vitaminen und Liposomen . Strafft und festigt die Haut. Mildert Fältchen und speichert die Feuchtigkeit länger. Lycopen – extrahiert aus Tomaten – sorgt als hocheffektiver Radikalfänger für einen wirksamen Zellschutz. Seidenproteine schenken ein angenehmes Hautgefühl. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und sanft einmassieren. Ergänzende Pflege für die Nacht: Hyaluron Repair Creme Nacht",
+   "skin": [
+    "Anti-Age"
+   ],
+   "images": [
+    "assets/shop/img/07910-1.webp",
+    "assets/shop/img/07910-2.webp"
+   ]
+  },
+  {
+   "id": "P78",
+   "sku": "07911",
+   "slug": "braukmann-professional-vitamin-feuchtigkeits-creme-tag-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Vitamin Feuchtigkeits Creme Tag",
+   "title": "Professional Vitamin Feuchtigkeits Creme Tag",
+   "size": "50 ml",
+   "price": 15,
+   "unitPrice": "300,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [
+    "Feuchtigkeit"
+   ],
+   "ean": "4016083079112",
+   "description": "Pflegende Tagesschutzcreme für alle Hauttypen – mit wohltuendem Vitaminkomplex. Vitamin Feuchtigkeits Creme Tag ist mit den hautaktiven Vitaminen A, C und E angereichert. Sie enthält außerdem Traubenkernöl mit hohem Gehalt an essenziellen Fettsäuren, hautberuhigenden Melissen-Extrakt und Hydroviton® , einen Feuchthaltefaktor auf natürlicher Basis zur Stabilisierung des Wasserhaushalts. Die Hautbeschaffenheit wird optimal verbessert und der Säureschutzmantel der Haut wirksam gestärkt. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und sanft einmassieren. Enthält Vitamin A. Berücksichtigen Sie Ihre tägliche Aufnahme vor der Anwendung. Ergänzende Pflege für die Nacht: Vitamin Creme Nacht",
+   "skin": [
+    "Normale Haut"
+   ],
+   "images": [
+    "assets/shop/img/07911-1.webp",
+    "assets/shop/img/07911-2.webp"
+   ]
+  },
+  {
+   "id": "P80",
+   "sku": "07913",
+   "slug": "braukmann-professional-weizenkeim-creme-tag-50-ml",
+   "brand": "Hildegard Braukmann",
+   "line": "PROFESSIONAL",
+   "name": "Weizenkeim Creme Tag",
+   "title": "Professional Weizenkeim Creme Tag",
+   "size": "50 ml",
+   "price": 15,
+   "unitPrice": "300,00 € / 1 l",
+   "category": "Tagespflege",
+   "concerns": [],
+   "ean": "4016083079136",
+   "description": "Reichhaltige Tagescreme für trockene Haut. Die Formel Weizenkeimöl plus Weizenkleie-Extrakt plus Sheabutter pflegt und schützt nachhaltig die trockene Haut mit erhöhtem Pflegebedarf. Dragoderm® stärkt die Hautbarriere und erhöht signifikant die Hautfeuchtigkeit. Durch regelmäßige Anwendung wird Fett- und Feuchtigkeitsmangel vorgebeugt, die Haut wird straffer und geschmeidiger. Mit innovativer Marina Wirkstoff Formel für zusätzliche, natürliche und nachhaltige Regeneration und Feuchtigkeitsversorgung.",
+   "application": "Morgens nach der Reinigung auf Gesicht und Hals auftragen und sanft einmassieren. Ergänzende Pflege für die Nacht: Aufbau Creme Nacht",
+   "skin": [
+    "Trockene Haut"
+   ],
+   "images": [
+    "assets/shop/img/07913-1.webp",
+    "assets/shop/img/07913-2.webp"
+   ]
+  }
+ ]
+}

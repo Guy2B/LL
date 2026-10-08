@@ -3776,6 +3776,7 @@ details summary {
     bottom: 16px;
     padding: 12px 18px;
   }
+}
 
 /* =====================================================
    PREISE — PREMIUM ACCORDION OPENING
@@ -4088,3 +4089,17 @@ details summary {
   .algbr-credit-by{font-size:6.8px}
 }
 
+
+/* Navigation with Shop + Ausbildung: keep one line on laptops */
+.nav-links a { white-space: nowrap; }
+@media (min-width: 901px) and (max-width: 1440px) {
+  .nav-links { gap: 1.35rem; }
+  .nav-links a { font-size: .96rem; }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+  .nav-inner { padding: 0 1rem; }
+  .nav-links { gap: .8rem; }
+  .nav-links a { font-size: .84rem; }
+  .brand-logo { height: 54px; }
+  .nav-links li:has(> a[href="inhaberin.html"]) { display: none; }
+}
