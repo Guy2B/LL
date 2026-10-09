@@ -4103,3 +4103,6 @@ details summary {
   .brand-logo { height: 54px; }
   .nav-links li:has(> a[href="inhaberin.html"]) { display: none; }
 }
+
+/* images with width/height attributes keep their aspect ratio */
+:where(img[height]){height:auto}

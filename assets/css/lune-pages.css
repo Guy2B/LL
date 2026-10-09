@@ -562,3 +562,6 @@
 .lx-collage .c0{grid-row:span 2;aspect-ratio:auto}
 .lx-collage .c3{display:none}
 @media(max-width:900px){.lx-collage{justify-self:center;grid-template-columns:repeat(3,1fr)}.lx-collage .c0{grid-row:auto;aspect-ratio:1/1}}
+
+/* images with width/height attributes keep their aspect ratio */
+:where(img[height]){height:auto}
