@@ -135,7 +135,7 @@ for (const p of items) {
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE }, { "@type": "ListItem", position: 2, name: "Shop", item: SITE + "shop.html" }, { "@type": "ListItem", position: 3, name: p.category, item: SITE + "shop.html#" + encodeURIComponent(p.category) }, { "@type": "ListItem", position: 4, name: p.title, item: url }] },
   ];
   const html = head({
-    title: `${p.brand} ${p.title} ${p.size} kaufen | Lune Beauty Shop`,
+    title: `Braukmann ${p.title} ${p.size} | Lune Beauty`,
     desc: metaDesc(p), path: productUrl(p), ogTitle: `${p.brand} ${p.title}`, image: SITE + p.images[0], ld, up: "../",
   }).replace("<html lang=\"de\">", "<html lang=\"de\" data-root=\"../\">") + `
 ${nav({ up: "../", active: "shop", cart: true })}
