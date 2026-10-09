@@ -280,6 +280,124 @@ const pages = [
   },
 ];
 
+
+/* ---------- photos (studio photos, Google profile, Pexels for LED) ---------- */
+Object.assign(pages.find(p => p.file === "aquafacial-worms.html"), { heroImg: "lune/hero-aquafacial.webp", heroPos: "center 40%", heroAlt: "Aquafacial mit Maske am Hydrafacial-Gerät bei Lune Beauty Worms", photo: "lune/card-aquafacial.webp", photoAlt: "Hydrafacial-Gerät von Lune Beauty in Worms", photoCaption: "Unser Hydradermabrasion-Gerät · Lune Beauty Worms" });
+Object.assign(pages.find(p => p.file === "anti-aging-worms.html"), { photo: "lune/card-anti-aging.webp" });
+Object.assign(pages.find(p => p.file === "akne-behandlung-worms.html"), { photo: "lune/card-akne.webp", photoAlt: "Professionelle Hautpflege von Hildegard Braukmann bei Lune Beauty Worms", photoCaption: "Abgestimmte Pflege · Lune Beauty Worms" });
+Object.assign(pages.find(p => p.file === "preise.html"), { heroImg: "lune/hero-preise.webp", heroAlt: "Lune Beauty Logo im Studio in Worms", heroPos: "center" });
+for (const f of ["aquafacial-worms.html", "anti-aging-worms.html"]) {
+  const p = pages.find(x => x.file === f);
+  p.related = [...p.related.slice(0, 1), ["hydro-boost-worms.html", "Hydro Boost"], ["radiofrequenz-worms.html", "Radiofrequenz"], ["led-therapie-worms.html", "LED-Therapie"], ...p.related.slice(1)];
+}
+
+const DEVICE_RELATED = [["gesichtsbehandlung-worms.html", "Alle Gesichtsbehandlungen"], ["aquafacial-worms.html", "Aquafacial"], ["anti-aging-worms.html", "Anti-Aging"], ["preise.html", "Preisliste"]];
+pages.push(
+  {
+    file: "hydro-boost-worms.html", heroImg: "lune/hero-hydro-boost.webp", heroNote: ["75 Minuten", "Hydro Boost Gesicht · 89 €"],
+    title: "Hydro Boost in Worms | Feuchtigkeitsbehandlung – Lune Beauty",
+    ogTitle: "Hydro Boost Feuchtigkeitsbehandlung in Worms – Lune Beauty",
+    desc: "Hydro Boost in Worms: intensive Feuchtigkeitsbehandlung für trockene, müde Haut bei Lune Beauty. Gesicht 89 €, mit Dekolleté 99 €. Mittelstraße 1, 67547 Worms.",
+    serviceName: "Hydro Boost Feuchtigkeitsbehandlung in Worms", crumb: "Hydro Boost Worms",
+    kicker: "Feuchtigkeit · Worms", h1: "Hydro Boost in Worms – <em>Feuchtigkeit</em>, die man sieht.",
+    lead: "Unsere Feuchtigkeitsbehandlung für trockene, müde oder gespannte Haut: Hautanalyse, Peeling, Feuchtigkeitsserum und Hydro-Maske für ein glattes, pralles Hautgefühl.",
+    cta: "Hydro Boost Gesicht", ctaLabel: "Hydro Boost anfragen",
+    photo: "lune/card-hydro-boost.webp", photoAlt: "Pflegeprodukte für die Hydro Boost Behandlung bei Lune Beauty Worms", photoCaption: "Feuchtigkeitspflege · Lune Beauty Worms",
+    intro: { eyebrow: "Hydro Boost", h2: "Wenn die Haut nach Feuchtigkeit verlangt.",
+      paras: ["Heizungsluft, Sonne, Stress oder einfach der Hauttyp: Viele Hautbilder verlieren Feuchtigkeit und wirken dann fahl, spannen oder zeigen feine Trockenheitsfältchen. Hydro Boost setzt genau dort an.",
+        "Nach einer kurzen Hautanalyse reinigen und peelen wir die Haut, damit die Wirkstoffe gut aufgenommen werden. Ein Feuchtigkeitsserum und eine intensive Hydro-Maske versorgen die Haut, eine passende Abschlusspflege hält die Feuchtigkeit."],
+      highlight: "Ihre Haut spannt, trocken oder müde wirkt, nach dem Sommer oder im Winter Pflege braucht – oder als Vorbereitung auf einen besonderen Anlass." },
+    rows: [
+      { tag: "Feuchtigkeit", name: "Hydro Boost Gesicht", text: "Hautanalyse · Reinigung · Peeling · Serum · Hydro-Maske · Abschlusspflege", min: "75 Min.", price: 89 },
+      { tag: "Ganzheitlich", name: "Hydro Boost Gesicht & Dekolleté", text: "Feuchtigkeitsritual für Gesicht und Dekolleté", min: "80 Min.", price: 99 },
+      { tag: "Intensiv", name: "Hydra Glow Facial (Aquafacial)", svc: "Hydra Glow Facial (Aquafacial)", text: "Hydradermabrasion mit Serum und LED – wenn es noch mehr Glow sein darf.", min: "90 Min.", price: 130 },
+      ...ADDONS,
+    ],
+    stepsTitle: "So läuft Ihre Hydro Boost Behandlung ab", stepsLead: "75 Minuten Ruhe und Feuchtigkeit – Schritt für Schritt auf Ihre Haut abgestimmt.",
+    steps: [["Hautanalyse & Reinigung", "Wir schauen uns Ihr Hautbild an und reinigen die Haut gründlich vor."],
+      ["Peeling & Serum", "Ein sanftes Peeling bereitet die Haut vor, das Feuchtigkeitsserum wird eingearbeitet."],
+      ["Hydro-Maske & Pflege", "Die Hydro-Maske versorgt intensiv, die Abschlusspflege schützt – Ihre Haut fühlt sich glatt und prall an."]],
+    faq: [
+      ["Für wen ist Hydro Boost geeignet?", "Für alle, deren Haut trocken, gespannt, fahl oder feuchtigkeitsarm ist – unabhängig vom Alter. Auch Mischhaut kann zu wenig Feuchtigkeit haben."],
+      ["Was ist der Unterschied zum Aquafacial?", "Hydro Boost ist eine klassische, intensive Feuchtigkeitsbehandlung mit Peeling, Serum und Maske. Beim Aquafacial (Hydra Glow Facial) arbeiten wir zusätzlich mit Hydradermabrasion, Ultraschall und LED."],
+      ["Wie oft sollte ich Hydro Boost machen?", "Für ein dauerhaft gut versorgtes Hautbild empfehlen wir alle 4 bis 6 Wochen eine Behandlung – im Winter gern häufiger."],
+      ["Was kostet Hydro Boost in Worms?", "Hydro Boost Gesicht kostet bei Lune Beauty 89 € (75 Minuten), mit Dekolleté 99 € (80 Minuten). LED oder Radiofrequenz lassen sich für je 10 € ergänzen."],
+    ],
+    ctaTitle: "Ihre Hydro Boost Behandlung in Worms anfragen", ctaText: "Lune Beauty · Mittelstraße 1 · 67547 Worms. Senden Sie Ihren Wunschtermin – wir melden uns persönlich.",
+    related: [["aquafacial-worms.html", "Aquafacial"], ["led-therapie-worms.html", "LED-Therapie"], ["gesichtsbehandlung-worms.html", "Alle Gesichtsbehandlungen"], ["preise.html", "Preisliste"]],
+  },
+  {
+    file: "radiofrequenz-worms.html", heroImg: "lune/hero-radiofrequenz.webp", heroNote: ["+ 10 Minuten", "Add-on zu jeder Gesichtsbehandlung · 10 €"],
+    heroAlt: "Multifunktionsgerät mit Radiofrequenz-Aufsatz bei Lune Beauty Worms",
+    title: "Radiofrequenz in Worms | Straffende Gesichtspflege – Lune Beauty",
+    ogTitle: "Radiofrequenz Behandlung in Worms – Lune Beauty",
+    desc: "Radiofrequenz bei Lune Beauty in Worms: sanfte Wärme für ein strafferes, festeres Hautgefühl – als Add-on zu jeder Gesichtsbehandlung für 10 €. Ohne Nadeln, ohne Ausfallzeit.",
+    serviceName: "Kosmetische Radiofrequenz in Worms", crumb: "Radiofrequenz Worms",
+    kicker: "Radiofrequenz · Worms", h1: "Radiofrequenz in Worms – <em>sanfte Wärme</em> für mehr Spannkraft.",
+    lead: "Kosmetische Radiofrequenz erwärmt die tieferen Hautschichten sanft. Das Ergebnis: ein strafferes, festeres Hautgefühl – angenehm, ohne Nadeln und ohne Ausfallzeit.",
+    cta: "Anti-Aging Behandlung", ctaLabel: "Mit Radiofrequenz anfragen",
+    photo: "lune/card-radiofrequenz.webp", photoAlt: "Geräte für Radiofrequenz und Hydradermabrasion im Studio Lune Beauty", photoCaption: "Unsere Geräte · Lune Beauty Worms",
+    intro: { eyebrow: "Radiofrequenz", h2: "Wärme, die die Haut straffer wirken lässt.",
+      paras: ["Bei der Radiofrequenz gleitet ein Aufsatz unseres Multifunktionsgeräts mit sanften Bewegungen über die Haut. Die Radiowellen erzeugen eine angenehme, kontrollierte Wärme in den tieferen Hautschichten – das unterstützt ein festeres, glatteres Hautgefühl.",
+        "Radiofrequenz ist bei uns ein Add-on: Sie können sie für 10 € zu jeder Gesichtsbehandlung dazubuchen. Besonders gut passt sie zur Anti-Aging Behandlung und zum Aquafacial."],
+      highlight: "Ihre Haut an Spannkraft verliert, die Konturen weicher werden oder Sie Ihre Anti-Aging-Pflege wirkungsvoll ergänzen möchten." },
+    rows: [
+      { tag: "Add-on", name: "Radiofrequenz", text: "Zu jeder Gesichtsbehandlung buchbar", min: "10 Min.", price: 10, book: false },
+      { tag: "Ideal mit", name: "Anti-Aging Behandlung", text: "Lifting · Anti-Aging Serum · LED-Therapie · Pflege", min: "90 Min.", price: 120 },
+      { tag: "Ideal mit", name: "Hydra Glow Facial (Aquafacial)", svc: "Hydra Glow Facial (Aquafacial)", text: "Hydradermabrasion · Ultraschall · Serum · LED", min: "90 Min.", price: 130 },
+      { tag: "Ideal mit", name: "Gesicht + Hals + Dekolleté", text: "Pflege von Gesicht bis Dekolleté", min: "75 Min.", price: 85 },
+    ],
+    note: "Radiofrequenz ist ein Add-on: Bitte wählen Sie eine Gesichtsbehandlung und vermerken Sie „Radiofrequenz“ in Ihrer Terminanfrage.",
+    stepsTitle: "So wird Radiofrequenz angewendet", stepsLead: "Eingebettet in Ihre Gesichtsbehandlung – etwa 10 Minuten zusätzlich.",
+    steps: [["Vorbereitung", "Die Haut wird gereinigt und mit einem leitfähigen Gel vorbereitet."],
+      ["Sanfte Wärme", "Der Aufsatz gleitet in langsamen Bewegungen über Gesicht und Hals – Sie spüren eine angenehme Wärme."],
+      ["Pflege", "Wirkstoffe und Abschlusspflege werden danach besonders gut aufgenommen."]],
+    faq: [
+      ["Ist Radiofrequenz schmerzhaft?", "Nein. Die meisten Kundinnen empfinden die Wärme als angenehm und entspannend. Wir passen die Intensität laufend an."],
+      ["Gibt es eine Ausfallzeit?", "Nein. Die Haut kann direkt danach leicht rosig sein, das klingt in der Regel schnell ab. Sie sind sofort wieder gesellschaftsfähig."],
+      ["Für wen ist Radiofrequenz nicht geeignet?", "Nicht in der Schwangerschaft, bei Herzschrittmachern, Metallimplantaten im Behandlungsbereich, akuten Entzündungen oder Hauterkrankungen. Im Zweifel beraten wir Sie vorab."],
+      ["Wie oft sollte man Radiofrequenz machen?", "Für ein sichtbares Ergebnis empfehlen wir eine Serie von mehreren Anwendungen im Abstand von 2 bis 4 Wochen, kombiniert mit einer passenden Heimpflege."],
+    ],
+    ctaTitle: "Radiofrequenz in Worms dazubuchen", ctaText: "Wählen Sie Ihre Gesichtsbehandlung und vermerken Sie „Radiofrequenz“ – wir beraten Sie gern persönlich.",
+    related: DEVICE_RELATED,
+  },
+  {
+    file: "led-therapie-worms.html", heroImg: "lune/hero-led.webp", heroNote: ["+ 10 Minuten", "LED-Maske als Add-on · 10 €"],
+    heroAlt: "LED-Lichttherapie bei einer kosmetischen Gesichtsbehandlung",
+    title: "LED-Therapie in Worms | Lichtpflege für die Haut – Lune Beauty",
+    ogTitle: "LED-Lichttherapie in Worms – Lune Beauty",
+    desc: "LED-Therapie bei Lune Beauty in Worms: kosmetisches LED-Licht für Ausstrahlung und Hautregeneration – enthalten im Aquafacial, Anti-Aging und Relax & Glow oder als Add-on für 10 €.",
+    serviceName: "Kosmetische LED-Lichttherapie in Worms", crumb: "LED-Therapie Worms",
+    kicker: "LED-Licht · Worms", h1: "LED-Therapie in Worms – <em>Licht</em>, das Ihre Haut pflegt.",
+    lead: "Kosmetisches LED-Licht ist ein entspannender Abschluss jeder Gesichtsbehandlung: Sie liegen ruhig unter der Lichtmaske, während das Licht die Regeneration der Haut unterstützt.",
+    cta: "Relax & Glow Behandlung", ctaLabel: "Behandlung mit LED anfragen",
+    photo: "lune/card-led.webp", photoAlt: "Behandlungskabine von Lune Beauty in Worms", photoCaption: "Unsere Behandlungskabine · Lune Beauty Worms",
+    intro: { eyebrow: "LED-Lichttherapie", h2: "Zehn Minuten Licht für mehr Ausstrahlung.",
+      paras: ["Bei der LED-Therapie wird die Haut mit Licht bestimmter Wellenlängen bestrahlt – ganz ohne Wärme oder UV-Strahlung. Je nach Hautbedürfnis wählen wir die Lichtfarbe: Rotlicht für Anti-Aging und Regeneration, Blaulicht für unreine Haut.",
+        "In unserem Hydra Glow Facial, der Anti-Aging Behandlung und der Relax & Glow Behandlung ist LED bereits enthalten. Zu allen anderen Gesichtsbehandlungen können Sie die LED-Maske für 10 € dazubuchen."],
+      highlight: "Sie Ihrer Haut nach einer Behandlung einen zusätzlichen Regenerationsschub geben möchten, zu Unreinheiten neigen oder einfach zehn Minuten entspannen wollen." },
+    rows: [
+      { tag: "Add-on", name: "LED Maske", text: "Zu jeder Gesichtsbehandlung buchbar", min: "10 Min.", price: 10, book: false },
+      { tag: "LED inklusive", name: "Relax & Glow Behandlung", text: "Luxuspflege · LED-Therapie · entspannende Massage", min: "90 Min.", price: 110 },
+      { tag: "LED inklusive", name: "Anti-Aging Behandlung", text: "Lifting · Anti-Aging Serum · LED-Therapie", min: "90 Min.", price: 120 },
+      { tag: "LED inklusive", name: "Hydra Glow Facial (Aquafacial)", svc: "Hydra Glow Facial (Aquafacial)", text: "Hydradermabrasion · Ultraschall · Serum · LED", min: "90 Min.", price: 130 },
+    ],
+    note: "LED als Add-on: Wählen Sie eine Gesichtsbehandlung und vermerken Sie „LED“ in Ihrer Terminanfrage.",
+    stepsTitle: "So läuft die LED-Therapie ab", stepsLead: "Der ruhigste Teil Ihrer Behandlung.",
+    steps: [["Gereinigte Haut", "LED wirkt am besten auf gereinigter, mit Wirkstoffen vorbereiteter Haut – meist nach Serum oder Maske."],
+      ["Licht & Ruhe", "Mit Augenschutz liegen Sie etwa 10 Minuten entspannt unter der Lichtmaske."],
+      ["Abschlusspflege", "Zum Schluss folgt die passende Pflege für Ihren Hauttyp."]],
+    faq: [
+      ["Ist LED-Licht gefährlich für die Haut?", "Nein. Kosmetisches LED-Licht arbeitet ohne UV-Strahlung und ohne Hitze. Zum Schutz der Augen tragen Sie während der Anwendung eine Schutzbrille."],
+      ["Welche Lichtfarbe ist die richtige?", "Rotlicht nutzen wir vor allem für Anti-Aging und Regeneration, Blaulicht bei unreiner Haut. Wir wählen die Einstellung passend zu Ihrem Hautbild."],
+      ["Wann sollte man auf LED verzichten?", "Bei Lichtempfindlichkeit, Einnahme lichtsensibilisierender Medikamente, Epilepsie oder in der Schwangerschaft sprechen Sie uns bitte vorher an."],
+      ["Was kostet LED-Therapie in Worms?", "Als Add-on kostet die LED-Maske bei Lune Beauty 10 € (10 Minuten). Im Hydra Glow Facial, in der Anti-Aging und der Relax & Glow Behandlung ist LED bereits enthalten."],
+    ],
+    ctaTitle: "Gesichtsbehandlung mit LED anfragen", ctaText: "Lune Beauty · Mittelstraße 1 · 67547 Worms. Wir beraten Sie gern, welche Behandlung zu Ihrer Haut passt.",
+    related: DEVICE_RELATED,
+  },
+);
+
 pages.find(p => p.file === "preise.html").navActive = "preise";
 for (const p of pages) {
   if (p.groups) p.rows = p.groups.flatMap(g => g.rows).filter(r => typeof r.price === "number");

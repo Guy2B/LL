@@ -11,7 +11,8 @@ const BUSINESS = {
 const LOCAL = [
   ["studio.html", "Kosmetikstudio Worms"], ["gesichtsbehandlung-worms.html", "Gesichtsbehandlung Worms"],
   ["aquafacial-worms.html", "Aquafacial Worms"], ["anti-aging-worms.html", "Anti-Aging Worms"],
-  ["akne-behandlung-worms.html", "Aknebehandlung Worms"], ["manikuere-pedikuere-worms.html", "Maniküre &amp; Fußpflege Worms"],
+  ["akne-behandlung-worms.html", "Aknebehandlung Worms"], ["hydro-boost-worms.html", "Hydro Boost Worms"],
+  ["radiofrequenz-worms.html", "Radiofrequenz Worms"], ["led-therapie-worms.html", "LED-Therapie Worms"], ["manikuere-pedikuere-worms.html", "Maniküre &amp; Fußpflege Worms"],
   ["augenpflege-worms.html", "Augenpflege Worms"], ["preise.html", "Preise"], ["shop.html", "Braukmann Shop"],
   ["kosmetik-ausbildung-worms.html", "Kosmetik-Ausbildung Worms"],
 ];
@@ -67,12 +68,17 @@ const MENU_TREAT = [
   ["Gesicht", [
     ["gesichtsbehandlung-worms.html", "Gesichtsbehandlung", "Individuelle Pflege &amp; Glow"],
     ["aquafacial-worms.html", "Aquafacial", "Hydra Glow Facial"],
+    ["hydro-boost-worms.html", "Hydro Boost", "Intensive Feuchtigkeit"],
     ["anti-aging-worms.html", "Anti-Aging", "Lifting, Wirkstoffe &amp; LED"],
     ["akne-behandlung-worms.html", "Unreine Haut", "Kosmetische Aknebehandlung"],
   ]],
   ["Hände, Füße &amp; Augen", [
     ["manikuere-pedikuere-worms.html", "Maniküre &amp; Fußpflege", "Gepflegte Hände &amp; Füße"],
     ["augenpflege-worms.html", "Augenpflege", "Wimpern &amp; Brauen"],
+  ]],
+  ["Technologien", [
+    ["radiofrequenz-worms.html", "Radiofrequenz", "Straffendes Hautgefühl"],
+    ["led-therapie-worms.html", "LED-Therapie", "Lichtpflege für die Haut"],
   ]],
   ["Beratung", [
     ["skin-ai.html", "Lune Skin Check", "Kostenlose digitale Hautanalyse"],
@@ -104,7 +110,7 @@ function header({ up = "", home = false, cart = false, theme = false } = {}) {
           <button class="lx-top" type="button" aria-expanded="false" aria-controls="lxDropTreat">Behandlungen ${CARET}</button>
           <div class="lx-drop wide" id="lxDropTreat">
             ${groups[0]}
-            <div>${groups[1]}${groups[2]}</div>
+            <div>${groups[1]}${groups[2]}${groups[3]}</div>
             <div class="lx-all"><a href="${href("index.html#services")}">Alle Behandlungen ansehen <span aria-hidden="true">→</span></a></div>
           </div>
         </li>
