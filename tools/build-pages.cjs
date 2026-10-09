@@ -285,7 +285,7 @@ const pages = [
 Object.assign(pages.find(p => p.file === "aquafacial-worms.html"), { heroImg: "lune/hero-aquafacial.webp", heroPos: "center 40%", heroAlt: "Aquafacial mit Maske am Hydrafacial-Gerät bei Lune Beauty Worms", photo: "lune/card-aquafacial.webp", photoAlt: "Hydrafacial-Gerät von Lune Beauty in Worms", photoCaption: "Unser Hydradermabrasion-Gerät · Lune Beauty Worms" });
 Object.assign(pages.find(p => p.file === "anti-aging-worms.html"), { photo: "lune/card-anti-aging.webp" });
 Object.assign(pages.find(p => p.file === "akne-behandlung-worms.html"), { photo: "lune/card-akne.webp", photoAlt: "Professionelle Hautpflege von Hildegard Braukmann bei Lune Beauty Worms", photoCaption: "Abgestimmte Pflege · Lune Beauty Worms" });
-Object.assign(pages.find(p => p.file === "preise.html"), { heroImg: "lune/hero-preise.webp", heroAlt: "Wartebereich im Kosmetikstudio Lune Beauty in Worms", heroPos: "center 30%", heroNote: ["Transparente Preise", "Inklusive persönlicher Beratung"] });
+Object.assign(pages.find(p => p.file === "preise.html"), { heroImg: "lune/hero-preise-2.webp", heroAlt: "Hildegard Braukmann Pflegeprodukte im Kosmetikstudio Lune Beauty in Worms", heroPos: "center 40%", heroNote: ["Transparente Preise", "Inklusive persönlicher Beratung"] });
 for (const f of ["aquafacial-worms.html", "anti-aging-worms.html"]) {
   const p = pages.find(x => x.file === f);
   p.related = [...p.related.slice(0, 1), ["hydro-boost-worms.html", "Hydro Boost"], ["radiofrequenz-worms.html", "Radiofrequenz"], ["led-therapie-worms.html", "LED-Therapie"], ...p.related.slice(1)];
