@@ -15,7 +15,16 @@ const SHIPPING = { "@type": "OfferShippingDetails", shippingRate: { "@type": "Mo
 const RETURNS = { "@type": "MerchantReturnPolicy", applicableCountry: "DE", returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow", merchantReturnDays: 14, returnMethod: "https://schema.org/ReturnByMail", returnFees: "https://schema.org/ReturnFeesCustomerResponsibility" };
 
 const productUrl = p => `produkt/${p.slug}.html`;
-const metaDesc = p => `${p.brand} ${p.title} ${p.size} online kaufen bei Lune Beauty Worms: ${(p.description || "").split(/(?<=\.)\s/)[0]} ${eur(p.price)}, Versand in 1–3 Werktagen.`.replace(/\s+/g, " ").slice(0, 158);
+const metaDesc = p => {
+  const first = (p.description || "").split(/(?<=\.)\s/)[0].replace(/\s+/g, " ");
+  const tail = ` ${eur(p.price)} – Versand in 1–3 Tagen.`;
+  let d = `${p.brand} ${p.title} ${p.size} kaufen bei Lune Beauty Worms. ${first}`;
+  if ((d + tail).length <= 158) return d + tail;
+  d = `${p.brand} ${p.title} ${p.size} kaufen: ${first}`;
+  if ((d + tail).length <= 158) return d + tail;
+  if (d.length <= 158) return d;
+  return d.slice(0, 157).replace(/\s+\S*$/, "") + "…";
+};
 
 function card(p, i, up) {
   return `<article class="p-card" data-product="${p.id}" data-order="${i}">
@@ -50,7 +59,7 @@ const shopLd = [
 ];
 const shopHtml = head({
   title: "Hildegard Braukmann online kaufen | Lune Beauty Shop Worms",
-  desc: `Hildegard Braukmann Institutspflege online kaufen: ${items.length} Originalprodukte – Pro Lift, Couperose Relax, Hyaluron, Reinigung & Masken. Versand in 1–3 Werktagen, ab 50 € versandkostenfrei.`,
+  desc: `Hildegard Braukmann online kaufen: ${items.length} Originalprodukte – Pro Lift, Couperose Relax, Hyaluron & mehr. Versand in 1–3 Tagen, ab 50 € gratis.`,
   path: "shop.html", ogTitle: "Hildegard Braukmann Shop – Lune Beauty Worms", ld: shopLd,
 }).replace("<html lang=\"de\">", "<html lang=\"de\" data-root=\"\">") + `
 ${nav({ active: "shop", cart: true })}
@@ -135,7 +144,7 @@ for (const p of items) {
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE }, { "@type": "ListItem", position: 2, name: "Shop", item: SITE + "shop.html" }, { "@type": "ListItem", position: 3, name: p.category, item: SITE + "shop.html#" + encodeURIComponent(p.category) }, { "@type": "ListItem", position: 4, name: p.title, item: url }] },
   ];
   const html = head({
-    title: `Braukmann ${p.title} ${p.size} | Lune Beauty`,
+    title: [`${p.title} ${p.size} | Braukmann`, `${p.name} ${p.size} | Braukmann`, `${p.name} | Braukmann`, p.name].find(x => x.length <= 60) || p.name,
     desc: metaDesc(p), path: productUrl(p), ogTitle: `${p.brand} ${p.title}`, image: SITE + p.images[0], ld, up: "../",
   }).replace("<html lang=\"de\">", "<html lang=\"de\" data-root=\"../\">") + `
 ${nav({ up: "../", active: "shop", cart: true })}
@@ -144,7 +153,7 @@ ${nav({ up: "../", active: "shop", cart: true })}
   <div class="pd" data-product="${p.id}">
     <div class="pd-gallery">
       <div class="pd-main"><img src="../${p.images[0]}" alt="${esc(p.brand + " " + p.title + " " + p.size)}" width="800" height="800"></div>
-      ${p.images.length > 1 ? `<div class="pd-thumbs">${p.images.map((im, i) => `<button type="button" data-src="../${im}" class="${i ? "" : "on"}" aria-label="Bild ${i + 1}"><img src="../${im}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
+      ${p.images.length > 1 ? `<div class="pd-thumbs">${p.images.map((im, i) => `<button type="button" data-src="../${im}" class="${i ? "" : "on"}" aria-label="Bild ${i + 1}"><img src="../${im}" alt="" width="800" height="800" loading="lazy"></button>`).join("")}</div>` : ""}
     </div>
     <div class="pd-info">
       <div class="lx-crumb" style="width:auto;margin:0 0 10px"><a href="../index.html">Home</a> · <a href="../shop.html">Shop</a> · <a href="../shop.html#${encodeURIComponent(p.category)}">${esc(p.category)}</a></div>

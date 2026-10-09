@@ -61,7 +61,7 @@ ${p.intro ? `  <section class="section-smart">
         <h2>${p.intro.h2}</h2>
         ${p.intro.paras.map(t => `<p>${t}</p>`).join("\n        ")}
         ${p.photo ? `<figure class="smart-service-photo">
-          <img src="assets/img/${p.photo}" alt="${p.photoAlt}" loading="lazy" />
+          <img src="assets/img/${p.photo}" alt="${p.photoAlt}" width="1400" height="1050" loading="lazy" decoding="async" />
           <figcaption>${p.photoCaption}</figcaption>
         </figure>` : ""}
         ${p.intro.highlight ? `<div class="smart-highlight"><strong>Ideal, wenn:</strong> ${p.intro.highlight}</div>` : ""}
@@ -201,9 +201,9 @@ const pages = [
   },
   {
     file: "akne-behandlung-worms.html", heroImg: "lune/hero-akne.webp", heroNote: ["70 Minuten", "Aknebehandlung · 89 €"],
-    title: "Aknebehandlung in Worms | Pflege bei unreiner Haut – Lune Beauty",
+    title: "Aknebehandlung in Worms | Unreine Haut – Lune Beauty",
     ogTitle: "Kosmetische Aknebehandlung in Worms – Lune Beauty",
-    desc: "Kosmetische Aknebehandlung in Worms: Tiefenreinigung, Fruchtsäure und professionelle Ausreinigung bei unreiner Haut. 70 Minuten, 89 €. Lune Beauty, Mittelstraße 1.",
+    desc: "Kosmetische Aknebehandlung in Worms: Tiefenreinigung, Fruchtsäure und Ausreinigung bei unreiner Haut. 70 Minuten, 89 € – Lune Beauty, Mittelstraße 1.",
     serviceName: "Kosmetische Aknebehandlung in Worms", crumb: "Aknebehandlung Worms",
     kicker: "Unreine Haut · Worms", h1: "Aknebehandlung in Worms – für ein klareres, ruhigeres Hautbild.",
     lead: "Professionelle kosmetische Pflege bei unreiner Haut, Mitessern und Pickeln – gründlich, schonend und ohne zu bewerten.",
@@ -236,7 +236,7 @@ const pages = [
     file: "preise.html", heroImg: "lune/hero-preise.webp", heroNote: ["Mittelstraße 1", "Ihr Studio in Worms"],
     title: "Preise Kosmetik Worms | Preisliste Lune Beauty Kosmetikstudio",
     ogTitle: "Preise – Lune Beauty Kosmetikstudio Worms",
-    desc: "Alle Preise von Lune Beauty in Worms: Gesichtsbehandlung ab 69 €, Aquafacial 130 €, Anti-Aging 120 €, Maniküre ab 33 €, Fußpflege ab 50 €, Wimpern & Brauen ab 15 €.",
+    desc: "Preise von Lune Beauty in Worms: Gesichtsbehandlung ab 69 €, Aquafacial 130 €, Anti-Aging 120 €, Maniküre ab 33 €, Fußpflege ab 50 €.",
     serviceName: "Kosmetikbehandlungen in Worms", crumb: "Preise",
     kicker: "Preisliste · Worms", h1: "Preise – klar, transparent, ohne Überraschungen.",
     lead: "Alle Behandlungen von Lune Beauty in Worms auf einen Blick. Inklusive persönlicher Beratung.",
@@ -285,7 +285,7 @@ const pages = [
 Object.assign(pages.find(p => p.file === "aquafacial-worms.html"), { heroImg: "lune/hero-aquafacial.webp", heroPos: "center 40%", heroAlt: "Aquafacial mit Maske am Hydrafacial-Gerät bei Lune Beauty Worms", photo: "lune/card-aquafacial.webp", photoAlt: "Hydrafacial-Gerät von Lune Beauty in Worms", photoCaption: "Unser Hydradermabrasion-Gerät · Lune Beauty Worms" });
 Object.assign(pages.find(p => p.file === "anti-aging-worms.html"), { photo: "lune/card-anti-aging.webp" });
 Object.assign(pages.find(p => p.file === "akne-behandlung-worms.html"), { photo: "lune/card-akne.webp", photoAlt: "Professionelle Hautpflege von Hildegard Braukmann bei Lune Beauty Worms", photoCaption: "Abgestimmte Pflege · Lune Beauty Worms" });
-Object.assign(pages.find(p => p.file === "preise.html"), { heroImg: "lune/hero-preise.webp", heroAlt: "Lune Beauty Logo im Studio in Worms", heroPos: "center" });
+Object.assign(pages.find(p => p.file === "preise.html"), { heroImg: "lune/hero-preise.webp", heroAlt: "Wartebereich im Kosmetikstudio Lune Beauty in Worms", heroPos: "center 30%", heroNote: ["Transparente Preise", "Inklusive persönlicher Beratung"] });
 for (const f of ["aquafacial-worms.html", "anti-aging-worms.html"]) {
   const p = pages.find(x => x.file === f);
   p.related = [...p.related.slice(0, 1), ["hydro-boost-worms.html", "Hydro Boost"], ["radiofrequenz-worms.html", "Radiofrequenz"], ["led-therapie-worms.html", "LED-Therapie"], ...p.related.slice(1)];
@@ -329,9 +329,9 @@ pages.push(
   {
     file: "radiofrequenz-worms.html", heroImg: "lune/hero-radiofrequenz.webp", heroNote: ["+ 10 Minuten", "Add-on zu jeder Gesichtsbehandlung · 10 €"],
     heroAlt: "Multifunktionsgerät mit Radiofrequenz-Aufsatz bei Lune Beauty Worms",
-    title: "Radiofrequenz in Worms | Straffende Gesichtspflege – Lune Beauty",
+    title: "Radiofrequenz in Worms | Straffe Haut – Lune Beauty",
     ogTitle: "Radiofrequenz Behandlung in Worms – Lune Beauty",
-    desc: "Radiofrequenz bei Lune Beauty in Worms: sanfte Wärme für ein strafferes, festeres Hautgefühl – als Add-on zu jeder Gesichtsbehandlung für 10 €. Ohne Nadeln, ohne Ausfallzeit.",
+    desc: "Radiofrequenz in Worms: sanfte Wärme für ein strafferes Hautgefühl – ohne Nadeln, ohne Ausfallzeit. Add-on zu jeder Gesichtsbehandlung für 10 €.",
     serviceName: "Kosmetische Radiofrequenz in Worms", crumb: "Radiofrequenz Worms",
     kicker: "Radiofrequenz · Worms", h1: "Radiofrequenz in Worms – <em>sanfte Wärme</em> für mehr Spannkraft.",
     lead: "Kosmetische Radiofrequenz erwärmt die tieferen Hautschichten sanft. Das Ergebnis: ein strafferes, festeres Hautgefühl – angenehm, ohne Nadeln und ohne Ausfallzeit.",
@@ -366,7 +366,7 @@ pages.push(
     heroAlt: "LED-Lichttherapie bei einer kosmetischen Gesichtsbehandlung",
     title: "LED-Therapie in Worms | Lichtpflege für die Haut – Lune Beauty",
     ogTitle: "LED-Lichttherapie in Worms – Lune Beauty",
-    desc: "LED-Therapie bei Lune Beauty in Worms: kosmetisches LED-Licht für Ausstrahlung und Hautregeneration – enthalten im Aquafacial, Anti-Aging und Relax & Glow oder als Add-on für 10 €.",
+    desc: "LED-Therapie in Worms: kosmetisches Licht für Ausstrahlung und Regeneration – inklusive im Aquafacial und Anti-Aging oder als Add-on für 10 €.",
     serviceName: "Kosmetische LED-Lichttherapie in Worms", crumb: "LED-Therapie Worms",
     kicker: "LED-Licht · Worms", h1: "LED-Therapie in Worms – <em>Licht</em>, das Ihre Haut pflegt.",
     lead: "Kosmetisches LED-Licht ist ein entspannender Abschluss jeder Gesichtsbehandlung: Sie liegen ruhig unter der Lichtmaske, während das Licht die Regeneration der Haut unterstützt.",
@@ -434,8 +434,8 @@ for (const p of pages) {
     { "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE }, { "@type": "ListItem", position: 2, name: "Kosmetik-Ausbildung Worms", item: url }] },
   ];
-  const html = head({ title: "Kosmetik-Ausbildung in Worms | 4 Wochen oder 4 Wochenenden – Lune Beauty", ogTitle: "Kosmetik-Ausbildung in Worms – Lune Beauty Academy",
-    desc: "Kosmetik-Ausbildung in Worms bei einer staatlich anerkannten Kosmetikerin: 4-Wochen-Intensivkurs oder 4 Wochenenden, viel Praxis an Modellen, Geräte-Kosmetik und Zertifikat.",
+  const html = head({ title: "Kosmetik-Ausbildung in Worms | Lune Beauty Academy", ogTitle: "Kosmetik-Ausbildung in Worms – Lune Beauty Academy",
+    desc: "Kosmetik-Ausbildung in Worms bei einer staatlich anerkannten Kosmetikerin: 4 Wochen oder 4 Wochenenden, viel Praxis an Modellen, mit Zertifikat.",
     path: file, image: SITE + "assets/img/lune/hero-ausbildung.webp", ld }) + `
 ${nav({ active: "ausbildung" })}
 
@@ -444,7 +444,7 @@ ${hero({ crumb: "Kosmetik-Ausbildung Worms", kicker: "Lune Beauty Academy · Wor
     lead: "Lernen Sie direkt im laufenden Studio bei einer staatlich anerkannten Kosmetikerin: persönlich betreut, mit echten Modellen, professionellen Geräten und allem, was Sie für Ihre ersten eigenen Kundinnen brauchen.",
     ctaHref: "#anfrage", ctaLabel: "Unverbindlich anfragen", secondaryHref: "#inhalte", secondaryLabel: "Inhalte ansehen",
     trust: ["4 Wochen oder 4 Wochenenden", "Viel Praxis an Modellen", "Mit Zertifikat"],
-    heroImg: "lune/hero-ausbildung.webp", heroAlt: "Praxis in der Kosmetik-Ausbildung bei Lune Beauty in Worms", heroNote: ["Im echten Studio", "Lernen, wo täglich behandelt wird"] })}
+    heroImg: "lune/hero-ausbildung.webp", heroPos: "center 25%", heroAlt: "Zertifikate und Wartebereich im Studio Lune Beauty in Worms", heroNote: ["Im echten Studio", "Lernen, wo täglich behandelt wird"] })}
 
 <main>
   <section class="section-smart">
@@ -486,7 +486,7 @@ ${MODULES.map(([t, d], i) => `      <div class="lx-module"><small style="color:#
         <h2>Lernen, wo täglich behandelt wird.</h2>
         <p>Ihre Ausbilderin ist staatlich anerkannte Kosmetikerin und hat in renommierten Kosmetikstudios in Deutschland und Frankreich gearbeitet. Sie lernen nicht in einem Schulungsraum, sondern im echten Studio – mit denselben Geräten, Produkten und Abläufen, mit denen wir unsere Kundinnen jeden Tag behandeln.</p>
         <figure class="smart-service-photo">
-          <img src="assets/img/lune/card-ausbildung.webp" alt="Kosmetik-Ausbildung: Behandlung am Modell bei Lune Beauty Worms" loading="lazy" />
+          <img src="assets/img/lune/card-ausbildung.webp" alt="Kosmetik-Ausbildung: Behandlung am Modell bei Lune Beauty Worms" width="1080" height="860" loading="lazy" decoding="async" />
           <figcaption>Praxis am Modell · Lune Beauty Worms</figcaption>
         </figure>
       </article>
@@ -589,7 +589,7 @@ const WIDERRUF = `
       <p>(*) Unzutreffendes streichen.</p>`;
 
 function legalPage({ file, title, desc, h1, kicker, lead, body, scripts = "", noindex = false }) {
-  return head({ title, desc, path: file, noindex }) + `
+  return head({ title, desc, path: file, noindex, ld: [{ "@type": "WebPage", name: title, url: SITE + file, isPartOf: { "@type": "WebSite", name: "Lune Beauty", url: SITE }, publisher: BUSINESS }] }) + `
 ${nav({})}
 <header class="lx-hero" style="padding-bottom:10px">
   <div class="lx-crumb"><a href="index.html">Home</a> · ${h1}</div>
