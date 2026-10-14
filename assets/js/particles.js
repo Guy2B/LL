@@ -6,4 +6,9 @@ document.querySelectorAll('.service-card').forEach(card => {
     const p = document.createElement('span');
     p.style.left = Math.random() * 90 + '%';
     p.style.top = Math.random() * 90 + '%';
-    p.style.animationDelay = (Math.random() * 3).to
+    p.style.animationDelay = (Math.random() * 3).toFixed(2) + 's';
+    container.appendChild(p);
+  }
+
+  card.appendChild(container);
+});
