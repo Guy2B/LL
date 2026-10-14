@@ -4106,3 +4106,31 @@ details summary {
 
 /* images with width/height attributes keep their aspect ratio */
 :where(img[height]){height:auto}
+
+/* Floating gold particles on the treatment cards (spans added by assets/js/particles.js) */
+.service-card { position: relative; }
+.service-card .particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+}
+.service-card .particles span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 231, 176, .95), rgba(213, 169, 97, 0) 70%);
+  box-shadow: 0 0 6px rgba(213, 169, 97, .45);
+  opacity: .55;
+  animation: luneParticle 7s ease-in-out infinite;
+}
+@keyframes luneParticle {
+  0%, 100% { transform: translateY(0) scale(1); opacity: .45; }
+  50% { transform: translateY(-14px) scale(1.25); opacity: .95; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-card .particles span { animation: none; }
+}
