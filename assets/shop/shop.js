@@ -36,11 +36,13 @@
     var c = readCart().map(function (l) { return l.id === id ? { id: id, qty: Math.max(0, Math.min(10, qty)) } : l; }).filter(function (l) { return l.qty > 0; });
     writeCart(c); renderCart();
   }
+  // Geschenkgutscheine are sent by e-mail: no shipping for them, and they do not count towards free shipping
   function totals(lines) {
     var sub = lines.reduce(function (s, l) { return s + l.total; }, 0);
+    var goods = lines.reduce(function (s, l) { return s + (l.p.voucher ? 0 : l.total); }, 0);
     var rules = (live && live.shipping) || { fee: 4.95, freeFrom: 50 };
-    var ship = !lines.length ? 0 : sub >= rules.freeFrom ? 0 : rules.fee;
-    return { sub: Math.round(sub * 100) / 100, ship: ship, total: Math.round((sub + ship) * 100) / 100, rules: rules };
+    var ship = goods <= 0 ? 0 : goods >= rules.freeFrom ? 0 : rules.fee;
+    return { sub: Math.round(sub * 100) / 100, goods: Math.round(goods * 100) / 100, ship: ship, total: Math.round((sub + ship) * 100) / 100, rules: rules, voucherOnly: lines.length > 0 && goods <= 0 };
   }
   function updateBadge() {
     var n = readCart().reduce(function (s, l) { return s + l.qty; }, 0);
@@ -97,11 +99,11 @@
         };
       });
     });
-    var missing = Math.max(0, t.rules.freeFrom - t.sub);
+    var missing = Math.max(0, t.rules.freeFrom - t.goods);
     foot.innerHTML =
-      (missing > 0 ? '<div class="cart-free">Noch <b>' + eur(missing) + '</b> bis zum kostenlosen Versand<i style="--p:' + Math.min(100, t.sub / t.rules.freeFrom * 100) + '%"></i></div>' : '<div class="cart-free">✓ Kostenloser Versand</div>') +
+      (t.voucherOnly ? '<div class="cart-free">✓ Gutschein kommt sofort per E-Mail</div>' : missing > 0 ? '<div class="cart-free">Noch <b>' + eur(missing) + '</b> bis zum kostenlosen Versand<i style="--p:' + Math.min(100, t.goods / t.rules.freeFrom * 100) + '%"></i></div>' : '<div class="cart-free">✓ Kostenloser Versand</div>') +
       '<div class="cart-row"><span>Zwischensumme</span><span>' + eur(t.sub) + '</span></div>' +
-      '<div class="cart-row"><span>Versand (DHL)</span><span>' + (t.ship ? eur(t.ship) : "kostenlos") + '</span></div>' +
+      (t.voucherOnly ? '' : '<div class="cart-row"><span>Versand (DHL)</span><span>' + (t.ship ? eur(t.ship) : "kostenlos") + '</span></div>') +
       '<div class="cart-row total"><span>Gesamt</span><span>' + eur(t.total) + '</span></div>' + legalNote() +
       '<div class="cart-checkout"></div>';
     renderCheckout($(".cart-checkout", foot), lines);
@@ -110,9 +112,10 @@
   function renderCheckout(box, lines) {
     if (!live) { box.innerHTML = '<button class="cart-btn" disabled>Verfügbarkeit wird geprüft…</button>'; return; }
     if (!live.enabled) {
-      var text = "Hallo Lune Beauty, ich möchte gern reservieren:\n" + lines.map(function (l) { return "• " + l.qty + " × " + l.p.title + " " + l.p.size; }).join("\n");
-      box.innerHTML = '<p class="cart-legal" style="margin-top:0">Die Online-Bezahlung wird gerade eingerichtet. Reservieren Sie Ihre Produkte einfach per WhatsApp – Abholung im Studio oder Versand nach Absprache.</p>' +
-        '<a class="cart-btn" style="display:grid;place-items:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text) + '">Per WhatsApp reservieren</a>';
+      var hasV = lines.some(function (l) { return l.p.voucher; });
+      var text = "Hallo Lune Beauty, ich möchte gern " + (hasV ? "bestellen" : "reservieren") + ":\n" + lines.map(function (l) { return "• " + l.qty + " × " + l.p.title + (l.p.voucher ? "" : " " + l.p.size); }).join("\n") + (hasV ? "\n\nGutschein für (Name, optional): \nVon: " : "");
+      box.innerHTML = '<p class="cart-legal" style="margin-top:0">Die Online-Bezahlung wird gerade eingerichtet. ' + (hasV ? 'Bestellen Sie einfach per WhatsApp: Sie erhalten den Gutschein nach der Zahlung (bar, Karte, PayPal oder Überweisung) per E-Mail oder WhatsApp.' : 'Reservieren Sie Ihre Produkte einfach per WhatsApp – Abholung im Studio oder Versand nach Absprache.') + '</p>' +
+        '<a class="cart-btn" style="display:grid;place-items:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text) + '">Per WhatsApp ' + (hasV ? "bestellen" : "reservieren") + '</a>';
       return;
     }
     box.innerHTML = '<p class="cart-legal" style="margin-top:0">Sie melden sich bei PayPal an und wählen Ihre Lieferadresse. <b>Danach prüfen Sie Ihre Bestellung hier noch einmal</b> – erst dann wird sie verbindlich.</p><div class="cart-pp" id="cartPayPal"></div>';
@@ -149,15 +152,18 @@
 
   function renderReview(body, foot, title) {
     var r = review.data, o = r.order, a = o.address || {};
+    var vOnly = o.items.length > 0 && o.items.every(function (i) { return i.voucher || (byId[i.id] && byId[i.id].voucher); });
     title.textContent = "Bestellung prüfen";
     body.innerHTML = '<div class="cart-review"><h3>Ihre Bestellung</h3>' + o.items.map(function (i) {
       var p = byId[i.id] || { images: [""] };
       return '<div class="cart-line"><img src="' + ROOT + esc(p.images[0]) + '" alt=""><div><b>' + esc(i.title) + '</b><small>' + esc(i.size) + ' · ' + i.qty + ' × ' + eur(i.price) + '</small></div><div class="lp">' + eur(i.total) + '</div></div>';
-    }).join("") + '<h3 style="margin-top:18px">Lieferadresse</h3><div class="addr">' + esc(o.name) + "<br>" + esc(a.line1) + (a.line2 ? "<br>" + esc(a.line2) : "") + "<br>" + esc(a.zip) + " " + esc(a.city) + '<br><small>' + esc(o.email) + '</small></div>' +
-      '<p class="cart-legal">Zahlungsart: PayPal. Lieferung mit DHL in 1–3 Werktagen. Adresse ändern? Gehen Sie zurück und wählen Sie bei PayPal eine andere Adresse.</p></div>';
+    }).join("") + (vOnly ? '<h3 style="margin-top:18px">Zustellung per E-Mail</h3><div class="addr">' + esc(o.name) + '<br><small>' + esc(o.email) + '</small></div>' +
+      '<p class="cart-legal">Zahlungsart: PayPal. Der Gutschein kommt direkt nach der Zahlung an diese E-Mail-Adresse, mit Code und Link zum Ausdrucken.</p></div>'
+      : '<h3 style="margin-top:18px">Lieferadresse</h3><div class="addr">' + esc(o.name) + "<br>" + esc(a.line1) + (a.line2 ? "<br>" + esc(a.line2) : "") + "<br>" + esc(a.zip) + " " + esc(a.city) + '<br><small>' + esc(o.email) + '</small></div>' +
+      '<p class="cart-legal">Zahlungsart: PayPal. Lieferung mit DHL in 1–3 Werktagen' + (o.items.some(function (i) { return i.voucher; }) ? ', Gutscheine sofort per E-Mail' : '') + '. Adresse ändern? Gehen Sie zurück und wählen Sie bei PayPal eine andere Adresse.</p></div>');
     foot.innerHTML = (r.shipsOk === false ? '<div class="cart-alert">Wir versenden derzeit nur innerhalb Deutschlands. Bitte gehen Sie zurück und wählen Sie bei PayPal eine deutsche Lieferadresse.</div>' : "") +
       '<div class="cart-row"><span>Zwischensumme</span><span>' + eur(o.subtotal) + '</span></div>' +
-      '<div class="cart-row"><span>Versand (DHL)</span><span>' + (o.shipping ? eur(o.shipping) : "kostenlos") + '</span></div>' +
+      (vOnly ? '' : '<div class="cart-row"><span>Versand (DHL)</span><span>' + (o.shipping ? eur(o.shipping) : "kostenlos") + '</span></div>') +
       '<div class="cart-row total"><span>Gesamt</span><span>' + eur(o.total) + '</span></div>' + legalNote() +
       '<button class="cart-btn" type="button" data-buy ' + (r.shipsOk === false ? "disabled" : "") + '>Zahlungspflichtig bestellen</button>' +
       '<button class="cart-btn light" type="button" data-back>Zurück zum Warenkorb</button>';
@@ -166,7 +172,7 @@
     buy.onclick = function () {
       buy.disabled = true; buy.textContent = "Zahlung wird abgeschlossen…";
       post("/capture", { paypalId: review.paypalId }).then(function (res) {
-        if (res.ok) return showDone(res.order);
+        if (res.ok) return showDone(res.order, res.vouchers);
         buy.disabled = false; buy.textContent = "Zahlungspflichtig bestellen";
         showAlert(foot, res.error || "Die Zahlung konnte nicht abgeschlossen werden.");
         if (res.retry) { view = "cart"; review = null; setTimeout(renderCart, 2500); }
@@ -175,10 +181,13 @@
     };
   }
 
-  function showDone(o) {
+  function showDone(o, vouchers) {
     view = "done"; writeCart([]); refreshLive();
+    vouchers = vouchers || [];
+    var onlyV = vouchers.length && (o.items || []).every(function (i) { return i.voucher || (byId[i.id] && byId[i.id].voucher); });
     $(".cart-head h2", drawer).textContent = "Vielen Dank!";
-    $(".cart-body", drawer).innerHTML = '<div class="cart-done"><div class="ok">✓</div><h3 style="font-family:\'Playfair Display\',serif;font-weight:600;font-size:1.5rem;margin:0 0 8px">Bestellung erhalten</h3><p style="color:#746653;line-height:1.7">Ihre Bestellnummer: <b>' + esc(o.number) + '</b><br>Gesamt: ' + eur(o.total) + ' (bezahlt mit PayPal)<br>Die Bestätigung haben wir an <b>' + esc(o.email) + '</b> gesendet.<br>Wir versenden innerhalb von 1–3 Werktagen mit DHL.</p></div>';
+    $(".cart-body", drawer).innerHTML = '<div class="cart-done"><div class="ok">✓</div><h3 style="font-family:\'Playfair Display\',serif;font-weight:600;font-size:1.5rem;margin:0 0 8px">Bestellung erhalten</h3><p style="color:#746653;line-height:1.7">Ihre Bestellnummer: <b>' + esc(o.number) + '</b><br>Gesamt: ' + eur(o.total) + ' (bezahlt mit PayPal)<br>Die Bestätigung haben wir an <b>' + esc(o.email) + '</b> gesendet.' + (onlyV ? '' : '<br>Wir versenden innerhalb von 1–3 Werktagen mit DHL.') + '</p>' +
+      (vouchers.length ? '<div class="cart-review" style="text-align:left;margin-top:14px"><h3>Ihre Geschenkgutscheine</h3>' + vouchers.map(function (v) { return '<div class="cart-row"><span><b style="font-family:ui-monospace,monospace;letter-spacing:.06em">' + esc(v.code) + '</b> · ' + eur(v.value) + '</span><a class="lx-link" href="' + esc(v.link) + '" target="_blank" rel="noopener">Öffnen &amp; drucken</a></div>'; }).join("") + '</div>' : '') + '</div>';
     $(".cart-foot", drawer).innerHTML = '<a class="cart-btn" style="display:grid;place-items:center;text-decoration:none" href="' + ROOT + 'shop.html">Weiter einkaufen</a>';
     try { window.dispatchEvent(new CustomEvent("lune:shop-order", { detail: { total: o.total } })); } catch (_) {}
   }
@@ -215,6 +224,8 @@
       var btns = $$("[data-add]", el), badge = $(".p-badge", el), stock = $("[data-stock]", el);
       btns.forEach(function (b) { b.disabled = l.stock < 1; });
       if (badge) { badge.hidden = l.stock > 2; badge.textContent = l.stock < 1 ? "Ausverkauft" : "Nur noch " + l.stock; badge.classList.toggle("out", l.stock < 1); }
+      if (stock && byId[id] && byId[id].voucher) { stock.textContent = "Sofort per E-Mail nach der Zahlung"; stock = null; }
+      if (badge && byId[id] && byId[id].voucher) { badge.hidden = true; badge = null; }
       if (stock) { stock.textContent = l.stock < 1 ? "Derzeit ausverkauft – gern im Studio nachfragen" : l.stock <= 2 ? "Nur noch " + l.stock + " auf Lager · Versand in 1–3 Werktagen" : "Auf Lager · Versand in 1–3 Werktagen"; stock.classList.toggle("out", l.stock < 1); }
     });
     filter();

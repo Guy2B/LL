@@ -2,6 +2,52 @@
  "updated": "2026-10-08",
  "items": [
   {
+   "id": "G50",
+   "sku": "GUTSCHEIN-50",
+   "slug": "geschenkgutschein-50-euro",
+   "brand": "Lune Beauty",
+   "line": "GESCHENKGUTSCHEIN",
+   "name": "Geschenkgutschein 50 €",
+   "title": "Geschenkgutschein 50 €",
+   "size": "Digital per E-Mail · zum Ausdrucken",
+   "price": 50,
+   "unitPrice": "Für Behandlungen & Produkte",
+   "category": "Geschenkgutscheine",
+   "concerns": [],
+   "ean": "",
+   "description": "Schenken Sie eine Auszeit: Der Lune Beauty Geschenkgutschein ist für alle Behandlungen und Produkte in unserem Studio in Worms einlösbar. Nach der Zahlung erhalten Sie den Gutschein sofort per E-Mail mit persönlichem Code und Link zum Ausdrucken oder Weiterleiten. Ein Restguthaben bleibt erhalten. Gültig drei Jahre bis zum Jahresende.",
+   "application": "Termin anfragen und beim Besuch den Gutscheincode nennen oder den Gutschein zeigen. Der Betrag wird mit der Rechnung verrechnet. Keine Barauszahlung.",
+   "skin": [],
+   "voucher": true,
+   "images": [
+    "assets/shop/img/gutschein-50-1.webp",
+    "assets/shop/img/gutschein-50-2.webp"
+   ]
+  },
+  {
+   "id": "G100",
+   "sku": "GUTSCHEIN-100",
+   "slug": "geschenkgutschein-100-euro",
+   "brand": "Lune Beauty",
+   "line": "GESCHENKGUTSCHEIN",
+   "name": "Geschenkgutschein 100 €",
+   "title": "Geschenkgutschein 100 €",
+   "size": "Digital per E-Mail · zum Ausdrucken",
+   "price": 100,
+   "unitPrice": "Für Behandlungen & Produkte",
+   "category": "Geschenkgutscheine",
+   "concerns": [],
+   "ean": "",
+   "description": "Schenken Sie eine Auszeit: Der Lune Beauty Geschenkgutschein ist für alle Behandlungen und Produkte in unserem Studio in Worms einlösbar. Nach der Zahlung erhalten Sie den Gutschein sofort per E-Mail mit persönlichem Code und Link zum Ausdrucken oder Weiterleiten. Ein Restguthaben bleibt erhalten. Gültig drei Jahre bis zum Jahresende.",
+   "application": "Termin anfragen und beim Besuch den Gutscheincode nennen oder den Gutschein zeigen. Der Betrag wird mit der Rechnung verrechnet. Keine Barauszahlung.",
+   "skin": [],
+   "voucher": true,
+   "images": [
+    "assets/shop/img/gutschein-100-1.webp",
+    "assets/shop/img/gutschein-100-2.webp"
+   ]
+  },
+  {
    "id": "P24",
    "sku": "07730",
    "slug": "braukmann-institute-derma-structure-pure-24h-aqua-plus-50-ml",
