@@ -5,7 +5,8 @@ const path = require("path");
 const { SITE, BUSINESS, esc, head, nav, footer } = require("./site-kit.cjs");
 
 const { items } = JSON.parse(fs.readFileSync("assets/shop/catalog.json", "utf8"));
-const CATS = ["Reinigung & Tonic", "Peelings & Masken", "Seren & Konzentrate", "Tagespflege", "Nachtpflege", "24h-Pflege", "Augen, Lippen & Hals", "Hände & Füße"];
+const products = items.filter(p => !p.voucher);   // Braukmann products (vouchers are digital, no shipping)
+const CATS = ["Geschenkgutscheine", "Reinigung & Tonic", "Peelings & Masken", "Seren & Konzentrate", "Tagespflege", "Nachtpflege", "24h-Pflege", "Augen, Lippen & Hals", "Hände & Füße"];
 const CONCERNS = ["Anti-Aging", "Sensible Haut", "Feuchtigkeit", "Unreine Haut & Glow"];
 const eur = n => Number(n).toFixed(2).replace(".", ",") + " €";
 const ADD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/><path d="M12 11v5M9.5 13.5h5"/></svg>';
@@ -48,6 +49,7 @@ const FAQ = [
   ["Wie schnell wird geliefert und was kostet der Versand?", "Wir versenden innerhalb Deutschlands mit DHL in 1–3 Werktagen. Der Versand kostet 4,95 €, ab einem Bestellwert von 50 € ist er kostenlos."],
   ["Wie kann ich bezahlen?", "Die Zahlung erfolgt ausschließlich und sicher über PayPal. Sie wählen Ihre Lieferadresse bei PayPal und prüfen Ihre Bestellung anschließend noch einmal bei uns, bevor sie verbindlich wird."],
   ["Welches Produkt passt zu meiner Haut?", "Wir beraten Sie gern persönlich im Studio oder starten Sie mit dem kostenlosen Lune Skin Check. Nach jeder Gesichtsbehandlung erhalten Sie außerdem eine Pflegeempfehlung."],
+  ["Gibt es Geschenkgutscheine?", "Ja, über 50 € oder 100 €. Sie erhalten den Gutschein nach der Zahlung sofort per E-Mail, mit Code und Link zum Ausdrucken. Einlösbar für alle Behandlungen und Produkte im Studio, ohne Versandkosten."],
   ["Kann ich Produkte auch im Studio abholen?", "Ja – schreiben Sie uns kurz per WhatsApp (0179 1544002), wir legen Ihre Produkte zurück. Sie bezahlen dann bei Abholung in der Mittelstraße 1."],
 ];
 const hero = items.filter(p => ["07738", "07930", "07939", "07710"].includes(p.sku));
@@ -59,7 +61,7 @@ const shopLd = [
 ];
 const shopHtml = head({
   title: "Hildegard Braukmann online kaufen | Lune Beauty Shop Worms",
-  desc: `Hildegard Braukmann online kaufen: ${items.length} Originalprodukte – Pro Lift, Couperose Relax, Hyaluron & mehr. Versand in 1–3 Tagen, ab 50 € gratis.`,
+  desc: `Hildegard Braukmann online kaufen: ${products.length} Originalprodukte – Pro Lift, Couperose Relax, Hyaluron & mehr. Versand in 1–3 Tagen, ab 50 € gratis.`,
   path: "shop.html", ogTitle: "Hildegard Braukmann Shop – Lune Beauty Worms", ld: shopLd,
 }).replace("<html lang=\"de\">", "<html lang=\"de\" data-root=\"\">") + `
 ${nav({ active: "shop", cart: true })}
@@ -99,7 +101,7 @@ ${nav({ active: "shop", cart: true })}
   <div class="shop-grid" id="shopGrid">
     ${items.map((p, i) => card(p, i, "")).join("\n    ")}
   </div>
-  <p class="shop-note">Alle Preise in Euro. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Zzgl. <a class="lx-link" href="versand-zahlung.html">Versandkosten</a> (4,95 €, ab 50 € kostenlos).</p>
+  <p class="shop-note">Alle Preise in Euro. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Zzgl. <a class="lx-link" href="versand-zahlung.html">Versandkosten</a> (4,95 €, ab 50 € kostenlos). Geschenkgutscheine kommen per E-Mail, ohne Versandkosten.</p>
 
   <div class="trust-row">
     <div class="trust-item"><b>Originalware</b><span>Direkt vom Hersteller Hildegard Braukmann</span></div>
@@ -127,7 +129,7 @@ ${FAQ.map(([q, a]) => `      <details><summary>${q}</summary><p>${a}</p></detail
   </section>
 </main>
 
-${footer({ scripts: '<script src="assets/shop/shop.js?v=1" defer></script>' })}`;
+${footer({ scripts: '<script src="assets/shop/shop.js?v=2" defer></script>' })}`;
 fs.writeFileSync("shop.html", shopHtml);
 
 /* ---------- produkt/<slug>.html ---------- */
@@ -135,17 +137,18 @@ fs.mkdirSync("produkt", { recursive: true });
 for (const f of fs.readdirSync("produkt")) if (f.endsWith(".html")) fs.unlinkSync(path.join("produkt", f));
 for (const p of items) {
   const url = SITE + productUrl(p);
-  const related = items.filter(x => x.id !== p.id && (x.category === p.category || x.concerns.some(c => p.concerns.includes(c)))).slice(0, 4);
+  const V = !!p.voucher;
+  const related = V ? items.filter(x => x.voucher && x.id !== p.id) : items.filter(x => !x.voucher && x.id !== p.id && (x.category === p.category || x.concerns.some(c => p.concerns.includes(c)))).slice(0, 4);
   const ld = [
     { "@type": "Product", "@id": url + "#product", name: `${p.brand} ${p.title} ${p.size}`, image: p.images.map(i => SITE + i), description: p.description, sku: p.sku, gtin13: p.ean || undefined,
       brand: { "@type": "Brand", name: p.brand }, category: p.category,
       offers: { "@type": "Offer", url, price: p.price.toFixed(2), priceCurrency: "EUR", availability: "https://schema.org/InStock", itemCondition: "https://schema.org/NewCondition",
-        seller: BUSINESS, shippingDetails: SHIPPING, hasMerchantReturnPolicy: RETURNS } },
+        seller: BUSINESS, ...(V ? {} : { shippingDetails: SHIPPING, hasMerchantReturnPolicy: RETURNS }) } },
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE }, { "@type": "ListItem", position: 2, name: "Shop", item: SITE + "shop.html" }, { "@type": "ListItem", position: 3, name: p.category, item: SITE + "shop.html#" + encodeURIComponent(p.category) }, { "@type": "ListItem", position: 4, name: p.title, item: url }] },
   ];
   const html = head({
-    title: [`${p.title} ${p.size} | Braukmann`, `${p.name} ${p.size} | Braukmann`, `${p.name} | Braukmann`, p.name].find(x => x.length <= 60) || p.name,
-    desc: metaDesc(p), path: productUrl(p), ogTitle: `${p.brand} ${p.title}`, image: SITE + p.images[0], ld, up: "../",
+    title: V ? `${p.title} | Lune Beauty Worms` : [`${p.title} ${p.size} | Braukmann`, `${p.name} ${p.size} | Braukmann`, `${p.name} | Braukmann`, p.name].find(x => x.length <= 60) || p.name,
+    desc: V ? `Lune Beauty ${p.title} online kaufen: sofort per E-Mail, zum Ausdrucken oder Weiterleiten. Für alle Behandlungen und Produkte im Studio in Worms.` : metaDesc(p), path: productUrl(p), ogTitle: `${p.brand} ${p.title}`, image: SITE + p.images[0], ld, up: "../",
   }).replace("<html lang=\"de\">", "<html lang=\"de\" data-root=\"../\">") + `
 ${nav({ up: "../", active: "shop", cart: true })}
 
@@ -160,35 +163,40 @@ ${nav({ up: "../", active: "shop", cart: true })}
       <span class="p-line">${esc(p.brand)} · ${esc(p.line)}</span>
       <h1>${esc(p.name)}</h1>
       <span class="pd-size">${esc(p.size)}${p.ean ? ` · EAN ${p.ean}` : ""}</span>
-      <div class="pd-price"><span data-price>${eur(p.price)}</span><small>${esc(p.unitPrice)} · gemäß § 19 UStG ohne USt. · zzgl. <a class="lx-link" href="../versand-zahlung.html">Versand</a></small></div>
-      <span class="pd-stock" data-stock>Auf Lager · Versand in 1–3 Werktagen</span>
+      <div class="pd-price"><span data-price>${eur(p.price)}</span><small>${esc(p.unitPrice)} · gemäß § 19 UStG ohne USt. · ${V ? "keine Versandkosten" : 'zzgl. <a class="lx-link" href="../versand-zahlung.html">Versand</a>'}</small></div>
+      <span class="pd-stock" data-stock>${V ? "Sofort per E-Mail nach der Zahlung" : "Auf Lager · Versand in 1–3 Werktagen"}</span>
       <div class="pd-buy">
         <div class="qty"><button type="button" data-q="-1" aria-label="Weniger">−</button><span data-qty>1</span><button type="button" data-q="1" aria-label="Mehr">+</button></div>
         <button class="service-btn primary" type="button" data-add>In den Warenkorb</button>
       </div>
-      <div class="pd-points">
+      <div class="pd-points">${V ? `
+        <span>✓ Einlösbar für alle Behandlungen und Produkte bei Lune Beauty</span>
+        <span>✓ Sofort per E-Mail · zum Ausdrucken oder Weiterleiten</span>
+        <span>✓ Restguthaben bleibt erhalten · 3 Jahre gültig</span>` : `
         <span>✓ Originalware von Hildegard Braukmann – auch in unseren Behandlungen verwendet</span>
-        <span>✓ Versand mit DHL in 1–3 Werktagen · ab 50 € versandkostenfrei</span>
+        <span>✓ Versand mit DHL in 1–3 Werktagen · ab 50 € versandkostenfrei</span>`}
         <span>✓ Sicher bezahlen mit PayPal</span>
       </div>
       ${p.description ? `<div class="pd-sec"><h2>Beschreibung</h2><p>${esc(p.description)}</p></div>` : ""}
-      ${p.application ? `<div class="pd-sec"><h2>Anwendung</h2><p>${esc(p.application)}</p></div>` : ""}
+      ${p.application ? `<div class="pd-sec"><h2>${V ? "So lösen Sie ein" : "Anwendung"}</h2><p>${esc(p.application)}</p></div>` : ""}
       ${p.skin.length ? `<div class="pd-sec"><h2>Geeignet für</h2><div class="pd-skin">${p.skin.map(s => `<span>${esc(s)}</span>`).join("")}</div></div>` : ""}
-      <div class="pd-advice"><b style="font-family:'Playfair Display',serif;font-size:1.15rem">Persönliche Pflegeberatung in Worms</b>
+      ${V ? `<div class="pd-advice"><b style="font-family:'Playfair Display',serif;font-size:1.15rem">Lieber im Studio kaufen?</b>
+        <p>Gutscheine gibt es auch direkt bei uns in der Mittelstraße 1, auf Wunsch mit Wunschbetrag. Schreiben Sie uns einfach per WhatsApp.</p>
+        <a href="https://wa.me/491791544002" target="_blank" rel="noopener">WhatsApp →</a> &nbsp; <a href="../index.html#booking">Termin anfragen →</a></div>` : `<div class="pd-advice"><b style="font-family:'Playfair Display',serif;font-size:1.15rem">Persönliche Pflegeberatung in Worms</b>
         <p>Sie möchten wissen, ob ${esc(p.name)} zu Ihrer Haut passt? Wir beraten Sie gern im Studio oder nach Ihrer Gesichtsbehandlung.</p>
-        <a href="../skin-ai.html">Kostenloser Skin Check →</a> &nbsp; <a href="../index.html#booking">Termin anfragen →</a></div>
+        <a href="../skin-ai.html">Kostenloser Skin Check →</a> &nbsp; <a href="../index.html#booking">Termin anfragen →</a></div>`}
     </div>
   </div>
 
   ${related.length ? `<section class="section-smart">
-    <div class="process-head"><h2>Passt gut dazu</h2></div>
+    <div class="process-head"><h2>${V ? "Auch als Gutschein" : "Passt gut dazu"}</h2></div>
     <div class="shop-grid">
     ${related.map((r, i) => card(r, i, "../")).join("\n    ")}
     </div>
   </section>` : ""}
 </main>
 
-${footer({ up: "../", scripts: '<script src="../assets/shop/shop.js?v=1" defer></script>' })}`;
+${footer({ up: "../", scripts: '<script src="../assets/shop/shop.js?v=2" defer></script>' })}`;
   fs.writeFileSync(productUrl(p), html);
 }
 console.log("shop.html +", items.length, "product pages");
