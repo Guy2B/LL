@@ -13,7 +13,7 @@ const LOCAL = [
   ["aquafacial-worms.html", "Aquafacial Worms"], ["anti-aging-worms.html", "Anti-Aging Worms"],
   ["akne-behandlung-worms.html", "Aknebehandlung Worms"], ["hydro-boost-worms.html", "Hydro Boost Worms"],
   ["radiofrequenz-worms.html", "Radiofrequenz Worms"], ["led-therapie-worms.html", "LED-Therapie Worms"], ["manikuere-pedikuere-worms.html", "Maniküre &amp; Fußpflege Worms"],
-  ["augenpflege-worms.html", "Augenpflege Worms"], ["preise.html", "Preise"], ["shop.html", "Braukmann Shop"],
+  ["augenpflege-worms.html", "Augenpflege Worms"], ["preise.html", "Preise"], ["gutschein-kosmetik-worms.html", "Gutschein Kosmetik Worms"], ["shop.html", "Braukmann Shop"],
   ["kosmetik-ausbildung-worms.html", "Kosmetik-Ausbildung Worms"],
 ];
 const LEGAL = [["impressum.html", "Impressum"], ["agb.html", "AGB"], ["datenschutz.html", "Datenschutz"], ["versand-zahlung.html", "Versand &amp; Zahlung"], ["widerruf.html", "Widerruf"]];
