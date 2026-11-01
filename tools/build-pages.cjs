@@ -162,6 +162,8 @@ const pages = [
       ["Sieht man danach Rötungen?", "Meist ist die Haut direkt danach frisch und rosig. Leichte Rötungen klingen in der Regel nach kurzer Zeit ab – Sie sind sofort wieder gesellschaftsfähig."],
       ["Wie oft sollte man ein Aquafacial machen?", "Für ein gleichmäßig gepflegtes Hautbild empfehlen wir eine Behandlung alle 4 bis 6 Wochen. Vor besonderen Anlässen idealerweise einige Tage vorher."],
       ["Was kostet ein Aquafacial in Worms?", "Das Hydra Glow Facial (Aquafacial) kostet bei Lune Beauty 130 € für 90 Minuten. LED-Maske oder Radiofrequenz können für je 10 € ergänzt werden."],
+      ["Ist ein Aquafacial dasselbe wie ein HydraFacial?", "HydraFacial ist der Markenname eines bestimmten Geräteherstellers. Das Aquafacial arbeitet nach demselben Prinzip der Hydradermabrasion: Reinigung, Peeling und Wirkstoffe mit Wasser und sanftem Vakuum. Bei Lune Beauty kombinieren wir es zusätzlich mit Ultraschall, LED-Licht und Massage."],
+      ["Kann ich ein Aquafacial verschenken?", "Ja. Mit einem <a href=\"gutschein-kosmetik-worms.html\">Lune Beauty Geschenkgutschein</a> über 50 € oder 100 € kann die Beschenkte ihre Behandlung selbst wählen, zum Beispiel ein Hydra Glow Facial."],
     ],
     ctaTitle: "Ihr Aquafacial in Worms anfragen", ctaText: "Lune Beauty · Mittelstraße 1 · 67547 Worms. Senden Sie Ihren Wunschtermin – wir melden uns persönlich zurück.",
     related: [["gesichtsbehandlung-worms.html", "Alle Gesichtsbehandlungen"], ["anti-aging-worms.html", "Anti-Aging"], ["akne-behandlung-worms.html", "Unreine Haut"], ["preise.html", "Preisliste"]],
@@ -399,6 +401,94 @@ pages.push(
 );
 
 pages.find(p => p.file === "preise.html").navActive = "preise";
+/* ---------- Gutschein Kosmetik Worms (landing page for gift vouchers) ---------- */
+const GS_FAQ = [
+  ["Wofür kann der Gutschein eingelöst werden?", "Für alle Behandlungen und Produkte bei Lune Beauty in Worms: Gesichtsbehandlungen wie das Aquafacial, Anti-Aging, Maniküre, Fußpflege, Augenpflege und die Pflegeprodukte von Hildegard Braukmann."],
+  ["Wie bekomme ich den Gutschein?", "Online gekaufte Gutscheine erhalten Sie direkt nach der Zahlung per E-Mail, mit persönlichem Code und einem Link zum Ausdrucken oder Weiterleiten. Im Studio in der Mittelstraße 1 gibt es Gutscheine auch mit Wunschbetrag."],
+  ["Wie lange ist der Gutschein gültig?", "Bis zum Ende des dritten Jahres nach dem Kauf, zum Beispiel bei Kauf im Jahr 2026 bis zum 31.12.2029. Das Datum steht auf dem Gutschein."],
+  ["Muss der Betrag auf einmal eingelöst werden?", "Nein. Der Gutschein kann in mehreren Teilbeträgen eingelöst werden; ein Restguthaben bleibt erhalten. Eine Barauszahlung ist nicht möglich."],
+  ["Kann ich den Gutschein noch kurz vor Weihnachten kaufen?", "Ja. Da der Gutschein per E-Mail kommt, gibt es keine Versandzeit: Sie können ihn bis zum letzten Moment kaufen und ausdrucken."],
+  ["Was kostet der Versand?", "Nichts. Geschenkgutscheine werden digital zugestellt, es fallen keine Versandkosten an."],
+];
+function gutscheinPage() {
+  const file = "gutschein-kosmetik-worms.html", url = SITE + file;
+  const p = { crumb: "Gutschein Kosmetik Worms", kicker: "Geschenkgutschein · Worms", h1: "Kosmetik-Gutschein für Worms – schöne Momente verschenken.",
+    lead: "Ein Lune Beauty Geschenkgutschein über 50 € oder 100 €: einlösbar für alle Behandlungen und Produkte in unserem Studio in der Mittelstraße. Sofort per E-Mail, ohne Versandkosten.",
+    ctaHref: "shop.html#Geschenkgutscheine", ctaLabel: "Gutschein kaufen", secondaryHref: "#so-funktionierts", secondaryLabel: "So funktioniert’s",
+    trust: ["Sofort per E-Mail", "3 Jahre gültig", "Für alle Behandlungen"], heroImg: "lune/hero-gutschein.webp", heroAlt: "Lune Beauty Geschenkgutscheine über 50 € und 100 €", heroNote: ["50 € oder 100 €", "Wunschbetrag im Studio"] };
+  const ld = [
+    { "@type": "WebPage", "@id": url + "#page", name: "Kosmetik-Gutschein Worms – Lune Beauty", url, isPartOf: { "@id": SITE + "#website" }, about: BUSINESS,
+      mainEntity: { "@type": "ItemList", itemListElement: [50, 100].map((v, i) => ({ "@type": "ListItem", position: i + 1, url: SITE + `produkt/geschenkgutschein-${v}-euro.html`, name: `Geschenkgutschein ${v} €` })) } },
+    { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE }, { "@type": "ListItem", position: 2, name: p.crumb, item: url }] },
+    { "@type": "FAQPage", mainEntity: GS_FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+  ];
+  const ideas = [["Aquafacial", "Hydra Glow Facial für frische, klare Haut", "130 €", "aquafacial-worms.html"], ["Spa Maniküre", "Handbad, Nagelpflege, Maske und Massage", "52 €", "manikuere-pedikuere-worms.html"], ["Kombi Augenbehandlung", "Brauen formen und färben, Wimpern färben", "45 €", "augenpflege-worms.html"]];
+  const html = head({ title: "Gutschein Kosmetik Worms | Geschenkgutschein Lune Beauty", desc: "Kosmetik-Gutschein in Worms: Lune Beauty Geschenkgutschein über 50 € oder 100 €, sofort per E-Mail, 3 Jahre gültig, für alle Behandlungen und Produkte.", path: file, ogTitle: "Kosmetik-Gutschein Worms – Lune Beauty", image: SITE + "assets/img/lune/hero-gutschein.webp", ld }) + `
+${nav({ active: "" })}
+
+${hero(p)}
+
+<main>
+  <section class="section-smart">
+    <div class="smart-grid">
+      <article class="smart-card">
+        <small>Das Geschenk für jede Haut</small>
+        <h2>Eine Auszeit, die wirklich ankommt.</h2>
+        <p>Ob Weihnachten, Geburtstag, Muttertag oder einfach als Dankeschön: Mit einem Lune Beauty Gutschein verschenken Sie eine professionelle Behandlung und Zeit für sich. Die Beschenkte wählt selbst, was ihrer Haut gerade guttut, und wir beraten sie persönlich im Studio in Worms.</p>
+        <p>Der Gutschein kommt sofort per E-Mail, mit persönlichem Code und einem Link zum Ausdrucken. So liegt er auch in letzter Minute unter dem Baum.</p>
+        <div class="smart-highlight"><strong>Tipp:</strong> Gutscheine mit Wunschbetrag und schöner Karte bekommen Sie auch direkt bei uns in der Mittelstraße 1.</div>
+      </article>
+      <aside class="smart-card">
+        <small>Gutschein wählen</small>
+        <div class="price-list">
+${[50, 100].map(v => `          <div class="price-row"><div><h3><a style="color:inherit;text-decoration:none" href="produkt/geschenkgutschein-${v}-euro.html">Geschenkgutschein ${v} €</a></h3><p>Für alle Behandlungen und Produkte · per E-Mail</p></div><div class="price-side"><span class="price">${v} €</span><a class="book-link" href="produkt/geschenkgutschein-${v}-euro.html">Auswählen</a></div></div>`).join("\n")}
+        </div>
+        <p class="mini-note">Bezahlung sicher mit PayPal. Gemäß § 19 UStG ohne Umsatzsteuer. Es gelten unsere <a href="agb.html#gutscheine">Gutscheinbedingungen</a>.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section-smart">
+    <div class="process-head"><h2>Beliebte Behandlungen zum Verschenken</h2><p>Mit 50 € oder 100 € lässt sich vieles erleben, ein Restguthaben bleibt erhalten.</p></div>
+    <div class="process-grid">
+${ideas.map(([h, t, pr, href]) => `      <article class="process-card"><small>${pr}</small><h3><a style="color:inherit;text-decoration:none" href="${href}">${h}</a></h3><p>${t}</p></article>`).join("\n")}
+    </div>
+  </section>
+
+  <section class="section-smart" id="so-funktionierts">
+    <div class="process-head"><h2>So funktioniert’s</h2><p>In wenigen Minuten verschenkt, ganz ohne Versand.</p></div>
+    <div class="process-grid">
+      <article class="process-card"><small>01</small><h3>Betrag wählen</h3><p>50 € oder 100 € im Shop in den Warenkorb legen und sicher mit PayPal bezahlen.</p></article>
+      <article class="process-card"><small>02</small><h3>Per E-Mail erhalten</h3><p>Direkt nach der Zahlung kommt Ihr Gutschein mit Code und Link zum Ausdrucken oder Weiterleiten.</p></article>
+      <article class="process-card"><small>03</small><h3>Einlösen in Worms</h3><p>Die Beschenkte fragt einen Termin an und nennt beim Besuch den Code. Der Betrag wird verrechnet.</p></article>
+    </div>
+  </section>
+
+  <section class="section-smart">
+    <div class="faq-head"><h2>Häufige Fragen zum Gutschein</h2></div>
+    <div class="faq-grid">
+${GS_FAQ.map(([q, a]) => `      <details>\n        <summary>${q}</summary>\n        <p>${a}</p>\n      </details>`).join("\n")}
+    </div>
+  </section>
+
+  <section class="section-smart">
+    <div class="cta-box">
+      <h2>Jetzt Gutschein verschenken</h2>
+      <p>Lune Beauty · Mittelstraße 1 · 67547 Worms. Fragen? Schreiben Sie uns per WhatsApp an 0179 1544002.</p>
+      <div class="service-actions">
+        <a href="shop.html#Geschenkgutscheine" class="service-btn primary">Gutschein kaufen →</a>
+        <a href="https://wa.me/491791544002" class="service-btn secondary" target="_blank" rel="noopener">Wunschbetrag per WhatsApp</a>
+      </div>
+      <div class="related-links"><a href="gesichtsbehandlung-worms.html">Gesichtsbehandlungen</a><a href="aquafacial-worms.html">Aquafacial</a><a href="preise.html">Preisliste</a><a href="shop.html">Braukmann Shop</a></div>
+    </div>
+  </section>
+</main>
+
+${footer({})}`;
+  fs.writeFileSync(file, html);
+}
+gutscheinPage();
+
 for (const p of pages) {
   if (p.groups) p.rows = p.groups.flatMap(g => g.rows).filter(r => typeof r.price === "number");
   fs.writeFileSync(p.file, page(p));
