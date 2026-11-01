@@ -113,7 +113,7 @@
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": "Saturday",
       "opens": "09:00",
-      "closes": "13:00"
+      "closes": "14:00"
     }
   ],
   "sameAs": [
@@ -2335,7 +2335,7 @@
     @lunebeauty2
   </a>
 </p>
-      <p><strong>Öffnungszeiten:</strong> Mo–Fr 09–18 Uhr · Sa 09–13 Uhr</p>
+      <p><strong>Öffnungszeiten:</strong> Mo–Fr 09–18 Uhr · Sa 09–14 Uhr</p>
       <p><strong>Webseite:</strong> www.lunebeauty.de</p>
            <!-- ✅ GOOGLE MAP EMBED (LOCAL SEO BOOST) -->
       <div class="map-embed" style="margin: 1.5rem 0;">
@@ -2876,7 +2876,7 @@
     var d=new Date(p[0],p[1]-1,p[2]);
     var day=d.getDay();
     if(day===0)return null;      // dimanche fermé
-    if(day===6)return 13*60;     // samedi 09:00–13:00
+    if(day===6)return 14*60;     // samedi 09:00–14:00
     return 18*60;               // lundi–vendredi 09:00–18:00
   }
   function duration(){
