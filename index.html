@@ -2307,6 +2307,11 @@
     <input id="booking-email" type="email" name="email" placeholder="name@beispiel.de" autocomplete="email" inputmode="email" required aria-required="true">
   </div>
 
+  <div class="booking-consent" style="font-size:.86rem;line-height:1.55;color:#7a6c58;margin:4px 0 14px">
+    <p style="margin:0 0 8px">Mit Ihrer Anfrage nehmen wir Sie kostenlos in den <b>Lune Mondkreis</b> auf, unser Treueprogramm mit Lichtpunkten bei jedem Besuch. Außerdem informieren wir Sie gelegentlich per E-Mail über Neuigkeiten und Angebote von Lune Beauty. Dem können Sie jederzeit widersprechen: über den Link in jeder E-Mail oder an <a href="mailto:kontakt@lunebeauty.de">kontakt@lunebeauty.de</a>. Mehr in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+    <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" name="noNewsletter" value="1" style="flex:none;width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;display:inline-block;order:0"> <span>Ich möchte keine E-Mails mit Neuigkeiten erhalten.</span></label>
+  </div>
+
   <div id="booking-success" class="booking-success hidden" hidden role="status" aria-live="polite">
     Vielen Dank. Ihre Terminanfrage ist bei uns eingegangen.<br>
     Der Termin ist erst nach unserer persönlichen Bestätigung verbindlich.
@@ -3001,6 +3006,8 @@
     fd.set('source','Website');
     fd.set('durationMinutes',String(meta.durationMinutes||fd.get('durationMinutes')||''));
     fd.set('price',String(meta.price||fd.get('price')||''));
+    // objection to e-mail news travels in the notes, so the CRM sees it whatever the cloud stores
+    if(fd.get('noNewsletter')){ fd.set('notes', (String(fd.get('notes')||'')+' [Kein Newsletter]').trim()); fd.delete('noNewsletter'); }
 
     var btn=form.querySelector('button[type="submit"]');
     var old=btn?btn.textContent:'Termin anfragen';

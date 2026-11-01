@@ -36,7 +36,7 @@
       service: getField(form, "service"),
       date: getField(form, "date"),
       time: getField(form, "time"),
-      notes: getField(form, "notes")
+      notes: (getField(form, "notes") + (form?.elements?.noNewsletter?.checked ? " [Kein Newsletter]" : "")).trim()
     });
 
     const controller = new AbortController();
