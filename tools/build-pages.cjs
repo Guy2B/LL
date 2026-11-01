@@ -574,6 +574,7 @@ const WIDERRUF = `
       <p>Sie müssen für einen etwaigen Wertverlust der Waren nur aufkommen, wenn dieser Wertverlust auf einen zur Prüfung der Beschaffenheit, Eigenschaften und Funktionsweise der Waren nicht notwendigen Umgang mit ihnen zurückzuführen ist.</p>
       <h3>Ausschluss bzw. vorzeitiges Erlöschen des Widerrufsrechts</h3>
       <p>Das Widerrufsrecht erlischt vorzeitig bei Verträgen zur Lieferung versiegelter Waren, die aus Gründen des Gesundheitsschutzes oder der Hygiene nicht zur Rückgabe geeignet sind, wenn ihre Versiegelung nach der Lieferung entfernt wurde.</p>
+      <p><b>Geschenkgutscheine:</b> Beim Kauf eines Geschenkgutscheins beginnt die Widerrufsfrist von vierzehn Tagen mit dem Tag des Vertragsschlusses. Die Rückzahlung erfolgt wie oben beschrieben; wurde der Gutschein bereits ganz oder teilweise eingelöst, wird der eingelöste Betrag verrechnet.</p>
       <p><em>Ende der Widerrufsbelehrung</em></p>
       <h2 id="formular" style="margin-top:34px">Muster-Widerrufsformular</h2>
       <p>(Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte dieses Formular aus und senden Sie es zurück.)</p>
@@ -666,7 +667,8 @@ fs.writeFileSync("versand-zahlung.html", legalPage({
         <li>Ein Versand ins Ausland ist derzeit nicht möglich.</li>
       </ul>
       <h2 style="margin-top:28px">Zahlung</h2>
-      <p>Die Bezahlung erfolgt ausschließlich über <b>PayPal</b>. Sie melden sich bei PayPal an, wählen Ihre Lieferadresse und Zahlungsquelle und prüfen anschließend Ihre Bestellung auf unserer Seite. Erst mit dem Klick auf „Zahlungspflichtig bestellen“ wird die Bestellung verbindlich und der Betrag abgebucht.</p>
+      <p>Die Bezahlung erfolgt ausschließlich über <b>PayPal</b>. Im Warenkorb prüfen Sie Ihre Bestellung; mit dem Klick auf „Zahlungspflichtig bestellen“ wird sie verbindlich und Sie werden zu PayPal weitergeleitet. Dort wählen Sie Ihre Lieferadresse und Zahlungsquelle. Nach der Zahlung erhalten Sie die Bestellbestätigung per E-Mail.</p>
+      <p><b>Geschenkgutscheine</b> erhalten Sie direkt nach der Zahlung per E-Mail, ohne Versandkosten.</p>
       <h2 style="margin-top:28px">Preise</h2>
       <p>Alle Preise sind Endpreise in Euro. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung). Bei Kosmetikprodukten ist zusätzlich der Grundpreis pro Liter bzw. Kilogramm angegeben.</p>
       <h2 style="margin-top:28px">Abholung im Studio</h2>
