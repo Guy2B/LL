@@ -129,7 +129,7 @@ ${FAQ.map(([q, a]) => `      <details><summary>${q}</summary><p>${a}</p></detail
   </section>
 </main>
 
-${footer({ scripts: '<script src="assets/shop/shop.js?v=2" defer></script>' })}`;
+${footer({ scripts: '<script src="assets/shop/shop.js?v=3" defer></script>' })}`;
 fs.writeFileSync("shop.html", shopHtml);
 
 /* ---------- produkt/<slug>.html ---------- */
@@ -196,7 +196,7 @@ ${nav({ up: "../", active: "shop", cart: true })}
   </section>` : ""}
 </main>
 
-${footer({ up: "../", scripts: '<script src="../assets/shop/shop.js?v=2" defer></script>' })}`;
+${footer({ up: "../", scripts: '<script src="../assets/shop/shop.js?v=3" defer></script>' })}`;
   fs.writeFileSync(productUrl(p), html);
 }
 console.log("shop.html +", items.length, "product pages");

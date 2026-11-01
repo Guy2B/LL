@@ -118,6 +118,7 @@
         '<a class="cart-btn" style="display:grid;place-items:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text) + '">Per WhatsApp ' + (hasV ? "bestellen" : "reservieren") + '</a>';
       return;
     }
+    if (live.mode === "email") return renderEmailCheckout(box, lines);
     box.innerHTML = '<p class="cart-legal" style="margin-top:0">Sie melden sich bei PayPal an und wählen Ihre Lieferadresse. <b>Danach prüfen Sie Ihre Bestellung hier noch einmal</b> – erst dann wird sie verbindlich.</p><div class="cart-pp" id="cartPayPal"></div>';
     loadPayPal(function (err) {
       if (err || !window.paypal) { box.innerHTML = '<div class="cart-alert">PayPal konnte nicht geladen werden. Bitte Seite neu laden oder Werbeblocker für diese Seite deaktivieren.</div>'; return; }
@@ -134,6 +135,49 @@
         onError: function (e) { showAlert(box, (e && e.message) || "PayPal meldet einen Fehler. Bitte erneut versuchen."); },
       }).render("#cartPayPal");
     });
+  }
+
+  // PayPal with the shop's PayPal address: the order is fixed here ("zahlungspflichtig bestellen"), then paid on paypal.com
+  function renderEmailCheckout(box, lines) {
+    var vOnly = lines.every(function (l) { return l.p.voucher; });
+    box.innerHTML = '<p class="cart-legal" style="margin-top:0">Mit Klick auf „Zahlungspflichtig bestellen“ geben Sie eine verbindliche Bestellung ab und werden zur Zahlung zu PayPal weitergeleitet. ' +
+      (vOnly ? 'Ihre Gutscheine erhalten Sie direkt nach der Zahlung per E-Mail.' : 'Ihre Lieferadresse wählen Sie bei PayPal (Versand nur innerhalb Deutschlands).') + '</p>' +
+      '<button class="cart-btn" type="button" data-pay>Zahlungspflichtig bestellen</button><p class="cart-legal" style="text-align:center;margin:8px 0 0">Bezahlung sicher über PayPal</p>';
+    var b = $("[data-pay]", box);
+    b.onclick = function () {
+      b.disabled = true; b.textContent = "Weiter zu PayPal…";
+      post("/order", { items: readCart() }).then(function (r) {
+        if (!r.ok || !r.redirect) { if (r.stock) refreshLive(); throw new Error(r.error || "Bestellung konnte nicht angelegt werden."); }
+        try { sessionStorage.setItem("lune_pending_order", r.number); } catch (_) {}
+        location.href = r.redirect;
+      }).catch(function (e) { b.disabled = false; b.textContent = "Zahlungspflichtig bestellen"; showAlert(box, e.message); });
+    };
+  }
+
+  // back from paypal.com: wait for PayPal's confirmation, then thank the customer
+  function returnFromPayPal() {
+    var q = new URLSearchParams(location.search), n = q.get("bestellung"), k = q.get("k");
+    if (!n || !k) return false;
+    openCart(); view = "done";
+    $(".cart-head h2", drawer).textContent = "Zahlung wird bestätigt…";
+    $(".cart-body", drawer).innerHTML = '<div class="cart-done"><div class="ok">…</div><p style="color:#746653;line-height:1.7">Einen Moment bitte, PayPal bestätigt Ihre Zahlung für die Bestellung <b>' + esc(n) + '</b>.</p></div>';
+    $(".cart-foot", drawer).innerHTML = "";
+    var tries = 0;
+    (function poll() {
+      fetch(API + "/status?n=" + encodeURIComponent(n) + "&k=" + encodeURIComponent(k), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (r) {
+        if (r.ok && r.paid && !r.pending) { history.replaceState(null, "", location.pathname); return showDone(r.order, r.vouchers); }
+        if (r.ok && r.pending) {
+          $(".cart-head h2", drawer).textContent = "Vielen Dank!";
+          $(".cart-body", drawer).innerHTML = '<div class="cart-done"><div class="ok">✓</div><p style="color:#746653;line-height:1.7">Ihre Bestellung <b>' + esc(n) + '</b> ist eingegangen. PayPal meldet die Zahlung noch als ausstehend; sobald sie bestätigt ist, erhalten Sie Ihre Bestätigung per E-Mail.</p></div>';
+          writeCart([]); return;
+        }
+        if (++tries < 20) return setTimeout(poll, 3000);
+        $(".cart-head h2", drawer).textContent = "Vielen Dank!";
+        $(".cart-body", drawer).innerHTML = '<div class="cart-done"><div class="ok">✓</div><p style="color:#746653;line-height:1.7">Wir haben Ihre Bestellung <b>' + esc(n) + '</b>. Die Bestätigung von PayPal dauert gerade etwas länger; Sie erhalten sie per E-Mail. Fragen? WhatsApp 0179 1544002.</p></div>';
+        writeCart([]);
+      }).catch(function () { if (++tries < 20) setTimeout(poll, 3000); });
+    })();
+    return true;
   }
 
   function showAlert(box, msg) {
@@ -282,6 +326,7 @@
     fetch(ROOT + "assets/shop/catalog.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
       catalog = d.items; catalog.forEach(function (p) { byId[p.id] = p; });
       wireListing(); wireProduct(); updateBadge(); renderCart(); refreshLive();
+      if (returnFromPayPal()) return;
       if (/[?&]warenkorb=1/.test(location.search)) openCart();
     });
   }
