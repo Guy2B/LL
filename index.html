@@ -3008,6 +3008,8 @@
     fd.set('price',String(meta.price||fd.get('price')||''));
     // objection to e-mail news travels in the notes, so the CRM sees it whatever the cloud stores
     if(fd.get('noNewsletter')){ fd.set('notes', (String(fd.get('notes')||'')+' [Kein Newsletter]').trim()); fd.delete('noNewsletter'); }
+    // recommended by a friend (link from her Mondkreis card): the CRM credits her after the first visit
+    if(window.LuneRef && window.LuneRef.note()){ fd.set('notes', (String(fd.get('notes')||'')+window.LuneRef.note()).trim()); }
 
     var btn=form.querySelector('button[type="submit"]');
     var old=btn?btn.textContent:'Termin anfragen';
@@ -3038,5 +3040,6 @@
 
 <script src="assets/js/lune-stats.js" defer></script>
 <script src="assets/js/lune-header.js?v=2" defer></script>
+<script src="assets/js/lune-ref.js?v=1" defer></script>
 </body>
 </html>
