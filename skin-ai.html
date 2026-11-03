@@ -650,8 +650,8 @@ function renderReport(){
   var weakest=DIMS.map(function(d,i){return[i,m[d.key]];}).sort(function(a,b){return a[1]-b[1];})[0][0];
   focusDim(weakest);
   $("reco").innerHTML='<h3>'+esc(t.title)+'</h3><div class="meta">'+esc(t.min)+' · '+esc(t.service)+'</div><div class="price">'+priceHtml(t)+'</div><p style="grid-column:1/-1;margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.6">'+esc(t.text)+'</p><div class="reasons" style="grid-column:1/-1">'+result.reasons.map(function(r){return "<span>"+esc(r)+"</span>";}).join("")+'</div><a href="'+t.page+'">Mehr zur Behandlung →</a>';
-  var q="index.html?service="+encodeURIComponent(t.service)+"&source=skincheck&score="+m.overall+"&profile="+encodeURIComponent(result.profile.name+" · Skin ID "+skinId+" · 10 % Skin-Check-Vorteil")+"#booking";$("lnkBook").href=q;
-  var wa="Hallo Lune Beauty, ich habe den Skin Check gemacht (Skin ID "+skinId+", Score "+m.overall+", "+result.profile.short+"). Ich möchte meine Analyse im Studio vervollständigen – Empfehlung: "+t.title+" (mit 10 % Skin-Check-Vorteil).";
+  var q="index.html?service="+encodeURIComponent(t.service)+"&source=skincheck&score="+m.overall+"&profile="+encodeURIComponent(result.profile.name+" · Skin ID "+skinId+(window.LuneRef&&window.LuneRef.code()?" · 30 % Empfehlung"+window.LuneRef.note():" · 10 % Skin-Check-Vorteil"))+"#booking";$("lnkBook").href=q;
+  var wa="Hallo Lune Beauty, ich habe den Skin Check gemacht (Skin ID "+skinId+", Score "+m.overall+", "+result.profile.short+"). Ich möchte meine Analyse im Studio vervollständigen – Empfehlung: "+t.title+(window.LuneRef&&window.LuneRef.code()?" (mit 30 % Empfehlung, Code "+window.LuneRef.code()+").":" (mit 10 % Skin-Check-Vorteil).");
   $("lnkWa").href=$("lnkWa2").href="https://wa.me/491791544002?text="+encodeURIComponent(wa);
   $("bookTreatment").textContent=t.title;
   $("offerId").textContent=skinId;
@@ -694,7 +694,7 @@ $("bookForm").addEventListener("submit",function(e){
   if(!$("consentData").checked){msg.textContent="Bitte stimmen Sie der Speicherung zu.";return;}
   msg.className="msg";msg.textContent="";
   var btn=$("btnSend");btn.disabled=true;btn.textContent="Wird gesendet …";
-  var r=result,payload={action:"publicSkinAnalysis",source:"Skin Check",page:location.href,name:name||"Skin Check Kundin",phone:phone,email:email,profileId:r.profile.id,profileName:r.profile.name,confidence:r.profile.conf,treatmentId:r.treatment.id,treatmentName:r.treatment.title,recommendedService:r.treatment.service,score:r.metrics.overall,scores:JSON.stringify(r.metrics),reasons:JSON.stringify(r.reasons.concat(["Skin ID "+skinId,"Skin-Check-Vorteil: 10 % auf die erste Behandlung"])),consent:"yes",consentText:"Kosmetisches Hautprofil darf zur Beratung gespeichert werden. Foto wird nicht übertragen."};
+  var r=result,payload={action:"publicSkinAnalysis",source:"Skin Check",page:location.href,name:name||"Skin Check Kundin",phone:phone,email:email,profileId:r.profile.id,profileName:r.profile.name,confidence:r.profile.conf,treatmentId:r.treatment.id,treatmentName:r.treatment.title,recommendedService:r.treatment.service,score:r.metrics.overall,scores:JSON.stringify(r.metrics),reasons:JSON.stringify(r.reasons.concat(["Skin ID "+skinId,(window.LuneRef&&window.LuneRef.code()?"Empfehlung: 30 % auf die erste Behandlung"+window.LuneRef.note():"Skin-Check-Vorteil: 10 % auf die erste Behandlung")])),consent:"yes",consentText:"Kosmetisches Hautprofil darf zur Beratung gespeichert werden. Foto wird nicht übertragen."};
   (apiReady()?jsonp(window.LUNE_STAFF_CLOUD_API,payload):Promise.reject(new Error("Cloud URL fehlt"))).then(function(){
     try{window.dispatchEvent(new Event("lune:skin-request-sent"));}catch(_){}
     $("doneCode").textContent=skinId;show("sDone");
@@ -719,5 +719,6 @@ window.addEventListener("pagehide",stopCamera);
   </a>
 </div>
 <script src="assets/js/lune-stats.js" defer></script>
+<script src="assets/js/lune-ref.js?v=1" defer></script>
 </body>
 </html>
