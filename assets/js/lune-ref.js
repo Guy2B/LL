@@ -7,9 +7,16 @@
   var KEY = 'lune_ref', API = 'https://karte.lunebeauty.de/api/ref?c=';
   function get(){ try { var x = JSON.parse(localStorage.getItem(KEY) || 'null'); return x && Date.now() - x.t < 60 * 86400000 ? x : null; } catch(_) { return null; } }
   function put(x){ try { localStorage.setItem(KEY, JSON.stringify(x)); } catch(_) {} }
+  // counted on the ambassador's code: link opened (once per device) and Skin Check sent; nothing about the visitor
+  function ping(c, e){
+    var body = JSON.stringify({c: c, e: e});
+    try { if(navigator.sendBeacon && navigator.sendBeacon('https://karte.lunebeauty.de/api/ref', new Blob([body], {type: 'text/plain'}))) return; } catch(_) {}
+    fetch('https://karte.lunebeauty.de/api/ref', {method: 'POST', body: body, keepalive: true}).catch(function(){});
+  }
   var q = new URLSearchParams(location.search).get('ref');
   var cur = get();
-  if(q && /^F-[A-Z0-9]{6}$/i.test(q)){ q = q.toUpperCase(); if(!cur || cur.c !== q) cur = {c: q, t: Date.now()}; put(cur); }
+  if(q && /^F-[A-Z0-9]{6}$/i.test(q)){ q = q.toUpperCase(); if(!cur || cur.c !== q){ cur = {c: q, t: Date.now()}; ping(q, 'open'); } put(cur); }
+  window.addEventListener('lune:skin-request-sent', function(){ var x = get(); if(x && active(x)) ping(x.c, 'skin'); });
   var active = function(x){ return x && x.until && new Date().toISOString().slice(0, 10) <= x.until; };
   window.LuneRef = {
     code: function(){ var x = get(); return x && active(x) ? x.c : ''; },
