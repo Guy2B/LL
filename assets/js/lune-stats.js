@@ -19,7 +19,7 @@
     t: 'page',
     p: location.pathname.replace(/^\/LL(?=\/)/, '') || '/',
     r: document.referrer || '',
-    u: params.get('utm_source') || '',
+    u: params.get('utm_source') || (params.get('gclid') || params.get('gbraid') || params.get('wbraid') ? 'google-ads' : ''),
     l: (document.documentElement.lang || '').slice(0, 2),
   });
 
