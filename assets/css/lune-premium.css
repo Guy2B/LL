@@ -4134,3 +4134,5 @@ details summary {
 @media (prefers-reduced-motion: reduce) {
   .service-card .particles span { animation: none; }
 }
+
+#contact .cta-btn.google-review { background: linear-gradient(135deg,#4f86ec,#2f62c9); }
