@@ -18,6 +18,12 @@
     );
   }
 
+  // request came from a Google Ads click on this page (ad link carries utm_source=google-ads or a gclid); nothing is stored
+  function adNote() {
+    const q = new URLSearchParams(location.search);
+    return (q.get("utm_source") === "google-ads" || q.get("gclid") || q.get("gbraid") || q.get("wbraid")) ? " [Quelle: Google Ads]" : "";
+  }
+
   function getField(form, name) {
     const el = form?.elements?.[name];
     return el ? String(el.value || "").trim() : "";
@@ -36,7 +42,7 @@
       service: getField(form, "service"),
       date: getField(form, "date"),
       time: getField(form, "time"),
-      notes: (getField(form, "notes") + (form?.elements?.noNewsletter?.checked ? " [Kein Newsletter]" : "") + (window.LuneRef ? window.LuneRef.note() : "")).trim()
+      notes: (getField(form, "notes") + (form?.elements?.noNewsletter?.checked ? " [Kein Newsletter]" : "") + (window.LuneRef ? window.LuneRef.note() : "") + adNote()).trim()
     });
 
     const controller = new AbortController();

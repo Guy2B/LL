@@ -3026,6 +3026,8 @@
     if(fd.get('noNewsletter')){ fd.set('notes', (String(fd.get('notes')||'')+' [Kein Newsletter]').trim()); fd.delete('noNewsletter'); }
     // recommended by a friend (link from her Mondkreis card): the CRM credits her after the first visit
     if(window.LuneRef && window.LuneRef.note()){ fd.set('notes', (String(fd.get('notes')||'')+window.LuneRef.note()).trim()); }
+    // came from a Google Ads click (utm_source=google-ads or gclid in this page's address); nothing is stored
+    (function(q){ if(q.get('utm_source')==='google-ads'||q.get('gclid')||q.get('gbraid')||q.get('wbraid')) fd.set('notes', (String(fd.get('notes')||'')+' [Quelle: Google Ads]').trim()); })(new URLSearchParams(location.search));
 
     var btn=form.querySelector('button[type="submit"]');
     var old=btn?btn.textContent:'Termin anfragen';
