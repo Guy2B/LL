@@ -6,7 +6,17 @@ const BUSINESS = {
   "@type": "BeautySalon", "@id": SITE + "#salon", name: "Lune Beauty", url: SITE, telephone: "+49 179 1544002",
   image: SITE + "assets/img/og-cover.webp", priceRange: "€€",
   address: { "@type": "PostalAddress", streetAddress: "Mittelstraße 1", addressLocality: "Worms", postalCode: "67547", addressCountry: "DE" },
+  geo: { "@type": "GeoCoordinates", latitude: 49.6299098, longitude: 8.3697315 },
+  hasMap: "https://maps.google.com/?cid=3213722800749902565",
+  openingHoursSpecification: [
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "18:00" },
+    { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "09:00", closes: "14:00" },
+  ],
+  sameAs: ["https://maps.google.com/?cid=3213722800749902565", "https://www.instagram.com/lunebeauty2/"],
 };
+// Google Business Profile: map link (cid) and the "write a review" link.
+const GOOGLE_MAPS = "https://maps.google.com/?cid=3213722800749902565";
+const GOOGLE_REVIEW = "https://g.page/r/CeV6RTncb5ksEBM/review";
 
 const LOCAL = [
   ["studio.html", "Kosmetikstudio Worms"], ["gesichtsbehandlung-worms.html", "Gesichtsbehandlung Worms"],
@@ -156,7 +166,7 @@ function nav(opts = {}) { return header(opts); }
 function footer({ up = "", scripts = "" }) {
   const links = (arr, label, cls) => `<nav class="${cls}" aria-label="${label}">\n    ${arr.map(([h, l]) => `<a href="${up}${h}">${l}</a>`).join("\n    <span>·</span>\n    ")}\n  </nav>`;
   return `<footer class="footer">
-  <p>© <span id="year"></span> Lune Beauty · Kosmetikstudio in Worms · Mittelstraße 1, 67547 Worms · <a href="tel:+491791544002" style="color:inherit">0179 1544002</a></p>
+  <p>© <span id="year"></span> Lune Beauty · Kosmetikstudio in Worms · Mittelstraße 1, 67547 Worms · <a href="tel:+491791544002" style="color:inherit">0179 1544002</a> · <a href="${GOOGLE_MAPS}" target="_blank" rel="noopener" style="color:inherit">Google Maps</a> · <a href="${GOOGLE_REVIEW}" target="_blank" rel="noopener" style="color:inherit">Auf Google bewerten</a></p>
   ${links(LEGAL, "Rechtliches", "footer-links")}
   ${links(LOCAL, "Lokale Seiten", "footer-local-links")}
 </footer>
@@ -169,4 +179,4 @@ ${scripts}
 `;
 }
 
-module.exports = { SITE, BUSINESS, LOCAL, LEGAL, esc, head, nav, header, footer, HEADER_ASSETS };
+module.exports = { SITE, BUSINESS, GOOGLE_MAPS, GOOGLE_REVIEW, LOCAL, LEGAL, esc, head, nav, header, footer, HEADER_ASSETS };
