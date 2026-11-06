@@ -29,13 +29,13 @@
     if (document.getElementById('luneConsentCss')) return;
     var s = document.createElement('style'); s.id = 'luneConsentCss';
     s.textContent =
-      '#luneConsent{position:fixed;z-index:9999;left:16px;bottom:16px;max-width:360px;background:#fbf8f4;color:#2f2a24;border:1px solid #eadcc4;border-radius:16px;box-shadow:0 10px 30px rgba(30,24,16,.14);padding:16px 16px 14px;font:14px/1.5 Inter,Arial,sans-serif;transform:translateY(20px);opacity:0;transition:all .35s ease}' +
+      '#luneConsent{position:fixed;z-index:10000;left:16px;bottom:16px;max-width:340px;background:#fbf8f4;color:#2f2a24;border:1px solid #eadcc4;border-radius:16px;box-shadow:0 10px 30px rgba(30,24,16,.14);padding:12px 14px;font:14px/1.5 Inter,Arial,sans-serif;transform:translateY(20px);opacity:0;transition:all .35s ease}' +
       '#luneConsent.on{transform:none;opacity:1}' +
       '#luneConsent b{display:block;font:600 15px/1.3 "Playfair Display",Georgia,serif;margin:0 0 4px;color:#1d1a16}' +
-      '#luneConsent p{margin:0 0 12px;color:#5a4f42}' +
+      '#luneConsent p{margin:0 0 10px;color:#3b342b;font-size:13px}' +
       '#luneConsent a{color:#8a6429}' +
       '#luneConsent .lcB{display:flex;gap:8px}' +
-      '#luneConsent button{flex:1;border-radius:999px;padding:9px 12px;font:600 14px Inter,Arial,sans-serif;cursor:pointer;border:1px solid #c9a95e}' +
+      '#luneConsent button{flex:1;border-radius:999px;padding:7px 12px;font:600 13px Inter,Arial,sans-serif;cursor:pointer;border:1px solid #c9a95e}' +
       '#luneConsent .y{background:#c9a95e;color:#1d1a16}#luneConsent .n{background:transparent;color:#2f2a24}' +
       '@media(max-width:560px){#luneConsent{left:10px;right:10px;bottom:10px;max-width:none;padding:12px 14px}#luneConsent p{font-size:13px;margin-bottom:10px}}';
     document.head.appendChild(s);
@@ -44,8 +44,7 @@
   function open(){
     if (box) return; css();
     box = document.createElement('div'); box.id = 'luneConsent'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'Datenschutz-Einstellungen');
-    box.innerHTML = '<b>Helfen Sie uns, die Website zu verbessern</b>' +
-      '<p>Mit Ihrer Zustimmung werten wir mit Microsoft Clarity aus, wie unsere Seite genutzt wird (Klicks, Scrollen). Eingaben in Formularen werden nicht erfasst. <a href="' + base + 'datenschutz.html">Mehr erfahren</a></p>' +
+    box.innerHTML = '<p>Dürfen wir mit Microsoft Clarity messen, wie unsere Seite genutzt wird? <a href="' + base + 'datenschutz.html">Info</a></p>' +
       '<div class="lcB"><button type="button" class="n">Nein, danke</button><button type="button" class="y">Gern</button></div>';
     document.body.appendChild(box);
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ box && box.classList.add('on'); }); });

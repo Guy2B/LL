@@ -4136,3 +4136,17 @@ details summary {
 }
 
 #contact .cta-btn.google-review { background: linear-gradient(135deg,#4f86ec,#2f62c9); }
+
+/* WhatsApp contact: compact pill (Nov 2026) */
+#whatsapp-box.wa2{width:auto;max-width:300px;left:auto;right:20px;bottom:20px;padding:8px 8px 8px 8px;display:flex;align-items:center;gap:4px;border-radius:999px;background:rgba(255,253,249,.97);border:1px solid #eadcc4;box-shadow:0 10px 28px rgba(30,24,16,.14);opacity:1;transform:none}
+#whatsapp-box.wa2:hover{transform:translateY(-2px)}
+#whatsapp-box.wa2 .wa2-link{display:flex;align-items:center;gap:10px;text-decoration:none;color:#1d1a16;padding-right:4px}
+#whatsapp-box.wa2 .wa2-ico{width:40px;height:40px;flex:none;border-radius:50%;background:#c9a95e;color:#1d1a16;display:grid;place-items:center}
+#whatsapp-box.wa2 .wa2-txt b{display:block;font:600 14px/1.25 Inter,Arial,sans-serif}
+#whatsapp-box.wa2 .wa2-txt small{display:block;font:12px/1.3 Inter,Arial,sans-serif;color:#7a6a55;white-space:nowrap}
+#whatsapp-box.wa2 #wa-close{background:none;border:0;font-size:18px;line-height:1;opacity:.4;padding:6px 8px;cursor:pointer;color:inherit}
+#whatsapp-box.wa2 #wa-close:hover{opacity:.9}
+[data-theme="dark"] #whatsapp-box.wa2{background:rgba(29,24,19,.97);border-color:#3a3026}
+[data-theme="dark"] #whatsapp-box.wa2 .wa2-link{color:#fff8ee}
+[data-theme="dark"] #whatsapp-box.wa2 .wa2-txt small{color:#cdbfab}
+@media(max-width:768px){#whatsapp-box.wa2{right:12px;bottom:12px;max-width:calc(100% - 24px)}}

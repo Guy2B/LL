@@ -217,8 +217,8 @@
 }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="preload" href="assets/css/lune-premium.css?v=5" as="style">
-<link rel="stylesheet" href="assets/css/lune-premium.css?v=5">
+  <link rel="preload" href="assets/css/lune-premium.css?v=6" as="style">
+<link rel="stylesheet" href="assets/css/lune-premium.css?v=6">
   <link rel="stylesheet" href="assets/css/lune-header.css?v=2">
 <meta name="theme-color" content="#d4af37">
 
@@ -1200,25 +1200,12 @@
 
 <body>
 
-<div id="whatsapp-box" aria-label="Persönlicher Kontakt">
-
-  <div class="wa-header">
-    <span class="wa-eyebrow">Persönlicher Kontakt</span>
-    <button id="wa-close" aria-label="Schließen">×</button>
-  </div>
-
-  <p class="wa-copy">
-    Für Terminwünsche oder persönliche Fragen stehen wir Ihnen jederzeit
-    diskret auf WhatsApp zur Verfügung.
-  </p>
-
-  <a
-    href="https://wa.me/491791544002"
-    target="_blank"
-    class="wa-cta">
-    Auf WhatsApp schreiben →
+<div id="whatsapp-box" class="wa2">
+  <a class="wa2-link" href="https://wa.me/491791544002" target="_blank" rel="noopener" aria-label="Fragen? Schreiben Sie uns auf WhatsApp">
+    <span class="wa2-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg></span>
+    <span class="wa2-txt"><b>Fragen? Schreiben Sie uns</b><small>per WhatsApp, persönlich &amp; diskret</small></span>
   </a>
-
+  <button id="wa-close" aria-label="Schließen">&times;</button>
 </div>
 
 <script src="assets/js/whatsapp-box.js"></script>
