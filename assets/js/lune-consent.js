@@ -4,7 +4,7 @@
  * Clarity is loaded only after "Gern"; "Nein, danke" loads nothing. Footer link "Datenschutz-Einstellungen" reopens it. */
 (function(){
   'use strict';
-  var CLARITY_ID = '';                       // project id from clarity.microsoft.com (10 characters)
+  var CLARITY_ID = 'z9ggt3j3je';                       // project id from clarity.microsoft.com (10 characters)
   var KEY = 'lune_consent_v1', MAX_AGE = 182 * 864e5;
   if (!CLARITY_ID) return;
   if (/bot|crawl|spider|lighthouse/i.test(navigator.userAgent)) return;
