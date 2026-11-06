@@ -4,6 +4,13 @@
 (function(){
   'use strict';
   var ENDPOINT = 'https://lune-crm.pages.dev/api/track';
+  // optional visit insights, loaded only after consent (see lune-consent.js); inactive until a Clarity id is set there
+  try {
+    var me = document.currentScript || document.querySelector('script[src*="lune-stats.js"]');
+    if (me && !document.querySelector('script[src*="lune-consent.js"]')) {
+      var cs = document.createElement('script'); cs.src = me.src.replace(/lune-stats\.js(\?.*)?$/, 'lune-consent.js'); cs.defer = true; document.head.appendChild(cs);
+    }
+  } catch (_) {}
   if (navigator.doNotTrack === '1' || /bot|crawl|spider|lighthouse/i.test(navigator.userAgent)) return;
 
   function send(payload){
