@@ -44,7 +44,7 @@
   function open(){
     if (box) return; css();
     box = document.createElement('div'); box.id = 'luneConsent'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'Datenschutz-Einstellungen');
-    box.innerHTML = '<p>Dürfen wir mit Microsoft Clarity messen, wie unsere Seite genutzt wird? <a href="' + base + 'datenschutz.html">Info</a></p>' +
+    box.innerHTML = '<p>Helfen Sie uns, die Webseite zu verbessern. <a href="' + base + 'datenschutz.html">Info</a></p>' +
       '<div class="lcB"><button type="button" class="n">Nein, danke</button><button type="button" class="y">Gern</button></div>';
     document.body.appendChild(box);
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ box && box.classList.add('on'); }); });
