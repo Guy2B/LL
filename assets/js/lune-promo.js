@@ -6,10 +6,14 @@
   'use strict';
   var END = '2026-11-30';
   var today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date());
+  window.LunePromo = null;
   if (today > END) return;
   var SERVICE = 'Hydra Glow Facial (Aquafacial)';
   var TEXT = 'Neukundinnen: −30 % auf Ihr erstes Hydra Glow Facial', SUB = 'bei Terminanfrage bis 30.11.2026';
   var TAG = '[Angebot −30 % Hydra Glow Neukundin]';
+  var REGULAR = 130, PRICE = 91;   // 130 € − 30 %
+  // read by lune-quick-booking.js (short request form on treatment pages)
+  window.LunePromo = { active: true, match: 'hydra glow', tag: TAG, price: PRICE, regular: REGULAR, until: END, untilText: '30.11.' };
 
   var me = document.currentScript || document.querySelector('script[src*="lune-promo.js"]');
   var base = me && me.src ? me.src.replace(/assets\/js\/lune-promo\.js.*$/, '') : '/';
@@ -25,6 +29,8 @@
       '#lunePromo button{background:none;border:0;color:#f6efe2;opacity:.6;font-size:16px;cursor:pointer;padding:2px 6px}' +
       '.lune-promo-line{margin:0 0 14px;padding:10px 14px;border-radius:14px;background:#fbf3e2;border:1px solid #e6cf9a;color:#5a4325;font:500 14px/1.4 Inter,Arial,sans-serif;text-align:center}' +
       '#lunePromo .s{display:none}' +
+      '.lune-promo-note{display:block;font:600 11px/1.3 Inter,Arial,sans-serif;color:#8a6429;margin:2px 0 6px}' +
+      '.lune-promo-hero{display:inline-block;margin:14px 0 0;padding:9px 14px;border-radius:12px;background:#1d1a16;color:#f6efe2;font:500 15px/1.4 Inter,Arial,sans-serif}.lune-promo-hero b{color:#e3c47e}' +
       '@media(max-width:560px){#lunePromo{width:calc(100% - 24px);justify-content:space-between;border-radius:16px;font-size:13px;padding:7px 6px 7px 14px;gap:8px}#lunePromo .l{display:none}#lunePromo .s{display:block;white-space:nowrap}#lunePromo a.go .s{display:inline}#lunePromo small{font-size:11px}#lunePromo a.go{padding:7px 12px}}';
     document.head.appendChild(s);
   }
@@ -56,6 +62,33 @@
     setTimeout(tag, 500);
   }
 
-  function start(){ css(); chip(); bookingLine(); }
+  // show the offer price wherever the Hydra Glow price appears (price lists, photo captions, homepage list)
+  function prices(){
+    var NEW = '<s style="opacity:.55;font-weight:400">' + REGULAR + ' €</s> ' + PRICE + ' €';
+    document.querySelectorAll('.price-row').forEach(function(r){
+      var n = r.querySelector('strong'), b = r.querySelector('.price-side b');
+      if (!n || !b || !/hydra glow/i.test(n.textContent) || b.textContent.trim() !== REGULAR + ' €') return;
+      b.innerHTML = NEW;
+      var note = document.createElement('span'); note.className = 'lune-promo-note'; note.textContent = 'Neukundinnen, bis 30.11.';
+      b.parentNode.insertBefore(note, b.nextSibling);
+    });
+    document.querySelectorAll('li').forEach(function(li){
+      var link = li.querySelector('[data-service]'), pr = li.querySelector('.price');
+      if (!link || !pr || !/hydra glow/i.test(link.getAttribute('data-service')) || pr.textContent.trim() !== REGULAR + ' €') return;
+      pr.innerHTML = NEW;
+    });
+    document.querySelectorAll('figcaption').forEach(function(fc){
+      if (/Hydra Glow Facial · 130 €/.test(fc.innerHTML)) fc.innerHTML = fc.innerHTML.replace('Hydra Glow Facial · 130 €', 'Hydra Glow Facial · ' + NEW);
+    });
+    // treatment page with the short request form: one clear offer line under the title
+    var h1 = document.querySelector('.lx-hero h1');
+    if (h1 && document.querySelector('[data-lune-quick*="Hydra Glow"]')) {
+      var line = document.createElement('p'); line.className = 'lune-promo-hero';
+      line.innerHTML = '<b>Neukundinnen: ' + PRICE + ' € statt ' + REGULAR + ' €</b> · bei Anfrage bis 30.11.';
+      h1.parentNode.insertBefore(line, h1.nextSibling);
+    }
+  }
+
+  function start(){ css(); chip(); bookingLine(); prices(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

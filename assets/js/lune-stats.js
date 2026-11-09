@@ -48,7 +48,7 @@
     if (/wa\.me|whatsapp/i.test(href)) send({t:'event', k:'whatsapp'});
     else if (/^tel:/i.test(href)) send({t:'event', k:'phone'});
     else if (/instagram\.com/i.test(href)) send({t:'event', k:'instagram'});
-    else if (/#booking$/.test(href)) send({t:'event', k:'booking_open'});
+    else if (/#(booking|anfrage)$/.test(href)) send({t:'event', k:'booking_open'});
   }, true);
 
   // Booking and skin-check requests: the site dispatches these events after a successful send.
