@@ -7,13 +7,14 @@
   var END = '2026-11-30';
   var today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date());
   if (today > END) return;
-  var TEXT = 'Neukundinnen: −30 % auf Ihre erste Behandlung', SUB = 'bei Terminanfrage bis 30.11.2026';
-  var TAG = '[Angebot −30 % Neukundin]';
+  var SERVICE = 'Hydra Glow Facial (Aquafacial)';
+  var TEXT = 'Neukundinnen: −30 % auf Ihr erstes Hydra Glow Facial', SUB = 'bei Terminanfrage bis 30.11.2026';
+  var TAG = '[Angebot −30 % Hydra Glow Neukundin]';
 
   var me = document.currentScript || document.querySelector('script[src*="lune-promo.js"]');
   var base = me && me.src ? me.src.replace(/assets\/js\/lune-promo\.js.*$/, '') : '/';
   var onHome = !!document.getElementById('booking-form');
-  var href = onHome ? '#booking' : base + 'index.html#booking';
+  var href = (onHome ? '' : base + 'index.html') + '?service=' + encodeURIComponent(SERVICE) + '#booking';
 
   function css(){
     var s = document.createElement('style');
@@ -24,7 +25,7 @@
       '#lunePromo button{background:none;border:0;color:#f6efe2;opacity:.6;font-size:16px;cursor:pointer;padding:2px 6px}' +
       '.lune-promo-line{margin:0 0 14px;padding:10px 14px;border-radius:14px;background:#fbf3e2;border:1px solid #e6cf9a;color:#5a4325;font:500 14px/1.4 Inter,Arial,sans-serif;text-align:center}' +
       '#lunePromo .s{display:none}' +
-      '@media(max-width:560px){#lunePromo{width:calc(100% - 24px);justify-content:space-between;border-radius:16px;font-size:13px;padding:7px 6px 7px 14px;gap:8px}#lunePromo .l{display:none}#lunePromo .s{display:block;white-space:nowrap}#lunePromo small{font-size:11px}#lunePromo a.go{padding:7px 12px}}';
+      '@media(max-width:560px){#lunePromo{width:calc(100% - 24px);justify-content:space-between;border-radius:16px;font-size:13px;padding:7px 6px 7px 14px;gap:8px}#lunePromo .l{display:none}#lunePromo .s{display:block;white-space:nowrap}#lunePromo a.go .s{display:inline}#lunePromo small{font-size:11px}#lunePromo a.go{padding:7px 12px}}';
     document.head.appendChild(s);
   }
 
@@ -32,7 +33,7 @@
     var closed = false; try { closed = sessionStorage.getItem('lune_promo_closed') === END; } catch(_) {}
     if (closed) return;
     var d = document.createElement('div'); d.id = 'lunePromo'; d.setAttribute('role', 'note');
-    d.innerHTML = '<span class="l">' + TEXT + '<small>' + SUB + '</small></span><span class="s"><b>−30 %</b> für Neukundinnen<small>bis 30.11.2026</small></span><a class="go" href="' + href + '">Termin anfragen</a><button type="button" aria-label="Schließen">×</button>';
+    d.innerHTML = '<span class="l">' + TEXT + '<small>' + SUB + '</small></span><span class="s"><b>−30 % Hydra Glow</b><small>für Neukundinnen · bis 30.11.</small></span><a class="go" href="' + href + '"><span class="l">Termin anfragen</span><span class="s">Anfragen</span></a><button type="button" aria-label="Schließen">×</button>';
     d.querySelector('button').onclick = function(){ d.remove(); try { sessionStorage.setItem('lune_promo_closed', END); } catch(_) {} };
     document.body.appendChild(d);
   }
@@ -40,13 +41,19 @@
   function bookingLine(){
     var form = document.getElementById('booking-form'); if (!form) return;
     var p = document.createElement('p'); p.className = 'lune-promo-line';
-    p.innerHTML = '<b>' + TEXT + '</b> · ' + SUB + '. Einmalig, nicht mit anderen Rabatten kombinierbar.';
+    p.innerHTML = '<b>' + TEXT + '</b> · ' + SUB + '. Einmalig, nur für das Hydra Glow Facial, nicht mit anderen Rabatten kombinierbar.';
     form.parentNode.insertBefore(p, form);
     // tag every request sent during the offer, whatever submit path the form uses
-    var notes = form.querySelector('input[name="notes"]');
-    var tag = function(){ if (notes && notes.value.indexOf(TAG) < 0) notes.value = (notes.value + ' ' + TAG).trim(); };
+    var notes = form.querySelector('input[name="notes"]'), sel = form.querySelector('select[name="service"]');
+    var tag = function(){
+      if (!notes) return;
+      var on = sel && /hydra glow/i.test(sel.value);
+      notes.value = notes.value.replace(TAG, '').trim();
+      if (on) notes.value = (notes.value + ' ' + TAG).trim();
+    };
     form.addEventListener('submit', tag, true);
-    tag();
+    if (sel) sel.addEventListener('change', tag);
+    setTimeout(tag, 500);
   }
 
   function start(){ css(); chip(); bookingLine(); }
