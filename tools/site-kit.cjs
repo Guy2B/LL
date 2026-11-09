@@ -12,7 +12,7 @@ const BUSINESS = {
     { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "18:00" },
     { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "09:00", closes: "14:00" },
   ],
-  sameAs: ["https://maps.google.com/?cid=3213722800749902565", "https://www.instagram.com/lunebeauty2/"],
+  sameAs: ["https://maps.google.com/?cid=3213722800749902565", "https://www.instagram.com/lunebeauty_worms/"],
 };
 // Google Business Profile: map link (cid) and the "write a review" link.
 const GOOGLE_MAPS = "https://maps.google.com/?cid=3213722800749902565";
