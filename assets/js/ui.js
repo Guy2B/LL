@@ -231,7 +231,7 @@ document.getElementById("booking-form")?.addEventListener("submit", async functi
 });
 const SERVICE_PRICES = {
   "Basisbehandlung Gesicht": "69 €",
-  "Gesicht + Hals + Dekolleté": "85 €",
+  "Basisbehandlung Gesicht + Hals + Dekolleté": "85 €",
   "Hydro Boost Gesicht": "89 €",
   "Hydro Boost Gesicht & Dekolleté": "99 €",
   "Relax & Glow Behandlung": "110 €",
