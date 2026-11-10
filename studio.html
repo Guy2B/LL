@@ -717,6 +717,7 @@
     color:rgba(47,42,36,.45);
   }
 </style>
+<link rel="stylesheet" href="assets/css/lune-studio-carousel-premium.css?v=2" />
 
 </head>
 
@@ -848,43 +849,43 @@
   <div class="slider-shell" id="studioSlider">
     <div class="slider-track">
       <article class="studio-slide">
-        <img width="494" height="640" src="assets/img/studio-0.webp" alt="Willkommen bei Lune Beauty Studio" loading="eager">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-0-m.webp"><img width="1600" height="900" src="assets/img/studio-p-0.webp" alt="Willkommen bei Lune Beauty Studio" loading="eager"></picture>
       </article>
       <article class="studio-slide">
-        <img width="640" height="640" src="assets/img/studio-2.webp" alt="Lune Beauty Studio Behandlungsliege und ruhige Atmosphäre" loading="eager">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-2-m.webp"><img width="1600" height="900" src="assets/img/studio-p-2.webp" alt="Lune Beauty Studio Behandlungsliege und ruhige Atmosphäre" loading="eager"></picture>
       </article>
       <article class="studio-slide">
-        <img width="640" height="640" src="assets/img/studio-3.webp" alt="Lune Beauty Studio Maniküre" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-3-m.webp"><img width="1600" height="900" src="assets/img/studio-p-3.webp" alt="Lune Beauty Studio Maniküre" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="360" height="640" src="assets/img/studio-4.webp" alt="Lune Beauty Produkte und Pflegeambiente" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-4-m.webp"><img width="1600" height="900" src="assets/img/studio-p-4.webp" alt="Lune Beauty Produkte und Pflegeambiente" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="360" height="640" src="assets/img/studio-5.webp" alt="Gesichtsbehandlung bei Lune Beauty" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-5-m.webp"><img width="1600" height="900" src="assets/img/studio-p-5.webp" alt="Gesichtsbehandlung bei Lune Beauty" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="1134" height="2016" src="assets/img/studio-6.webp" alt="Lune Beauty Studio Fusspflege" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-6-m.webp"><img width="1600" height="900" src="assets/img/studio-p-6.webp" alt="Lune Beauty Studio Fusspflege" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="1080" height="1350" src="assets/img/studio-9.webp" alt="Lune Beauty Studio Glow" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-9-m.webp"><img width="1600" height="900" src="assets/img/studio-p-9.webp" alt="Lune Beauty Studio Glow" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="1512" height="2016" src="assets/img/studio-12.webp" alt="Kosmetikstudio Detail und Licht" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-12-m.webp"><img width="1600" height="900" src="assets/img/studio-p-12.webp" alt="Kosmetikstudio Detail und Licht" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="640" height="640" src="assets/img/studio-13.webp" alt="Behandlungsraum Lune Beauty" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-13-m.webp"><img width="1600" height="900" src="assets/img/studio-p-13.webp" alt="Behandlungsraum Lune Beauty" loading="lazy"></picture>
       </article>
       <article class="studio-slide">
-        <img width="360" height="640" src="assets/img/studio-14.webp" alt="Lune Beauty Pflegeerlebnis" loading="lazy">
+        <picture><source media="(max-width:680px)" srcset="assets/img/studio-p-14-m.webp"><img width="1600" height="900" src="assets/img/studio-p-14.webp" alt="Lune Beauty Pflegeerlebnis" loading="lazy"></picture>
       </article>
     </div>
 
     <div class="slide-caption" aria-live="polite">
       <div>
-        <strong id="slideTitle">Ruhige Atmosphäre</strong>
-        <span id="slideText">Ein Raum für Ankommen, Loslassen und hochwertige Pflege.</span>
+        <strong id="slideTitle">Willkommen bei Lune Beauty</strong>
+        <span id="slideText">Ein erster Eindruck unseres Studios.</span>
       </div>
-      <div class="slider-counter" id="slideCounter">1/8</div>
+      <div class="slider-counter" id="slideCounter">1/10</div>
     </div>
 
     <button class="slider-btn prev" type="button" aria-label="Vorheriges Bild">‹</button>
@@ -980,14 +981,16 @@
     if (!slider || !track || !slides.length || !dotsContainer || !prevBtn || !nextBtn) return;
 
     const captions = [
-      ["Ruhige Atmosphäre", "Ein Raum zum Ankommen, Loslassen und Wohlfühlen."],
-      ["Sanfte Details", "Warme Texturen, weiches Licht und ein Gefühl von Ruhe."],
-      ["Pflege im Fokus", "Hochwertige Behandlungen, abgestimmt auf Ihre Haut und Ihr Wohlbefinden."],
-      ["Gesichtsbehandlung", "Jede Behandlung wird bewusst, ruhig und individuell begleitet."],
-      ["Studio Moment", "Kleine Details schaffen ein gepflegtes, hochwertiges Ambiente."],
-      ["Licht & Ruhe", "Ein weiches Umfeld, das Entspannung und Schönheit zusammenführt."],
-      ["Persönliche Auszeit", "Ein Ort, an dem Pflege bewusst erlebt wird."],
-      ["Lune Experience", "Premium Kosmetik mit Ruhe, Nähe und Aufmerksamkeit."]
+      ["Willkommen bei Lune Beauty", "Ein erster Eindruck unseres Studios."],
+      ["Ruhige Atmosphäre", "Ein Ort zum Ankommen und Entspannen."],
+      ["Maniküre im Studio", "Liebe zum Detail, von Anfang an."],
+      ["Ausgewählte Pflege", "Hochwertige Produkte, individuell abgestimmt."],
+      ["Gesichtsbehandlung", "Persönliche Pflege mit Ruhe und Aufmerksamkeit."],
+      ["Professionelle Details", "Saubere Vorbereitung und sorgfältige Arbeit."],
+      ["Pflegeerlebnis", "Zeit für Ihre Haut und Ihr Wohlbefinden."],
+      ["Lune Beauty", "Ein Studio mit persönlichem Charakter."],
+      ["Einladendes Ambiente", "Raum für Ihre individuelle Beauty-Auszeit."],
+      ["Augenblicke der Ruhe", "Kleine Pausen, die gut tun."]
     ];
 
     let current = 0;
