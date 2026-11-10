@@ -1,0 +1,92 @@
+/* Lune Beauty — Studio carousel premium / scoped CSS override
+   Compatible avec studio.html du dépôt Guy2B/LL.
+   À charger APRÈS le CSS principal et APRÈS les styles de studio.html.
+*/
+.studio-slider .slider-shell {
+  background:#f5eee5;
+  border:1px solid rgba(198,165,111,.28);
+  border-radius:clamp(18px,2.8vw,32px);
+  box-shadow:0 24px 70px rgba(54,38,25,.115);
+  isolation:isolate;
+}
+.studio-slider .studio-slide {
+  background:#f5eee5;
+  height:clamp(360px,55vw,650px);
+}
+.studio-slider .studio-slide img {
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  object-position:center;
+  transform:none;
+  filter:none;
+}
+.studio-slider .studio-slide::after {
+  background:linear-gradient(180deg,transparent 48%,rgba(29,24,21,.12) 72%,rgba(29,24,21,.60));
+}
+.studio-slider .slide-caption {
+  left:clamp(20px,4vw,50px);
+  right:clamp(20px,4vw,50px);
+  bottom:clamp(38px,6vw,58px);
+}
+.studio-slider .slide-caption strong {
+  color:#fff;
+  text-shadow:0 2px 18px rgba(0,0,0,.40);
+}
+.studio-slider .slide-caption span {
+  color:rgba(255,255,255,.93);
+  text-shadow:0 2px 12px rgba(0,0,0,.38);
+}
+.studio-slider .slider-btn {
+  background:rgba(255,253,248,.91);
+  color:#3c3028;
+  box-shadow:0 7px 24px rgba(33,23,18,.16);
+}
+.studio-slider .slider-dots {
+  bottom:14px;
+  background:rgba(255,250,242,.90);
+}
+@media(max-width:680px){
+  .studio-slider{width:calc(100% - 20px);margin-bottom:80px}
+  .studio-slider .studio-slide{height:clamp(340px,105vw,530px)}
+  .studio-slider .studio-slide img{object-fit:contain}
+  .studio-slider .slide-caption{left:20px;right:20px;bottom:48px;gap:8px;align-items:flex-end}
+  .studio-slider .slide-caption strong{font-size:clamp(1.3rem,5.2vw,1.9rem)}
+  .studio-slider .slide-caption span{font-size:.82rem;line-height:1.45;max-width:29ch}
+  .studio-slider .slider-counter{width:44px;height:44px;font-size:12px}
+  .studio-slider .slider-btn{width:38px;height:38px;font-size:1.5rem}
+  .studio-slider .slider-btn.prev{left:8px}
+  .studio-slider .slider-btn.next{right:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .studio-slider .slider-track{transition:none}
+}
+
+/* V2 — intégrité du cadrage : aucun rognage des photos, y compris sur mobile.
+   Les anciennes règles de studio.html et le patch V1 utilisaient object-fit:cover. */
+.studio-slider .studio-slide {
+  background:linear-gradient(135deg,#e9e0d4,#f8f3ec 55%,#e8dfd3);
+}
+.studio-slider .studio-slide img {
+  object-fit:contain !important;
+  object-position:50% 50% !important;
+  transform:none !important;
+}
+@media (max-width:680px) {
+  .studio-slider .studio-slide img {object-fit:contain !important;}
+  .studio-slider .studio-slide {height:clamp(350px,105vw,520px);}
+  .studio-slider .slide-caption {
+    bottom:34px;
+  }
+  .studio-slider .slider-dots {bottom:8px}
+}
+
+/* Lune: on phones the original-ratio photos are used (picture source), so they fill the frame without empty bands;
+   arrows sit mid-height so they never cover the caption. */
+.studio-slider .studio-slide picture{display:block;width:100%;height:100%}
+@media (max-width:680px){
+  .studio-slider .studio-slide{height:clamp(420px,125vw,560px)}
+  .studio-slider .slider-btn{top:42%;bottom:auto;transform:translateY(-50%)}
+  .studio-slider .slide-caption{bottom:44px}
+}
