@@ -8,6 +8,7 @@
   var KEY = 'lune_consent_v1', MAX_AGE = 182 * 864e5;
   if (!CLARITY_ID) return;
   if (/bot|crawl|spider|lighthouse/i.test(navigator.userAgent)) return;
+  try { if (/[?&]ich=1/.test(location.search) || localStorage.getItem('lune_self') === '1') return; } catch(_) {}   // own visits: no banner, no Clarity
 
   function read(){ try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && Date.now() - v.at < MAX_AGE ? v : null; } catch(_) { return null; } }
   function save(ok){ try { localStorage.setItem(KEY, JSON.stringify({clarity: ok, at: Date.now()})); } catch(_) {} }
