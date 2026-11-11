@@ -13,6 +13,13 @@
       }
     });
   } catch (_) {}
+  // own visits (owner, studio): open lunebeauty.de/?ich=1 once per device to stop counting it, ?ich=0 to count again
+  try {
+    var ich = new URLSearchParams(location.search).get('ich');
+    if (ich === '1') localStorage.setItem('lune_self', '1');
+    if (ich === '0') localStorage.removeItem('lune_self');
+    if (localStorage.getItem('lune_self') === '1') { window.LuneSelf = true; return; }
+  } catch (_) {}
   if (navigator.doNotTrack === '1' || /bot|crawl|spider|lighthouse/i.test(navigator.userAgent)) return;
 
   function send(payload){
