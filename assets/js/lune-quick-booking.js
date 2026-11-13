@@ -110,6 +110,14 @@
         box.scrollIntoView({behavior: 'smooth', block: 'center'});
         try { window.dispatchEvent(new Event('lune:booking-sent')); } catch(_) {}
       } catch (e) {
+        // second path: the CRM keeps the request and mails the studio, so nothing is lost
+        var saved = window.LuneBookingBackup ? await window.LuneBookingBackup({name: E.name.value, phone: E.phone.value, email: E.email.value, service: E.service.value, date: E.date.value, time: E.time.value, notes: notes}, e) : false;
+        if (saved) {
+          f.innerHTML = '<div class="ok">Vielen Dank. Ihre Anfrage ist bei uns eingegangen.<br>Der Termin ist erst nach unserer persönlichen Bestätigung verbindlich.</div>';
+          box.scrollIntoView({behavior: 'smooth', block: 'center'});
+          try { window.dispatchEvent(new Event('lune:booking-sent')); } catch(_) {}
+          return;
+        }
         btn.disabled = false; btn.textContent = 'Termin anfragen';
         err.innerHTML = 'Die Terminanfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns per <a href="https://wa.me/491791544002">WhatsApp</a> oder telefonisch: <a href="tel:+491791544002">0179 1544002</a>.';
         err.hidden = false;

@@ -2960,6 +2960,7 @@
 })();
 </script>
 
+<script src="assets/js/lune-booking-backup.js"></script>
 <script id="lune-booking-hardfix-v40">
 (function(){
   'use strict';
@@ -3033,7 +3034,16 @@
       try{window.dispatchEvent(new Event("lune:booking-sent"));}catch(_){}
     }catch(err){
       console.error('Booking hardfix V40',err);
-      alert('Die Terminanfrage konnte nicht gesendet werden: '+(err.message||err));
+      // second path: the CRM keeps the request and mails the studio, so nothing is lost
+      var saved=window.LuneBookingBackup ? await window.LuneBookingBackup({name:fd.get('name'),phone:fd.get('phone'),email:fd.get('email'),service:fd.get('service'),date:fd.get('date'),time:fd.get('time'),notes:fd.get('notes')}, err) : false;
+      if(saved){
+        var okBox=document.getElementById('booking-success');
+        if(okBox){okBox.textContent='Vielen Dank. Ihre Anfrage ist bei uns eingegangen. Der Termin ist erst nach unserer persönlichen Bestätigung verbindlich.';okBox.classList.remove('hidden');}
+        form.reset(); syncHidden();
+        try{window.dispatchEvent(new Event("lune:booking-sent"));}catch(_){}
+      }else{
+        alert('Die Terminanfrage konnte leider nicht gesendet werden. Bitte schreiben Sie uns per WhatsApp oder rufen Sie an: 0179 1544002.');
+      }
     }finally{
       if(btn){btn.disabled=false;btn.textContent=old;}
     }
