@@ -5,6 +5,7 @@
   'use strict';
   var URL = 'https://lune-crm.pages.dev/api/booking-backup';
   window.LuneBookingBackup = async function(d, err){
+    try { window.dispatchEvent(new Event('lune:booking-failed')); } catch (_) {}
     try {
       var res = await fetch(URL, {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({
         name: String(d.name || '').trim(), phone: String(d.phone || '').trim(), email: String(d.email || '').trim(),

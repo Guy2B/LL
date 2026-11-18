@@ -39,10 +39,29 @@
     l: (document.documentElement.lang || '').slice(0, 2),
   });
 
+  // Booking form funnel: which fields get filled, which are rejected on submit. Field names only, never values.
+  var FIELDS = {service:1, date:1, time:1, name:1, phone:1, email:1}, filled = {}, rejected = {}, lastTry = 0;
+  function isBookingForm(f){ return !!(f && f.elements && f.elements.service && f.elements.date && f.elements.phone); }
+  document.addEventListener('change', function(e){
+    var t = e.target, f = t && t.form;
+    if (!isBookingForm(f) || !FIELDS[t.name] || filled[t.name] || !String(t.value || '').trim()) return;
+    filled[t.name] = 1; send({t:'event', k:'bf_' + t.name});
+  }, true);
+  document.addEventListener('invalid', function(e){
+    var t = e.target, f = t && t.form;
+    if (!isBookingForm(f) || !FIELDS[t.name] || rejected[t.name]) return;
+    rejected[t.name] = 1; send({t:'event', k:'bi_' + t.name});
+  }, true);
+
   var lastItem = '', lastAt = 0;
   document.addEventListener('click', function(e){
     var el = e.target && e.target.closest ? e.target.closest('a,button') : null;
     if (!el) return;
+    if (el.tagName === 'BUTTON' && (el.type || 'submit') === 'submit' && isBookingForm(el.form)) {
+      var nowTry = Date.now();
+      if (nowTry - lastTry > 10000) { lastTry = nowTry; send({t:'event', k:'booking_try'}); }
+      return;
+    }
     var service = el.getAttribute('data-service');
     if (service) {
       var now = Date.now();
@@ -60,5 +79,6 @@
 
   // Booking and skin-check requests: the site dispatches these events after a successful send.
   window.addEventListener('lune:booking-sent', function(){ send({t:'event', k:'booking_submit'}); });
+  window.addEventListener('lune:booking-failed', function(){ send({t:'event', k:'booking_fail'}); });
   window.addEventListener('lune:skin-request-sent', function(){ send({t:'event', k:'skin_request'}); });
 })();
