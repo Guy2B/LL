@@ -5,9 +5,37 @@
 (function(){
   'use strict';
   var END = '2026-11-30';
+  // December: gift vouchers for Christmas (chip on every page, line above the booking form)
+  var XMAS_FROM = '2026-12-01', XMAS_TO = '2026-12-24';
+  function christmas(){
+    var me = document.currentScript || document.querySelector('script[src*="lune-promo.js"]');
+    var base = me && me.src ? me.src.replace(/assets\/js\/lune-promo\.js.*$/, '') : '/';
+    var last = today >= '2026-12-20';
+    var href = base + 'gutschein-kosmetik-worms.html';
+    var st = document.createElement('style');
+    st.textContent = '#lunePromo{position:fixed;z-index:10040;left:50%;transform:translateX(-50%);top:calc(var(--lh-h,72px) + 10px);display:flex;align-items:center;gap:10px;max-width:calc(100% - 24px);padding:7px 8px 7px 16px;border-radius:999px;background:#1d1a16;color:#f6efe2;font:500 13.5px/1.3 Inter,Arial,sans-serif;box-shadow:0 10px 26px rgba(0,0,0,.18)}' +
+      '#lunePromo a.go{color:#1d1a16;background:#c9a95e;border-radius:999px;padding:6px 12px;font-weight:600;text-decoration:none;white-space:nowrap}#lunePromo small{display:block;opacity:.7;font-size:11px}' +
+      '#lunePromo button{background:none;border:0;color:#f6efe2;opacity:.6;font-size:16px;cursor:pointer;padding:2px 6px}' +
+      '.lune-promo-line{margin:0 0 14px;padding:10px 14px;border-radius:14px;background:#fbf3e2;border:1px solid #e6cf9a;color:#5a4325;font:500 14px/1.4 Inter,Arial,sans-serif;text-align:center}.lune-promo-line a{color:#8a6429;font-weight:600}' +
+      '@media(max-width:560px){#lunePromo{width:calc(100% - 24px);justify-content:space-between;border-radius:16px;font-size:13px;padding:7px 6px 7px 14px;gap:8px}}';
+    var go = function(){
+      document.head.appendChild(st);
+      var closed = false; try { closed = sessionStorage.getItem('lune_promo_closed') === XMAS_TO; } catch(_) {}
+      if (!closed && !/gutschein-kosmetik-worms/.test(location.pathname)) {
+        var d = document.createElement('div'); d.id = 'lunePromo'; d.setAttribute('role', 'note');
+        d.innerHTML = '<span><b>' + (last ? 'Last-Minute-Geschenk' : 'Weihnachten: Zeit für sich verschenken') + '</b><small>Lune Beauty Gutschein · sofort per E-Mail</small></span>' +
+          '<a class="go" href="' + href + '">Gutschein</a><button type="button" aria-label="Schließen">×</button>';
+        d.querySelector('button').onclick = function(){ d.remove(); try { sessionStorage.setItem('lune_promo_closed', XMAS_TO); } catch(_) {} };
+        document.body.appendChild(d);
+      }
+      var form = document.getElementById('booking-form');
+      if (form) { var p = document.createElement('p'); p.className = 'lune-promo-line'; p.innerHTML = 'Noch ein Weihnachtsgeschenk gesucht? <a href="' + href + '">Lune Beauty Gutschein</a>, sofort per E-Mail, 3 Jahre gültig.'; form.parentNode.insertBefore(p, form); }
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  }
   var today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date());
   window.LunePromo = null;
-  if (today > END) return;
+  if (today > END) { if (today >= XMAS_FROM && today <= XMAS_TO) christmas(); return; }
   var SERVICE = 'Hydra Glow Facial (Aquafacial)';
   var TEXT = 'Neukundinnen: −30 % auf Ihr erstes Hydra Glow Facial', SUB = 'bei Terminanfrage bis 30.11.2026';
   var TAG = '[Angebot −30 % Hydra Glow Neukundin]';
