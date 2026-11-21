@@ -4,7 +4,7 @@ const SITE = "https://www.lunebeauty.de/";
 
 const BUSINESS = {
   "@type": "BeautySalon", "@id": SITE + "#salon", name: "Lune Beauty", url: SITE, telephone: "+49 179 1544002",
-  image: SITE + "assets/img/og-cover.webp", priceRange: "€€",
+  image: SITE + "assets/img/og-cover.jpg", priceRange: "€€",
   address: { "@type": "PostalAddress", streetAddress: "Mittelstraße 1", addressLocality: "Worms", postalCode: "67547", addressCountry: "DE" },
   geo: { "@type": "GeoCoordinates", latitude: 49.6299098, longitude: 8.3697315 },
   hasMap: "https://maps.google.com/?cid=3213722800749902565",
@@ -43,7 +43,7 @@ function head({ title, desc, path, ogTitle, image, ld = [], up = "", noindex = f
   ${noindex ? '<meta name="robots" content="noindex, follow" />' : ""}
   <meta property="og:title" content="${esc(ogTitle || title)}" />
   <meta property="og:description" content="${esc(desc)}" />
-  <meta property="og:image" content="${image || SITE + "assets/img/og-cover.webp"}" />
+  <meta property="og:image" content="${image || SITE + "assets/img/og-cover.jpg"}" />
   <meta property="og:url" content="${url}" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="de_DE" />
