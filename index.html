@@ -2283,6 +2283,7 @@
   <div class="booking-field">
     <label for="booking-time">Wunschzeit</label>
     <input id="booking-time" type="time" name="time" required>
+    <div id="booking-time-hint" class="service-meta" style="margin-top:8px;font-size:.9rem" aria-live="polite"></div>
   </div>
 
   <div class="booking-group-label" id="booking-group-contact" hidden><span>3</span> Kontakt</div>
@@ -2928,7 +2929,13 @@
   function isValid(showMessage){
     var date=document.getElementById('booking-date');
     var time=document.getElementById('booking-time');
-    if(!date||!time||!date.value||!time.value)return true;
+    if(!date||!time)return true;
+    if(!date.value||!time.value){
+      time.setCustomValidity('');
+      if(date)date.setCustomValidity(date.value&&closeForDate(date.value)===null?'Sonntags sind keine Termine buchbar.':'');
+      hint('');
+      return true;
+    }
     var close=closeForDate(date.value);
     var start=mins(time.value);
     var dur=duration();
@@ -2939,8 +2946,42 @@
       msg='Dieser Termin endet nach Ladenschluss. Bitte wählen Sie eine frühere Uhrzeit.';
     }
     time.setCustomValidity(msg);
-    if(msg && showMessage) time.reportValidity();
+    date.setCustomValidity(close===null?'Sonntags sind keine Termine buchbar.':'');
+    hint(msg);
+    if(msg && showMessage){
+      reject(close===null?'sunday':start<OPEN_MIN?'early':'late');
+      time.reportValidity();
+    }
     return !msg;
+  }
+  // anonymous reason of a refused time (no values), counted on the CRM statistics page
+  var sentReasons={};
+  function reject(reason){
+    if(sentReasons[reason])return; sentReasons[reason]=1;
+    try{window.dispatchEvent(new CustomEvent('lune:booking-time-rejected',{detail:{reason:reason}}));}catch(_){}
+  }
+  // minutes are rounded to the next quarter instead of being refused (phone pickers offer every minute)
+  function snap(){
+    var time=document.getElementById('booking-time');
+    var m=String(time&&time.value||'').match(/^(\d{1,2}):(\d{2})/);
+    if(!m)return;
+    var n=Number(m[1])*60+Number(m[2]);
+    if(n%15===0)return;
+    time.value=hhmm(Math.min(1425,Math.round(n/15)*15));
+  }
+  // what can be booked on the chosen day, shown under the time field
+  function hint(msg){
+    var el=document.getElementById('booking-time-hint'), date=document.getElementById('booking-date');
+    if(!el||!date)return;
+    var close=closeForDate(date.value), txt='', bad=false;
+    if(!date.value) txt='Mo–Fr 09:00–18:00 Uhr · Sa 09:00–14:00 Uhr · So geschlossen';
+    else if(close===null){txt='Sonntags ist das Studio geschlossen. Bitte wählen Sie einen anderen Tag.';bad=true;}
+    else {
+      var last=close-duration(), day=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][new Date(date.value+'T12:00:00').getDay()];
+      txt='Am '+day+' buchbar: 09:00 bis '+hhmm(last)+' Uhr (Beginn der Behandlung)';
+      if(msg){txt=msg+' '+txt+'.';bad=true;}
+    }
+    el.textContent=txt; el.style.color=bad?'#b83227':''; el.hidden=false;
   }
   window.LuneValidateBookingHours=function(showMessage){updateLimits();return isValid(showMessage!==false);};
   window.LuneUpdateBookingTimeLimits=updateLimits;
@@ -2950,11 +2991,14 @@
     var time=document.getElementById('booking-time');
     var service=document.getElementById('booking-service');
     if(!date||!time)return;
-    date.addEventListener('change',function(){updateLimits();isValid(false);});
+    date.addEventListener('change',function(){
+      updateLimits();isValid(false);
+      if(closeForDate(date.value)===null&&date.value)reject('sunday');
+    });
     time.addEventListener('input',function(){isValid(false);});
-    time.addEventListener('change',function(){isValid(true);});
+    time.addEventListener('change',function(){snap();isValid(true);});
     if(service)service.addEventListener('change',function(){setTimeout(function(){updateLimits();isValid(false);},0);});
-    updateLimits();
+    updateLimits();hint('');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

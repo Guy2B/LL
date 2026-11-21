@@ -53,11 +53,23 @@
       '<label>E-Mail-Adresse<input name="email" type="email" inputmode="email" placeholder="name@beispiel.de" autocomplete="email" required></label>' +
       '<div class="fine"><details><summary>Mit Ihrer Anfrage werden Sie Mitglied im <b>Lune Mondkreis</b> und erhalten gelegentlich Neuigkeiten per E-Mail. <u>Mehr</u></summary><p style="margin:6px 0 0">Der Lune Mondkreis ist unser kostenloses Treueprogramm mit Lichtpunkten bei jedem Besuch. Per E-Mail informieren wir Sie gelegentlich über Neuigkeiten und Angebote von Lune Beauty. Dem können Sie jederzeit widersprechen: über den Link in jeder E-Mail oder an <a href="mailto:kontakt@lunebeauty.de">kontakt@lunebeauty.de</a>. Mehr in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p></details>' +
       '<label class="cb"><input type="checkbox" name="noNewsletter" value="1"><span>Ich möchte keine E-Mails mit Neuigkeiten erhalten.</span></label></div>' +
+      '<div class="hint fine" aria-live="polite"></div>' +
       '<div class="err" hidden></div>' +
       '<button type="submit">Termin anfragen</button>';
     box.appendChild(f);
 
-    var E = f.elements, info = f.querySelector('.svc'), err = f.querySelector('.err');
+    var E = f.elements, info = f.querySelector('.svc'), err = f.querySelector('.err'), hintEl = f.querySelector('.hint'), sent = {};
+    // anonymous reason of a refused time (no values), counted on the CRM statistics page
+    function reject(reason){ if (sent[reason]) return; sent[reason] = 1; try { window.dispatchEvent(new CustomEvent('lune:booking-time-rejected', {detail: {reason: reason}})); } catch(_) {} }
+    // minutes are rounded to the next quarter instead of being refused (phone pickers offer every minute)
+    function snap(){ var n = mins(E.time.value); if (isNaN(n) || n % 15 === 0) return; E.time.value = hhmm(Math.min(1425, Math.round(n / 15) * 15)); }
+    function hint(){
+      var c = closeFor(E.date.value), day;
+      if (!E.date.value) { hintEl.textContent = 'Mo–Fr 09:00–18:00 Uhr · Sa 09:00–14:00 Uhr · So geschlossen'; return; }
+      if (c === null) { hintEl.textContent = 'Sonntags ist das Studio geschlossen. Bitte wählen Sie einen anderen Tag.'; return; }
+      day = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][new Date(E.date.value + 'T12:00:00').getDay()];
+      hintEl.textContent = 'Am ' + day + ' buchbar: 09:00 bis ' + hhmm(c - duration()) + ' Uhr (Beginn der Behandlung)';
+    }
     E.date.min = berlinToday();
     var meta = function(){ return META[E.service.value] || [0, 0]; };
     var duration = function(){ return meta()[0] || DEFAULT_DURATION; };
@@ -77,13 +89,16 @@
       else if (E.date.value && E.time.value && t < OPEN) msg = 'Der früheste buchbare Termin ist 09:00 Uhr.';
       else if (E.date.value && E.time.value && t + duration() > c) msg = 'Dieser Termin endet nach Ladenschluss. Bitte wählen Sie eine frühere Uhrzeit.';
       E.time.setCustomValidity(msg);
-      err.textContent = msg; err.hidden = !(msg && show);
+      E.date.setCustomValidity(E.date.value && c === null ? 'Sonntags sind keine Termine buchbar.' : '');
+      err.textContent = msg + (msg && c ? ' Am ' + ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][new Date(E.date.value + 'T12:00:00').getDay()] + ' buchbar: 09:00 bis ' + hhmm(c - duration()) + ' Uhr.' : ''); err.hidden = !(msg && show);
+      if (msg && show && E.time.value) reject(c === null ? 'sunday' : t < OPEN ? 'early' : 'late');
+      hint();
       return !msg;
     }
     E.service.addEventListener('change', function(){ showInfo(); limits(); valid(false); });
-    E.date.addEventListener('change', function(){ limits(); valid(true); });
-    E.time.addEventListener('change', function(){ valid(true); });
-    showInfo(); limits();
+    E.date.addEventListener('change', function(){ limits(); valid(true); if (E.date.value && closeFor(E.date.value) === null) reject('sunday'); });
+    E.time.addEventListener('change', function(){ snap(); valid(true); });
+    showInfo(); limits(); hint();
 
     f.addEventListener('submit', async function(ev){
       ev.preventDefault();

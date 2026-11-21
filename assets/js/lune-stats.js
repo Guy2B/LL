@@ -80,5 +80,7 @@
   // Booking and skin-check requests: the site dispatches these events after a successful send.
   window.addEventListener('lune:booking-sent', function(){ send({t:'event', k:'booking_submit'}); });
   window.addEventListener('lune:booking-failed', function(){ send({t:'event', k:'booking_fail'}); });
+  // why a time was refused (sunday / early / late), never the chosen values
+  window.addEventListener('lune:booking-time-rejected', function(e){ var r = e && e.detail && e.detail.reason; if (/^(sunday|early|late)$/.test(r || '')) send({t:'event', k:'bt_' + r}); });
   window.addEventListener('lune:skin-request-sent', function(){ send({t:'event', k:'skin_request'}); });
 })();
