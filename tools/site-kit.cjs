@@ -30,7 +30,9 @@ const LEGAL = [["impressum.html", "Impressum"], ["agb.html", "AGB"], ["datenschu
 
 const esc = s => String(s == null ? "" : s).replace(/&(?![a-z#0-9]+;)/gi, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
-function head({ title, desc, path, ogTitle, image, ld = [], up = "", noindex = false, extra = "" }) {
+function head({ title, desc, path, ogTitle, image, imageAlt = "", ld = [], up = "", noindex = false, extra = "" }) {
+  // every preview image of the site is 1200 x 630 (assets/img/og-cover.jpg, assets/img/og/*, assets/newsletter/*)
+  const img = image || SITE + "assets/img/og-cover.jpg", wide = !image || /\/(og\/|og-cover|newsletter\/)/.test(img);
   const url = SITE + path;
   return `<!DOCTYPE html>
 <html lang="de">
@@ -43,7 +45,11 @@ function head({ title, desc, path, ogTitle, image, ld = [], up = "", noindex = f
   ${noindex ? '<meta name="robots" content="noindex, follow" />' : ""}
   <meta property="og:title" content="${esc(ogTitle || title)}" />
   <meta property="og:description" content="${esc(desc)}" />
-  <meta property="og:image" content="${image || SITE + "assets/img/og-cover.jpg"}" />
+  <meta property="og:image" content="${img}" />
+  ${wide ? `<meta property="og:image:width" content="1200" />\n  <meta property="og:image:height" content="630" />` : ""}
+  ${imageAlt ? `<meta property="og:image:alt" content="${esc(imageAlt)}" />` : ""}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="${img}" />
   <meta property="og:url" content="${url}" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="de_DE" />
@@ -99,6 +105,7 @@ const MENU_STUDIO = [
   ["studio.html", "Über das Studio", "Räume &amp; Atmosphäre"],
   ["kosmetik-ausbildung-worms.html", "Ausbildung", "Lune Beauty Academy"],
   ["index.html#instagram", "Inhalte", "Reels &amp; Pflege-Inspiration"],
+  ["hautpflege-winter-worms.html", "Hautwissen", "Pflegetipps für den Winter"],
   ["index.html#contact", "Kontakt &amp; Anfahrt", "Mittelstraße 1, Worms"],
 ];
 

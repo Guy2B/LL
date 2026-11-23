@@ -36,6 +36,11 @@ function hero(p) {
 </header>`;
 }
 
+// landscape 1200 x 630 preview images (assets/img/og/), made for social media
+const OG = { "akne-behandlung-worms.html": "og-akne.jpg", "anti-aging-worms.html": "og-anti-aging.jpg", "aquafacial-worms.html": "og-aquafacial.jpg",
+  "gesichtsbehandlung-worms.html": "og-gesicht.jpg", "hydro-boost-worms.html": "og-hydro-boost.jpg", "led-therapie-worms.html": "og-led.jpg", "radiofrequenz-worms.html": "og-radiofrequenz.jpg",
+  "augenpflege-worms.html": "og-augenpflege.jpg", "manikuere-pedikuere-worms.html": "og-manikuere.jpg", "kosmetik-ausbildung-worms.html": "og-ausbildung.jpg",
+  "gutschein-kosmetik-worms.html": "og-gutschein.jpg", "preise.html": "og-preise.jpg", "studio.html": "og-studio.jpg", "inhaberin.html": "og-inhaberin.jpg", "shop.html": "og-shop.jpg" };
 function page(p) {
   const url = SITE + p.file;
   const ld = [{ "@type": "Service", "@id": url + "#service", name: p.serviceName, description: p.desc,
@@ -48,7 +53,7 @@ function page(p) {
   const prices = p.groups
     ? p.groups.map(g => `      <h3 class="price-group">${esc(g.title)}</h3>\n${g.rows.map(priceRow).join("\n")}`).join("\n")
     : p.rows.map(priceRow).join("\n");
-  return head({ title: p.title, desc: p.desc, path: p.file, ogTitle: p.ogTitle, image: SITE + "assets/img/" + p.heroImg, ld }) + `
+  return head({ title: p.title, desc: p.desc, path: p.file, ogTitle: p.ogTitle, image: OG[p.file] ? SITE + "assets/img/og/" + OG[p.file] : SITE + "assets/img/" + p.heroImg, ld }) + `
 ${nav({ active: p.navActive || "" })}
 
 ${hero(p)}
