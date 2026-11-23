@@ -23,7 +23,7 @@
       var closed = false; try { closed = sessionStorage.getItem('lune_promo_closed') === XMAS_TO; } catch(_) {}
       if (!closed && !/gutschein-kosmetik-worms/.test(location.pathname)) {
         var d = document.createElement('div'); d.id = 'lunePromo'; d.setAttribute('role', 'note');
-        d.innerHTML = '<span><b>' + (last ? 'Last-Minute-Geschenk' : 'Weihnachten: Zeit für sich verschenken') + '</b><small>Gutschein ab 100 € = 20 € Bonus für Sie</small></span>' +
+        d.innerHTML = '<span><b>' + (last ? 'Last-Minute-Geschenk' : 'Weihnachten: Zeit für sich verschenken') + '</b><small>Neue Kundin beschenken = 20 € für Sie</small></span>' +
           '<a class="go" href="' + href + '">Gutschein</a><button type="button" aria-label="Schließen">×</button>';
         d.querySelector('button').onclick = function(){ d.remove(); try { sessionStorage.setItem('lune_promo_closed', XMAS_TO); } catch(_) {} };
         document.body.appendChild(d);
@@ -32,11 +32,11 @@
       var choose = Array.prototype.find.call(document.querySelectorAll('small'), function(el){ return /Gutschein wählen/.test(el.textContent); });
       if (choose) {
         var box = document.createElement('p'); box.className = 'lune-promo-line'; box.style.margin = '0 0 16px';
-        box.style.textAlign = 'left'; box.innerHTML = '<b>Weihnachtsdankeschön:</b> Zu jedem Gutschein ab 100 € erhalten Sie <b>20 € Wohlfühlbonus</b> für Ihre eigene Behandlung im Januar oder Februar.<small style="display:block;margin-top:6px;font-size:12px;opacity:.8">Kauf bis 24.12.2026, Bonus-Code kommt mit der Bestätigung, einlösbar 01.01. bis 28.02.2027. Keine Barauszahlung, nicht mit anderen Aktionen kombinierbar.</small>';
+        box.style.textAlign = 'left'; box.innerHTML = '<b>Weihnachtsdankeschön:</b> Schenken Sie Lune Beauty jemandem, der uns noch nicht kennt. Sobald die Beschenkte ihren Gutschein bei ihrem ersten Besuch einlöst, erhalten Sie <b>20 € Wohlfühlbonus</b> für Ihre eigene Behandlung.<small style="display:block;margin-top:6px;font-size:12px;opacity:.8">Für Gutscheine ab 100 €, gekauft bis 24.12.2026. Der Bonus ist 3 Monate gültig, nur für eine Behandlung, keine Barauszahlung, nicht mit anderen Aktionen kombinierbar.</small>';
         choose.parentNode.insertBefore(box, choose.nextSibling);
       }
       var form = document.getElementById('booking-form');
-      if (form) { var p = document.createElement('p'); p.className = 'lune-promo-line'; p.innerHTML = '<b>Weihnachten bei Lune Beauty:</b> Zu jedem <a href="' + href + '">Gutschein ab 100 €</a> schenken wir Ihnen einen 20-€-Wohlfühlbonus für Ihre eigene Behandlung im Januar oder Februar. Gutschein sofort per E-Mail.'; form.parentNode.insertBefore(p, form); }
+      if (form) { var p = document.createElement('p'); p.className = 'lune-promo-line'; p.innerHTML = '<b>Weihnachten bei Lune Beauty:</b> Verschenken Sie einen <a href="' + href + '">Gutschein ab 100 €</a> an jemanden, der uns noch nicht kennt. Bei ihrem ersten Besuch erhalten Sie 20 € für Ihre eigene Auszeit.'; form.parentNode.insertBefore(p, form); }
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
   }
